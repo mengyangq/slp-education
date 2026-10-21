@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Phonetics Lab 1: Phonetics Playground</title>
+<meta name="description" content="Phonetics Lab 1: identify morphemes, decide whether two words form a minimal pair, and count phonemes. Thirty questions across three activities.">
+<link rel="stylesheet" href="css/lab.css">
+<script>
+  window.LAB_MODE = "site";
+  // Draw affricates and diphthongs with a tie bar: /t͡ʃ/, /ɑ͡ɪ/. Set false for the plain form.
+  window.LAB_TIE = true;
+  window.LAB_META = {
+    course: "Phonetics",
+    lab: 1,
+    home: "../"
+  };
+</script>
+</head>
+<body>
+<a class="skip" href="#stage">Skip to the activity</a>
+
+
+<div class="lab">
+
+  <!-- ============ the path ============ -->
+  <aside class="rail" id="rail" aria-label="Your progress through the lab">
+    <div class="rail-head">
+      <span class="rail-course">Phonetics Lab 1</span>
+      <span class="rail-title">Phonetics Playground</span>
+    </div>
+    <div class="rail-scroll" id="railScroll">
+      <div class="path-wrap" id="pathWrap"></div>
+    </div>
+  </aside>
+  <div class="rail-scrim" id="railScrim"></div>
+
+  <!-- ============ everything else ============ -->
+  <div class="content">
+    <header class="hud">
+      <button type="button" class="map-btn" id="mapBtn" aria-expanded="false" aria-controls="rail">
+        &#9776; Map
+      </button>
+      <h1 class="hud-leg" id="hudLeg"><span class="leg-dot"></span><span>Phonetics Playground</span></h1>
+      <span class="hud-spacer"></span>
+      <button type="button" class="fx-btn" id="fxBtn" aria-pressed="true">
+        &#9834;<span class="vh">Effect sounds on</span>
+      </button>
+      <p class="gem-tally" id="gemTally">
+        <svg class="gem-ico" viewBox="0 0 36 28" aria-hidden="true" focusable="false">
+          <linearGradient id="gemHud" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#7BE0F0"/><stop offset="1" stop-color="#1FB6D4"/>
+          </linearGradient>
+          <path d="M12 3 h12 l6 8 -12 14 -12 -14 z" fill="url(#gemHud)"/>
+          <path d="M18 11 l12 0 -12 14 z" fill="#0E7E96" opacity=".22"/>
+          <path d="M12 3 l6 8 -12 0 z" fill="#A6ECF7"/>
+        </svg>
+        <span id="gemCount">0</span>
+        <span class="vh">gems earned</span>
+      </p>
+    </header>
+
+    <main class="stage" id="stage" tabindex="-1"></main>
+    <footer class="site-foot">
+      <p><a href="../">&larr; Back to the Phonetics Lab</a></p>
+      <p>Created by <a href="https://mengyang.dev">Mengyang Qiu</a> in collaboration with Siena Sun. Built with the help of Claude (Anthropic) and GPT (OpenAI).</p>
+      <p class="foot-notice">Except where otherwise noted, original instructional content &copy; 2026 Mengyang Qiu and Siena Sun is licensed under <a href="https://creativecommons.org/licenses/by-nc/4.0/">CC BY-NC 4.0</a>. Site source code is licensed under the <a href="https://opensource.org/license/mit">MIT License</a>. Third-party media retain their original rights and licenses; see <a href="../../credits.html#phonetics">Credits</a>.</p>
+    </footer>
+  </div>
+</div>
+
+<script src="js/lab-art.js"></script>
+<script src="js/items.js"></script>
+<script src="js/lab-audio-manifest.js"></script>
+<script src="js/lab-engine.js"></script>
+<script src="js/lab-screens.js"></script>
+</body>
+</html>

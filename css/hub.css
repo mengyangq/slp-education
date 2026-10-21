@@ -1,0 +1,95 @@
+/* SLP Education hub: the front page and Credits & Licensing.
+   The colours of mengyang.dev, in their darker variant: navy (#002e5e) buttons and footer,
+   Buffalo blue (#005bbb) for hover and focus, navy links on light gray. System fonts only; no external files. */
+
+:root{
+  --blue:#005bbb; --navy:#002e5e; --link:#143c68; --link-hover:#0f2d4e;
+  --bg:#eeeeee; --surface:#FFFFFF; --surface-2:#F7F9FC; --line:#DCE1E8;
+  --ink:#222831; --ink-2:#414a57; --muted:#5b6573;
+  --accent-soft:#E3EDF9;
+  --foot-bg:#002e5e; --foot-text:#f5f5f5;
+  --shadow:0 1px 2px rgba(0,46,94,.06), 0 12px 32px rgba(0,46,94,.09);
+  --font:-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,Roboto,"Helvetica Neue",Arial,sans-serif;
+  --mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+}
+
+*,*::before,*::after{ box-sizing:border-box }
+html{ -webkit-text-size-adjust:100% }
+body{ margin:0; background:var(--bg); color:var(--ink); font-family:var(--font);
+  font-size:clamp(15.5px,15px + .2vw,17px); line-height:1.6; -webkit-font-smoothing:antialiased;
+  min-height:100vh; min-height:100dvh; display:flex; flex-direction:column }
+main{ flex:1 0 auto }
+a{ color:var(--link) } a:hover{ color:var(--link-hover) }
+svg{ display:block }
+.skip{ position:absolute; left:-9999px; top:0; z-index:9; padding:10px 16px; background:var(--navy); color:#fff }
+.skip:focus{ left:0 }
+:focus-visible{ outline:3px solid var(--blue); outline-offset:3px; border-radius:6px }
+.wrap{ max-width:960px; margin:0 auto; padding:0 clamp(16px,4vw,32px) }
+
+/* top bar (Credits page): light, like the masthead of mengyang.dev */
+.bar{ background:var(--surface); color:var(--ink); border-bottom:1px solid var(--line) }
+.bar .wrap{ display:flex; align-items:center; gap:10px; height:56px }
+.bar a{ color:var(--ink); text-decoration:none; display:flex; align-items:center; gap:10px }
+.bar a:hover{ color:var(--blue) }
+.bar .dot{ width:12px; height:12px; border-radius:4px; background:var(--navy) }
+.bar b{ font-family:var(--mono); font-size:.78rem; letter-spacing:.16em; text-transform:uppercase; font-weight:600 }
+
+.hero{ padding:clamp(40px,7vw,72px) 0 clamp(26px,4vw,36px) }
+.hero h1{ font-size:clamp(2.3rem,1.5rem + 3.6vw,3.7rem); line-height:1.04; letter-spacing:-.035em; margin:0 0 .35em; font-weight:800 }
+.hero p{ font-size:clamp(1.05rem,1rem + .4vw,1.25rem); color:var(--ink-2); margin:0 }
+
+/* front page tiles */
+main{ padding-bottom:52px }
+.tiles{ list-style:none; margin:0; padding:0; display:grid; grid-template-columns:repeat(auto-fit,minmax(290px,1fr));
+  grid-auto-rows:1fr; gap:22px }
+.tile{ background:var(--surface); border:1px solid var(--line); border-radius:20px; box-shadow:var(--shadow);
+  overflow:hidden; display:flex; flex-direction:column }
+.art{ height:170px; overflow:hidden } .art svg{ width:100%; height:100% }
+.art.phonetics{ background:linear-gradient(135deg,#0a4f9e,#002e5e 55%,#001c3b) }
+.art.aphasia{ background:linear-gradient(135deg,#3f5f84,#1d3a5c 55%,#001c3b) }
+.tbody{ padding:20px 22px 22px; display:flex; flex-direction:column; flex:1 }
+.tags{ display:flex; flex-wrap:wrap; gap:6px; margin-bottom:12px }
+.tags span{ font-size:.74rem; font-weight:600; color:var(--navy); background:var(--accent-soft); border-radius:999px; padding:3px 10px }
+.tile h2{ font-size:1.35rem; letter-spacing:-.01em; margin:0 0 .35em; line-height:1.2 }
+.tile p{ color:var(--ink-2); margin:0 0 18px }
+.btn{ margin-top:auto; display:block; text-align:center; background:var(--navy); color:#fff; text-decoration:none;
+  font-weight:700; padding:12px 18px; border-radius:12px }
+.btn:hover{ background:var(--blue); color:#fff }
+
+/* footer: the page footer, at the bottom of the window when the page is short */
+.foot{ background:var(--foot-bg); padding:24px 0 40px; color:var(--foot-text); flex-shrink:0 }
+.foot p{ font-size:.86rem; margin:0 0 .5em } .foot .small{ font-size:.8rem; line-height:1.6; color:#c9d6e6 }
+.foot a{ color:#fff } .foot a:hover{ color:#dde8f6 }
+.foot :focus-visible{ outline-color:#fff }
+
+/* Credits & Licensing */
+.sec{ margin-bottom:44px } .sec > h2{ font-size:1.5rem; letter-spacing:-.01em; margin:0 0 .7em }
+table{ width:100%; border-collapse:separate; border-spacing:0; background:var(--surface); border:1px solid var(--line);
+  border-radius:16px; overflow:hidden; box-shadow:var(--shadow); font-size:.92rem }
+th,td{ text-align:left; vertical-align:top; padding:13px 16px; border-bottom:1px solid var(--line) }
+tr:last-child td{ border-bottom:0 }
+th{ font-size:.72rem; letter-spacing:.12em; text-transform:uppercase; color:var(--muted); background:var(--surface-2); font-weight:600 }
+td:first-child{ font-weight:650; width:24% }
+.lic{ display:inline-block; font-family:var(--mono); font-size:.72rem; font-weight:600; color:#fff; background:var(--navy);
+  border-radius:6px; padding:3px 8px; text-decoration:none; white-space:nowrap }
+.lic-text{ font-size:.82rem; color:var(--muted) }
+.notes{ color:var(--ink-2); font-size:.9rem; padding-left:1.1em; margin-top:16px } .notes li{ margin:.35em 0 }
+.res{ margin-bottom:34px; scroll-margin-top:16px }
+.rh{ display:flex; align-items:center; gap:12px; margin:0 0 6px }
+.rh .em{ width:36px; height:36px; border-radius:10px; display:grid; place-items:center; color:#fff; flex:none }
+.rh .em.phonetics{ background:linear-gradient(135deg,#0a4f9e,#001c3b) } .rh .em.aphasia{ background:linear-gradient(135deg,#3f5f84,#001c3b) }
+.rh h3{ font-size:1.25rem; margin:0 }
+.by{ color:var(--ink-2); font-size:.92rem; margin:0 0 4px }
+.copy{ color:var(--muted); font-size:.88rem; margin:0 0 14px }
+.ipa{ margin-top:8px; font-size:.86rem; color:var(--ink-2) }
+.ipa summary{ color:var(--link); font-weight:600; cursor:pointer }
+.ipa ul{ margin:.6em 0 0; padding-left:1.1em } .ipa li{ margin:.25em 0 }
+
+@media (max-width:640px){
+  table,thead,tbody,tr,th,td{ display:block } thead{ display:none }
+  tr{ border-bottom:1px solid var(--line); padding:6px 0 } tr:last-child{ border-bottom:0 }
+  td{ border:0; padding:6px 16px } td:first-child{ width:auto }
+  td[data-h]:not(:first-child)::before{ content:attr(data-h); display:block; font-size:.68rem; letter-spacing:.12em;
+    text-transform:uppercase; color:var(--muted) }
+  td:empty{ display:none }
+}
