@@ -80,13 +80,22 @@
      Flat screen list
      ============================================================ */
   var LEGS = BANK.legs;
-  var PER = LEGS[0].items.length;
+  var PER = LEGS[0].items.length;          // kept for older callers; trails may differ in length
   var TOTAL = LEGS.reduce(function (n, l) { return n + l.items.length; }, 0);
+
+  /* Items are numbered 0..TOTAL-1 across the trails. Trails need not be the same
+     length (Lab 8: 15, 10 and 5), so position is worked out from each trail's
+     offset rather than from a fixed trail length. */
+  var OFF = [];
+  LEGS.reduce(function (o, l) { OFF.push(o); return o + l.items.length; }, 0);
+  function tOf(li, i) { return OFF[li] + i; }
+  function liOf(t) { for (var li = LEGS.length - 1; li > 0; li--) if (t >= OFF[li]) return li; return 0; }
+  function iOf(t) { return t - OFF[liOf(t)]; }
 
   var SCREENS = [{ k: "intro" }];
   LEGS.forEach(function (leg, li) {
     SCREENS.push({ k: "concept", leg: li });
-    leg.items.forEach(function (_, i) { SCREENS.push({ k: "item", leg: li, i: i, t: li * PER + i }); });
+    leg.items.forEach(function (_, i) { SCREENS.push({ k: "item", leg: li, i: i, t: tOf(li, i) }); });
     SCREENS.push({ k: "checkpoint", leg: li });
   });
   SCREENS.push({ k: "finish" });
@@ -109,22 +118,145 @@
     return it.type === "boolean" ? (v ? "true" : "false") : String(v);
   }
 
+  /* Lab 9: transcriptions with stress marks (it.judge === "stress"). There are
+     too many ways to be nearly right to list them, so these items are judged
+     by rule rather than looked up:
+       - the sounds must match, symbol for symbol, except where the item allows
+         a choice (it.vary: segment index -> the other symbols that count, an
+         unstressed vowel written [ə] or [ɪ]);
+       - every mark belongs to the syllable whose vowel comes next after it;
+       - the main stress (pri, ˈ) on the wrong syllable, two of them, none at
+         all, or a mark that belongs to no syllable: no gem;
+       - the main stress right but a secondary stress (sec, ˌ) missing, extra
+         or moved, or a mark on the right syllable but not at its start (before
+         its first consonant; it.mark_ok lists other starts that count, by
+         syllable): half a gem;
+       - everything right: the gem. A one-syllable word needs no mark, and a
+         main-stress mark at its start counts too; a secondary mark on a syllable
+         where the dictionary gives one as optional (it.sec_ok) counts either way.
+     it.starts gives the segment index at which each syllable begins. */
+  var MARKS = { pri: 2, sec: 1 };
+  var VOWELS = {};
+  LEGS.forEach(function (leg) {
+    (leg.tiles || []).forEach(function (tl) { if (tl.cat === "v") VOWELS[tl.slug] = true; });
+  });
+  function splitMarks(key) {
+    var segs = [], marks = [];
+    String(key).split(".").forEach(function (s) {
+      if (MARKS[s] != null) marks.push({ lv: MARKS[s], pos: segs.length });
+      else if (s) segs.push(s);
+    });
+    return { segs: segs, marks: marks };
+  }
+  var VERDICTS = {};
+  function verdictOf(it, given) {
+    if (given == null || it.judge !== "stress") return null;
+    var ck = it.id + "|" + given;
+    if (VERDICTS[ck]) return VERDICTS[ck];
+    var K = splitMarks(it.answer), G = splitMarks(given), vary = it.vary || {};
+    var v = { credit: 0, kinds: [], missing: [], extra: [], misplaced: [], misLv: {}, main: -1, givenMain: -1 };
+    var secOk = it.sec_ok || [];
+    // the key's syllables: one per vowel
+    var vpos = [];
+    K.segs.forEach(function (s, i) { if (VOWELS[s]) vpos.push(i); });
+    var nSyl = vpos.length;
+    function sylOf(pos, P) { for (var k = 0; k < P.length; k++) if (P[k] >= pos) return k; return -1; }
+    var keyAt = {};
+    K.marks.forEach(function (m) { keyAt[sylOf(m.pos, vpos)] = m; });
+    for (var k0 in keyAt) if (keyAt[k0].lv === 2) v.main = +k0;
+    // the student's sounds, with any allowed choice put back to the key's, so
+    // the reveal sets real differences only against the answer
+    var same = G.segs.length === K.segs.length;
+    var segs = G.segs.map(function (s, i) {
+      return same && s !== K.segs[i] && vary[i] && vary[i].indexOf(s) >= 0 ? K.segs[i] : s;
+    });
+    v.segKey = segs.join(".");
+    var soundsOK = v.segKey === K.segs.join(".");
+    // the student's marks, on their own syllables (by their own vowels)
+    var gpos = [];
+    G.segs.forEach(function (s, i) { if (VOWELS[s]) gpos.push(i); });
+    var givAt = {}, odd = false;
+    G.marks.forEach(function (m) {
+      var k = sylOf(m.pos, gpos);
+      if (k < 0 || givAt[k]) odd = true;
+      else givAt[k] = m;
+    });
+    // the reference the reveal lines the answer up against: the key's marks
+    // and sounds, with the student's allowed choices where they made them
+    var ref = [];
+    var mk = {};
+    K.marks.forEach(function (m) { mk[m.pos] = m; });
+    K.segs.forEach(function (s, i) {
+      if (mk[i]) ref.push(mk[i].lv === 2 ? "pri" : "sec");
+      ref.push(same && G.segs[i] !== s && vary[i] && vary[i].indexOf(G.segs[i]) >= 0 ? G.segs[i] : s);
+    });
+    v.ref = ref;
+    var mains = Object.keys(givAt).filter(function (k) { return givAt[k].lv === 2; }).map(Number);
+    v.givenMain = mains.length === 1 ? mains[0] : -1;
+    var starts = it.starts || [0], ok = it.mark_ok || {}, k;
+    if (!soundsOK) {
+      v.kinds.push("sounds");
+      // when only sounds were swapped, not added or dropped, the marks can still be
+      // judged against the key: say so if every one of them is right
+      if (same && !odd && mains.length === 1 && mains[0] === v.main) {
+        var allRight = true;
+        for (k = 0; k < nSyl; k++) {
+          var want = keyAt[k] ? keyAt[k].lv : 0, got = givAt[k], gl = got ? got.lv : 0;
+          if (gl !== want && !(want === 0 && gl === 1 && secOk.indexOf(k) >= 0)) allRight = false;
+          if (got && !(got.pos === starts[k] || (ok[k] || []).indexOf(got.pos) >= 0)) allRight = false;
+        }
+        if (allRight) v.kinds.push("stress_ok");
+      }
+      return (VERDICTS[ck] = v);
+    }
+    if (odd) { v.kinds.push("marks_odd"); return (VERDICTS[ck] = v); }
+    if (nSyl > 1 || v.main >= 0) {
+      if (!G.marks.length) { v.kinds.push("no_marks"); return (VERDICTS[ck] = v); }
+      if (mains.length === 0) { v.kinds.push("no_main"); return (VERDICTS[ck] = v); }
+      if (mains.length > 1) { v.kinds.push("two_mains"); return (VERDICTS[ck] = v); }
+      if (mains[0] !== v.main) { v.kinds.push("main"); return (VERDICTS[ck] = v); }
+    } else if (mains.length > 1) {
+      v.kinds.push("two_mains"); return (VERDICTS[ck] = v);
+    }
+    // the main stress is right (or the word has one syllable): now the lighter beats
+    for (k = 0; k < nSyl; k++) {
+      var kl = keyAt[k] ? keyAt[k].lv : (nSyl === 1 ? 2 : 0), g = givAt[k];
+      if (kl === 1 && !(g && g.lv === 1)) v.missing.push(k);
+      if (g && g.lv === 1 && kl !== 1 && secOk.indexOf(k) < 0) { v.extra.push(k); continue; }
+      // a mark that should not be there at all is not also told where it should go
+      if (g && !(g.pos === starts[k] || (ok[k] || []).indexOf(g.pos) >= 0)) { v.misplaced.push(k); v.misLv[k] = g.lv; }
+    }
+    if (v.missing.length) v.kinds.push("sec_missing");
+    if (v.extra.length) v.kinds.push("sec_extra");
+    if (v.misplaced.length) v.kinds.push("mark_place");
+    v.credit = v.kinds.length ? ALT_CREDIT : 1;
+    return (VERDICTS[ck] = v);
+  }
+  function verdict(t) {
+    if (S.given[t] == null) return null;
+    return verdictOf(LEGS[liOf(t)].items[iOf(t)], String(S.given[t]));
+  }
+
   /* The answer this course teaches. An item may list further answers that
      are equally right (it.also, Lab 3: /w/ as lips, or lips + tongue back);
      any of them earns the whole gem. */
   function isCorrect(t) {
     if (S.given[t] == null) return false;
-    var li = Math.floor(t / PER), i = t % PER, it = LEGS[li].items[i];
+    var li = liOf(t), i = iOf(t), it = LEGS[li].items[i];
     if (S.given[t] === it.answer) return true;
-    return !!(it.also && it.also.indexOf(keyOf(it, S.given[t])) >= 0);
+    if (it.also && it.also.indexOf(keyOf(it, S.given[t])) >= 0) return true;
+    var v = verdict(t);
+    return !!(v && v.credit === 1);
   }
 
   /* A defensible alternative analysis: not the course answer, but not a
      mistake either. Earns the gem, and is marked differently on the path. */
   function isAlternate(t) {
     if (S.given[t] == null || isCorrect(t)) return false;
-    var li = Math.floor(t / PER), i = t % PER, it = LEGS[li].items[i];
-    return !!(it.accept && it.accept[keyOf(it, S.given[t])]);
+    var li = liOf(t), i = iOf(t), it = LEGS[li].items[i];
+    if (it.accept && it.accept[keyOf(it, S.given[t])]) return true;
+    var v = verdict(t);
+    return !!(v && v.credit > 0 && v.credit < 1);
   }
 
   /* What earns something, and therefore what counts toward the grade.
@@ -157,12 +289,12 @@
   }
   function legGems(li) {
     var n = 0;
-    for (var i = 0; i < PER; i++) n += creditOf(li * PER + i);
+    for (var i = 0; i < LEGS[li].items.length; i++) n += creditOf(tOf(li, i));
     return Math.round(n * 100) / 100;
   }
   function legAlternates(li) {
     var n = 0;
-    for (var i = 0; i < PER; i++) if (isAlternate(li * PER + i)) n++;
+    for (var i = 0; i < LEGS[li].items.length; i++) if (isAlternate(tOf(li, i))) n++;
     return n;
   }
   function alternates() {
@@ -613,8 +745,289 @@
       }
     },
 
+    /* Ghosts, synthesized (Lab 8, window.LAB_FX = "ghosts"): a soft, wobbling
+       "ooo", two sine voices an octave apart gliding up and back down under a
+       slow vibrato, and a faint shimmer of three high notes. */
+    ghosts: function (when, size) {
+      if (!S.fx) return;
+      var c = this._ctx();
+      if (!c) return;
+      size = size || 1;
+      var t0 = c.currentTime + (when || 0), dur = 0.78;
+      var lp = c.createBiquadFilter();
+      lp.type = "lowpass";
+      lp.frequency.value = 1700;
+      var g = c.createGain();
+      g.gain.setValueAtTime(0.0001, t0);
+      g.gain.exponentialRampToValueAtTime(Math.min(0.08, 0.055 * size), t0 + 0.1);
+      g.gain.setValueAtTime(Math.min(0.08, 0.055 * size), t0 + dur - 0.25);
+      g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+      lp.connect(g); g.connect(c.destination);
+      var vib = c.createOscillator(), vd = c.createGain();
+      vib.frequency.value = 5.2;
+      vd.gain.value = 9;
+      vib.connect(vd);
+      [[1, 0.6], [0.5, 0.4]].forEach(function (v) {
+        var o = c.createOscillator(), og = c.createGain();
+        o.type = "sine";
+        o.frequency.setValueAtTime(330 * v[0], t0);
+        o.frequency.exponentialRampToValueAtTime(494 * v[0], t0 + 0.32);
+        o.frequency.exponentialRampToValueAtTime(370 * v[0], t0 + dur);
+        vd.connect(o.frequency);
+        og.gain.value = v[1];
+        o.connect(og); og.connect(lp);
+        o.start(t0); o.stop(t0 + dur + 0.05);
+      });
+      vib.start(t0); vib.stop(t0 + dur + 0.05);
+      [1319, 1568, 1976].forEach(function (f, i) {
+        var tt = t0 + 0.12 + i * 0.09, o = c.createOscillator(), og = c.createGain();
+        o.type = "triangle";
+        o.frequency.value = f;
+        og.gain.setValueAtTime(0.0001, tt);
+        og.gain.exponentialRampToValueAtTime(0.018, tt + 0.01);
+        og.gain.exponentialRampToValueAtTime(0.0001, tt + 0.35);
+        o.connect(og); og.connect(c.destination);
+        o.start(tt); o.stop(tt + 0.37);
+      });
+    },
+    /* The skeletons' dance tune, an original little riff on a synthesized
+       xylophone: each note a sine with a fast decay and a dry knock on top, in
+       A minor, ending on a held A with a rattle. */
+    bones: function (when) {
+      if (!S.fx) return;
+      var c = this._ctx();
+      if (!c) return;
+      var t0 = c.currentTime + (when || 0), self = this;
+      var tune = [[440, 1], [523, 1], [659, 1], [880, 1], [831, 1], [659, 1], [494, 1], [659, 1],
+                  [440, 1], [523, 1], [659, 1], [784, 1], [698, 1], [587, 1], [523, 1], [440, 3]];
+      var at = t0;
+      tune.forEach(function (n) {
+        var o = c.createOscillator(), og = c.createGain();
+        o.type = "sine";
+        o.frequency.value = n[0] * 2;
+        og.gain.setValueAtTime(0.0001, at);
+        og.gain.exponentialRampToValueAtTime(0.07, at + 0.004);
+        og.gain.exponentialRampToValueAtTime(0.0001, at + 0.18 * Math.min(2, n[1]));
+        o.connect(og); og.connect(c.destination);
+        o.start(at); o.stop(at + 0.4);
+        var k = c.createBufferSource();
+        k.buffer = self._noise(0.02);
+        var bp = c.createBiquadFilter();
+        bp.type = "bandpass";
+        bp.Q.value = 6;
+        bp.frequency.value = 2600;
+        var kg = c.createGain();
+        kg.gain.setValueAtTime(0.0001, at);
+        kg.gain.exponentialRampToValueAtTime(0.05, at + 0.002);
+        kg.gain.exponentialRampToValueAtTime(0.0001, at + 0.02);
+        k.connect(bp); bp.connect(kg); kg.connect(c.destination);
+        k.start(at); k.stop(at + 0.03);
+        at += 0.13 * n[1];
+      });
+      // the rattle under the last note
+      for (var r = 0; r < 7; r++) {
+        var rt = at - 0.36 + r * 0.045, rb = c.createBufferSource(), rf = c.createBiquadFilter(), rg = c.createGain();
+        rb.buffer = this._noise(0.02);
+        rf.type = "bandpass"; rf.Q.value = 5; rf.frequency.value = 1800 + (r % 3) * 500;
+        rg.gain.setValueAtTime(0.0001, rt);
+        rg.gain.exponentialRampToValueAtTime(0.035, rt + 0.002);
+        rg.gain.exponentialRampToValueAtTime(0.0001, rt + 0.02);
+        rb.connect(rf); rf.connect(rg); rg.connect(c.destination);
+        rb.start(rt); rb.stop(rt + 0.03);
+      }
+    },
+
+    /* Peach blossom, synthesized (Lab 9, window.LAB_FX = "peach"): plucked
+       notes in a pentatonic scale, like a zither, each with a slight bend into
+       pitch, and a soft pop for the peach. */
+    _pluck: function (c, at, f, vol, dec) {
+      var o = c.createOscillator(), o2 = c.createOscillator(), g = c.createGain(), g2 = c.createGain();
+      o.type = "triangle"; o2.type = "sine";
+      o.frequency.setValueAtTime(f * 1.012, at);
+      o.frequency.exponentialRampToValueAtTime(f, at + 0.05);
+      o2.frequency.value = f * 2;
+      g.gain.setValueAtTime(0.0001, at);
+      g.gain.exponentialRampToValueAtTime(vol, at + 0.005);
+      g.gain.exponentialRampToValueAtTime(0.0001, at + dec);
+      g2.gain.value = 0.25;
+      o.connect(g); o2.connect(g2); g2.connect(g); g.connect(c.destination);
+      o.start(at); o2.start(at); o.stop(at + dec + 0.02); o2.stop(at + dec + 0.02);
+    },
+    peach: function (when, size) {
+      if (!S.fx) return;
+      var c = this._ctx();
+      if (!c) return;
+      size = size || 1;
+      var t0 = c.currentTime + (when || 0), self = this;
+      var notes = size > 1.3 ? [587, 659, 740, 880, 988] : [587, 740, 880];
+      notes.forEach(function (f, i) { self._pluck(c, t0 + i * 0.075, f, 0.06, 0.45); });
+      // the peach: a little rising pop
+      var pt = t0 + 0.05, o = c.createOscillator(), g = c.createGain();
+      o.type = "sine";
+      o.frequency.setValueAtTime(380, pt);
+      o.frequency.exponentialRampToValueAtTime(920, pt + 0.07);
+      g.gain.setValueAtTime(0.0001, pt);
+      g.gain.exponentialRampToValueAtTime(0.07, pt + 0.008);
+      g.gain.exponentialRampToValueAtTime(0.0001, pt + 0.12);
+      o.connect(g); g.connect(c.destination);
+      o.start(pt); o.stop(pt + 0.14);
+    },
+    /* The peach tree's growth, timed to the drawing (FX "tree"): the seed lands
+       with a plip, the sprout comes up on two notes, the branches grow to a
+       rising run of plucks, the blossoms open with high plinks, and the peaches
+       ripen on a warm chord. */
+    tree: function (when) {
+      if (!S.fx) return;
+      var c = this._ctx();
+      if (!c) return;
+      var t0 = c.currentTime + (when || 0), self = this, i;
+      var land = t0 + 0.45, o = c.createOscillator(), g = c.createGain();
+      o.type = "sine";
+      o.frequency.setValueAtTime(1300, land);
+      o.frequency.exponentialRampToValueAtTime(520, land + 0.08);
+      g.gain.setValueAtTime(0.0001, land);
+      g.gain.exponentialRampToValueAtTime(0.07, land + 0.006);
+      g.gain.exponentialRampToValueAtTime(0.0001, land + 0.14);
+      o.connect(g); g.connect(c.destination);
+      o.start(land); o.stop(land + 0.16);
+      this._pluck(c, t0 + 0.75, 440, 0.05, 0.5);
+      this._pluck(c, t0 + 0.95, 587, 0.05, 0.6);
+      var run = [294, 330, 370, 440, 494, 587, 659, 740, 880, 988, 1175, 1319];
+      for (i = 0; i < run.length; i++) this._pluck(c, t0 + 1.25 + i * 0.2, run[i], 0.05, 0.55);
+      var pent = [1175, 1319, 1480, 1760, 1976, 2349];
+      for (i = 0; i < 10; i++) this._pluck(c, t0 + 3.65 + i * 0.11 + Math.random() * 0.04, pent[(i * 3) % pent.length], 0.028, 0.3);
+      var ch = t0 + 4.85;
+      [294, 370, 440, 587, 740].forEach(function (f, k) {
+        var po = c.createOscillator(), pg = c.createGain();
+        po.type = "triangle";
+        po.frequency.value = f;
+        pg.gain.setValueAtTime(0.0001, ch);
+        pg.gain.exponentialRampToValueAtTime(0.035, ch + 0.12);
+        pg.gain.exponentialRampToValueAtTime(0.0001, ch + 2.2);
+        po.connect(pg); pg.connect(c.destination);
+        po.start(ch); po.stop(ch + 2.3);
+        self._pluck(c, ch + 0.05 + k * 0.09, f * 2, 0.04, 0.6);
+      });
+    },
+
+    /* The egg and the chick, synthesized (Lab 10, window.LAB_FX = "egg"): a
+       crack of the shell (short bright clicks of noise) and a "cheep cheep",
+       two quick sine chirps that rise and fall. */
+    _click: function (c, at, freq, vol) {
+      var b = c.createBufferSource(), f = c.createBiquadFilter(), g = c.createGain();
+      b.buffer = this._noise(0.03);
+      f.type = "bandpass"; f.Q.value = 3; f.frequency.value = freq;
+      g.gain.setValueAtTime(0.0001, at);
+      g.gain.exponentialRampToValueAtTime(vol, at + 0.002);
+      g.gain.exponentialRampToValueAtTime(0.0001, at + 0.03);
+      b.connect(f); f.connect(g); g.connect(c.destination);
+      b.start(at); b.stop(at + 0.04);
+    },
+    _cheep: function (c, at, vol) {
+      var o = c.createOscillator(), g = c.createGain();
+      o.type = "sine";
+      o.frequency.setValueAtTime(2600, at);
+      o.frequency.exponentialRampToValueAtTime(3700, at + 0.035);
+      o.frequency.exponentialRampToValueAtTime(2500, at + 0.09);
+      g.gain.setValueAtTime(0.0001, at);
+      g.gain.exponentialRampToValueAtTime(vol, at + 0.01);
+      g.gain.exponentialRampToValueAtTime(0.0001, at + 0.1);
+      o.connect(g); g.connect(c.destination);
+      o.start(at); o.stop(at + 0.12);
+    },
+    egg: function (when, size) {
+      if (!S.fx) return;
+      var c = this._ctx();
+      if (!c) return;
+      size = size || 1;
+      var t0 = c.currentTime + (when || 0);
+      this._click(c, t0 + 0.28, 3200, 0.09);
+      this._click(c, t0 + 0.36, 2600, 0.08);
+      this._click(c, t0 + 0.46, 3600, 0.1);
+      this._cheep(c, t0 + 0.6, 0.05);
+      this._cheep(c, t0 + 0.74, 0.045);
+      if (size > 1.3) this._cheep(c, t0 + 0.9, 0.04);
+    },
+    /* The bicycle bell: two metallic strikes, a high partial over an
+       inharmonic one, each ringing out. */
+    _bell: function (c, at) {
+      [0, 0.16].forEach(function (d) {
+        [[2640, 0.06], [4130, 0.03], [6050, 0.015]].forEach(function (p) {
+          var o = c.createOscillator(), g = c.createGain();
+          o.type = "sine";
+          o.frequency.value = p[0];
+          g.gain.setValueAtTime(0.0001, at + d);
+          g.gain.exponentialRampToValueAtTime(p[1], at + d + 0.004);
+          g.gain.exponentialRampToValueAtTime(0.0001, at + d + 0.5);
+          o.connect(g); g.connect(c.destination);
+          o.start(at + d); o.stop(at + d + 0.52);
+        });
+      });
+    },
+    /* The finale, timed to the drawing (FX "hatch"): knocks as the big egg
+       rocks, cracks, a pop as the top flies off, a cluck, the bell as the
+       bicycle arrives, a boing for the hop, the freewheel ticking as the
+       chicken rides off, and the bell once more on the way. */
+    hatchRide: function (when) {
+      if (!S.fx) return;
+      var c = this._ctx();
+      if (!c) return;
+      var t0 = c.currentTime + (when || 0), self = this, i;
+      [0.45, 0.72, 0.98].forEach(function (k) {
+        var o = c.createOscillator(), g = c.createGain();
+        o.type = "sine";
+        o.frequency.setValueAtTime(220, t0 + k);
+        o.frequency.exponentialRampToValueAtTime(120, t0 + k + 0.08);
+        g.gain.setValueAtTime(0.0001, t0 + k);
+        g.gain.exponentialRampToValueAtTime(0.09, t0 + k + 0.005);
+        g.gain.exponentialRampToValueAtTime(0.0001, t0 + k + 0.1);
+        o.connect(g); g.connect(c.destination);
+        o.start(t0 + k); o.stop(t0 + k + 0.12);
+      });
+      [0.9, 1.06, 1.2, 1.28].forEach(function (k, j) { self._click(c, t0 + k, 2400 + j * 500, 0.11); });
+      var pt = t0 + 1.36, po = c.createOscillator(), pg = c.createGain();
+      po.type = "sine";
+      po.frequency.setValueAtTime(300, pt);
+      po.frequency.exponentialRampToValueAtTime(1100, pt + 0.09);
+      pg.gain.setValueAtTime(0.0001, pt);
+      pg.gain.exponentialRampToValueAtTime(0.1, pt + 0.01);
+      pg.gain.exponentialRampToValueAtTime(0.0001, pt + 0.16);
+      po.connect(pg); pg.connect(c.destination);
+      po.start(pt); po.stop(pt + 0.18);
+      // the cluck: a buzzy note through a vowel-like filter, twice
+      [1.6, 1.82].forEach(function (k, j) {
+        var o = c.createOscillator(), f = c.createBiquadFilter(), g = c.createGain(), at = t0 + k;
+        o.type = "sawtooth";
+        o.frequency.setValueAtTime(460 + j * 60, at);
+        o.frequency.exponentialRampToValueAtTime(720 + j * 60, at + 0.05);
+        o.frequency.exponentialRampToValueAtTime(420, at + 0.15);
+        f.type = "bandpass"; f.Q.value = 4; f.frequency.value = 1300;
+        g.gain.setValueAtTime(0.0001, at);
+        g.gain.exponentialRampToValueAtTime(0.07, at + 0.015);
+        g.gain.exponentialRampToValueAtTime(0.0001, at + 0.17);
+        o.connect(f); f.connect(g); g.connect(c.destination);
+        o.start(at); o.stop(at + 0.19);
+      });
+      this._bell(c, t0 + 2.56);
+      var bt = t0 + 2.7, bo = c.createOscillator(), bg = c.createGain();
+      bo.type = "triangle";
+      bo.frequency.setValueAtTime(260, bt);
+      bo.frequency.exponentialRampToValueAtTime(620, bt + 0.12);
+      bo.frequency.exponentialRampToValueAtTime(380, bt + 0.3);
+      bg.gain.setValueAtTime(0.0001, bt);
+      bg.gain.exponentialRampToValueAtTime(0.06, bt + 0.02);
+      bg.gain.exponentialRampToValueAtTime(0.0001, bt + 0.32);
+      bo.connect(bg); bg.connect(c.destination);
+      bo.start(bt); bo.stop(bt + 0.34);
+      for (i = 0; i < 52; i++) this._click(c, t0 + 3.1 + i * 0.065, 5200, 0.018);
+      this._bell(c, t0 + 4.6);
+    },
+
     _hit: function (when, size) {
-      if (w.LAB_FX === "bats") this.bats(when, size);
+      if (w.LAB_FX === "egg") this.egg(when, size);
+      else if (w.LAB_FX === "peach") this.peach(when, size);
+      else if (w.LAB_FX === "ghosts") this.ghosts(when, size);
+      else if (w.LAB_FX === "bats") this.bats(when, size);
       else if (w.LAB_FX === "balloons") this.balloons(when, size);
       else if (w.LAB_FX === "confetti") this.confetti(when, size);
       else if (w.LAB_FX === "dragon") this.dragon(when, size);
@@ -624,7 +1037,12 @@
     good: function () { this._hit(0, 1); },
     bad: function () { this.tone([311, 262], 0.2, 0.055); },
     cheer: function () { this._hit(0, 1.25); this._hit(0.4, 1.05); },
-    finale: function () { this._hit(0, 1.6); this._hit(0.55, 1.4); this._hit(1.1, 1.5); }
+    finale: function () {
+      if (w.LAB_FX === "egg") { this.hatchRide(0); return; }
+      if (w.LAB_FX === "peach") { this.tree(0); return; }
+      if (w.LAB_FX === "ghosts") { this.bones(0.35); this.ghosts(0, 1.4); this.ghosts(2.6, 1.2); return; }
+      this._hit(0, 1.6); this._hit(0.55, 1.4); this._hit(1.1, 1.5);
+    }
   };
 
   /* ============================================================
@@ -666,6 +1084,9 @@
       if (w.LAB_FX === "dragon") return this._dragon(ox, oy, o);
       if (w.LAB_FX === "snake") return this._snake(ox, oy, o);
       if (w.LAB_FX === "bats") return this._bats(ox, oy, o);
+      if (w.LAB_FX === "ghosts") return this._ghosts(ox, oy, o);
+      if (w.LAB_FX === "peach") return this._peach(ox, oy, o);
+      if (w.LAB_FX === "egg") return this._egg(ox, oy, o);
       var n = o.count || 64;
       var cols = o.rainbow ? null : this.THEMES[Math.floor(Math.random() * this.THEMES.length)];
       var scale = o.scale || 1, life = o.life || 1;
@@ -1184,6 +1605,940 @@
       ctx.restore();
     },
 
+    /* Ghosts (Lab 8, window.LAB_FX = "ghosts"). Two or three friendly ghosts
+       rise out of the point, swaying, their hems rippling, and fade near the
+       top; the first one says "boo!". o.count ghosts; o.orbit, when given
+       ({cx, cy, R}), sends them circling that point instead (the finale), then
+       up and away. */
+    _ghosts: function (ox, oy, o) {
+      var n = o.count || 3, scale = o.scale || 1, life = (o.life || 1) * 150;
+      for (var i = 0; i < n; i++) {
+        var g = {
+          kind: "ghost", t: 0, x: ox + (i - (n - 1) / 2) * 30 * scale + (Math.random() - 0.5) * 10,
+          y: oy - 8, vy: -(1.1 + Math.random() * 0.6) * scale, r: (13 + Math.random() * 5) * Math.sqrt(scale),
+          ph: Math.random() * 6.28, sway: 0.7 + Math.random() * 0.6, delay: i * 7 + (o.delay || 0),
+          life: life, max: life, boo: i === 0 && o.boo !== false, tint: i % 3
+        };
+        if (o.orbit) {
+          g.orbit = o.orbit;
+          g.ang = (i / n) * Math.PI * 2;
+          g.delay = (o.delay || 0) + i * 3;
+          g.boo = i === 0;
+        }
+        this._ps.push(g);
+      }
+      this._run();
+    },
+    GHOST_TINT: ["#FFFFFF", "#F3F0FF", "#EEF7FF"],
+    _drawGhost: function (ctx, g) {
+      var r = g.r, a = Math.max(0, Math.min(1, g.t / 8, g.life / 30));
+      var hem = 1.35 * r, tilt = Math.sin(g.t * 0.08 + g.ph) * 0.12;
+      ctx.save();
+      ctx.globalAlpha = a * 0.96;
+      ctx.translate(g.x, g.y);
+      ctx.rotate(tilt);
+      // soft glow
+      var gl = ctx.createRadialGradient(0, r * 0.3, r * 0.4, 0, r * 0.3, r * 2.2);
+      gl.addColorStop(0, "rgba(190,200,255,.35)"); gl.addColorStop(1, "rgba(190,200,255,0)");
+      ctx.fillStyle = gl;
+      ctx.beginPath(); ctx.arc(0, r * 0.3, r * 2.2, 0, 6.29); ctx.fill();
+      // body: a round head, straight sides, a hem of three rippling scallops
+      ctx.beginPath();
+      ctx.moveTo(-r, 0);
+      ctx.arc(0, 0, r, Math.PI, 0);
+      ctx.lineTo(r, hem);
+      var k, xs = [r, r / 3, -r / 3, -r];
+      for (k = 0; k < 3; k++) {
+        var x0 = xs[k], x1 = xs[k + 1], mid = (x0 + x1) / 2;
+        var dip = r * (0.32 + 0.1 * Math.sin(g.t * 0.22 + k * 1.7 + g.ph));
+        ctx.quadraticCurveTo(mid, hem + dip, x1, hem);
+      }
+      ctx.lineTo(-r, 0);
+      ctx.closePath();
+      ctx.fillStyle = this.GHOST_TINT[g.tint];
+      ctx.fill();
+      ctx.strokeStyle = "#8A93B8";
+      ctx.lineWidth = Math.max(1.2, r * 0.09);
+      ctx.stroke();
+      // eyes that blink now and then, rosy cheeks, a little round mouth
+      var blink = (g.t + g.ph * 20) % 90 < 5 ? 0.15 : 1;
+      ctx.fillStyle = "#2B2740";
+      [-1, 1].forEach(function (sd) {
+        ctx.beginPath(); ctx.ellipse(sd * r * 0.36, -r * 0.08, r * 0.13, r * 0.19 * blink, 0, 0, 6.29); ctx.fill();
+      });
+      ctx.fillStyle = "rgba(255,140,170,.45)";
+      [-1, 1].forEach(function (sd) {
+        ctx.beginPath(); ctx.ellipse(sd * r * 0.58, r * 0.2, r * 0.13, r * 0.08, 0, 0, 6.29); ctx.fill();
+      });
+      ctx.fillStyle = "#2B2740";
+      ctx.beginPath(); ctx.ellipse(0, r * 0.32, r * 0.1, r * 0.13 + r * 0.04 * Math.sin(g.t * 0.3), 0, 0, 6.29); ctx.fill();
+      ctx.restore();
+      // "boo!" for a moment, beside the first ghost
+      if (g.boo && g.t > 10 && g.t < 70) {
+        var ba = Math.min(1, (g.t - 10) / 8, (70 - g.t) / 10) * a;
+        ctx.save();
+        ctx.globalAlpha = ba;
+        ctx.font = "800 " + Math.round(r * 0.95) + 'px -apple-system,"Segoe UI",system-ui,sans-serif';
+        ctx.fillStyle = "#5B4FA8";
+        ctx.textAlign = "left";
+        ctx.fillText("boo!", g.x + r * 1.1, g.y - r * 0.7);
+        ctx.restore();
+      }
+    },
+
+    /* A cartoon skeleton for the finale, dancing: it bobs, swings its arms,
+       kicks, tilts its skull and chatters its jaw. Built from rounded bones,
+       ivory with a dark outline so it reads on the light page. p.x is where
+       it stands, p.base the floor line, p.s its size; it rises from below the
+       floor, dances, and sinks back. */
+    _drawSkeleton: function (ctx, p) {
+      var s = p.s, t = p.t, ph = p.ph;
+      function ease(u) { u = Math.max(0, Math.min(1, u)); return 1 - Math.pow(1 - u, 3); }
+      var lift = ease(t / 40) * ease(p.life / 35);      // up out of the floor, and back down at the end
+      var beat = t * 0.19 + ph;
+      var bob = Math.abs(Math.sin(beat)) * 9 * s;
+      var BONE = "#FBF8EF", LINE = "#4A4458";
+      ctx.save();
+      ctx.translate(p.x, p.base + (1 - lift) * 230 * s - bob);
+      ctx.globalAlpha = Math.max(0, Math.min(1, lift * 1.5));
+      function bone(x1, y1, x2, y2, wdt) {
+        ctx.lineCap = "round";
+        ctx.strokeStyle = LINE; ctx.lineWidth = (wdt + 3.2) * s;
+        ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke();
+        ctx.strokeStyle = BONE; ctx.lineWidth = wdt * s;
+        ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke();
+        [[x1, y1], [x2, y2]].forEach(function (q) {
+          ctx.fillStyle = BONE; ctx.strokeStyle = LINE; ctx.lineWidth = 1.6 * s;
+          ctx.beginPath(); ctx.arc(q[0], q[1], wdt * 0.62 * s, 0, 6.29); ctx.fill(); ctx.stroke();
+        });
+      }
+      function limb(x, y, a1, l1, a2, l2, wdt) {     // two bones from a joint, angles from straight down
+        var ex = x + Math.sin(a1) * l1 * s, ey = y + Math.cos(a1) * l1 * s;
+        var hx = ex + Math.sin(a1 + a2) * l2 * s, hy = ey + Math.cos(a1 + a2) * l2 * s;
+        bone(x, y, ex, ey, wdt); bone(ex, ey, hx, hy, wdt * 0.85);
+        return [hx, hy];
+      }
+      var swing = Math.sin(beat * 2), kick = Math.sin(beat * 2 + 1.2);
+      // legs (drawn first, behind the pelvis)
+      [-1, 1].forEach(function (sd) {
+        var k = sd < 0 ? kick : -kick;
+        var f = limb(sd * 10 * s, -4 * s, sd * 0.12 + k * 0.45, 42, -Math.max(0, k) * 0.9, 40, 7);
+        ctx.fillStyle = BONE; ctx.strokeStyle = LINE; ctx.lineWidth = 1.8 * s;
+        ctx.beginPath(); ctx.ellipse(f[0] + sd * 6 * s, f[1] + 2 * s, 9 * s, 4.5 * s, 0, 0, 6.29); ctx.fill(); ctx.stroke();
+      });
+      // pelvis
+      ctx.fillStyle = BONE; ctx.strokeStyle = LINE; ctx.lineWidth = 2 * s;
+      [-1, 1].forEach(function (sd) {
+        ctx.beginPath(); ctx.ellipse(sd * 9 * s, -8 * s, 11 * s, 9 * s, sd * 0.4, 0, 6.29); ctx.fill(); ctx.stroke();
+      });
+      // spine, vertebra by vertebra
+      for (var v = 0; v < 7; v++) {
+        var vy = (-20 - v * 12) * s, vx = Math.sin(beat + v * 0.25) * 2.2 * s;
+        ctx.beginPath(); ctx.ellipse(vx, vy, 5.5 * s, 4.4 * s, 0, 0, 6.29); ctx.fill(); ctx.stroke();
+      }
+      // ribs, three pairs
+      ctx.lineCap = "round";
+      [[-82, 26], [-70, 29], [-58, 24]].forEach(function (rb) {
+        [-1, 1].forEach(function (sd) {
+          var y = rb[0] * s, wd = rb[1] * s;
+          ctx.strokeStyle = LINE; ctx.lineWidth = 6.4 * s;
+          ctx.beginPath(); ctx.moveTo(0, y); ctx.quadraticCurveTo(sd * wd, y - 4 * s, sd * wd * 0.82, y + 9 * s); ctx.stroke();
+          ctx.strokeStyle = BONE; ctx.lineWidth = 3.4 * s;
+          ctx.beginPath(); ctx.moveTo(0, y); ctx.quadraticCurveTo(sd * wd, y - 4 * s, sd * wd * 0.82, y + 9 * s); ctx.stroke();
+        });
+      });
+      // arms: up and down in turn, elbows bent
+      [-1, 1].forEach(function (sd) {
+        var up = sd < 0 ? swing : -swing;
+        var hnd = limb(sd * 22 * s, -90 * s, sd * (0.5 + 1.6 * (up * 0.5 + 0.5)), 34, sd * 0.7, 30, 6);
+        ctx.fillStyle = BONE; ctx.strokeStyle = LINE; ctx.lineWidth = 1.6 * s;
+        ctx.beginPath(); ctx.arc(hnd[0], hnd[1], 5.5 * s, 0, 6.29); ctx.fill(); ctx.stroke();
+      });
+      // collarbone
+      bone(-22 * s, -91 * s, 22 * s, -91 * s, 5);
+      // skull, tilting with the beat, the jaw chattering
+      ctx.save();
+      ctx.translate(Math.sin(beat) * 3 * s, -122 * s);
+      ctx.rotate(Math.sin(beat) * 0.18);
+      var jaw = (Math.sin(t * 0.7 + ph) > 0 ? 1 : 0) * 5 * s;
+      ctx.fillStyle = BONE; ctx.strokeStyle = LINE; ctx.lineWidth = 2.2 * s;
+      ctx.beginPath();
+      if (ctx.roundRect) ctx.roundRect(-11 * s, 12 * s + jaw, 22 * s, 10 * s, 4 * s); else ctx.rect(-11 * s, 12 * s + jaw, 22 * s, 10 * s);
+      ctx.fill(); ctx.stroke();
+      ctx.beginPath(); ctx.arc(0, 0, 20 * s, 0, 6.29); ctx.fill(); ctx.stroke();
+      ctx.fillStyle = BONE; ctx.beginPath(); ctx.ellipse(0, 12 * s, 13 * s, 6 * s, 0, 0, 6.29); ctx.fill();
+      ctx.strokeStyle = LINE; ctx.lineWidth = 1.4 * s;
+      for (var tth = -2; tth <= 2; tth++) {
+        ctx.beginPath(); ctx.moveTo(tth * 4 * s, 13 * s); ctx.lineTo(tth * 4 * s, 18 * s); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(tth * 4 * s, 13 * s + jaw + 3 * s); ctx.lineTo(tth * 4 * s, 17 * s + jaw + 3 * s); ctx.stroke();
+      }
+      ctx.fillStyle = "#2B2740";
+      [-1, 1].forEach(function (sd) {
+        ctx.beginPath(); ctx.ellipse(sd * 7.5 * s, -2 * s, 5.6 * s, 6.6 * s, sd * -0.2, 0, 6.29); ctx.fill();
+      });
+      ctx.fillStyle = "#FFE08A";
+      [-1, 1].forEach(function (sd) {
+        ctx.beginPath(); ctx.arc(sd * 7.5 * s + 1.4 * s, -3 * s, 1.6 * s, 0, 6.29); ctx.fill();
+      });
+      ctx.fillStyle = "#2B2740";
+      ctx.beginPath(); ctx.moveTo(0, 4 * s); ctx.lineTo(-3 * s, 9 * s); ctx.lineTo(3 * s, 9 * s); ctx.closePath(); ctx.fill();
+      ctx.restore();
+      ctx.restore();
+    },
+
+    /* Peach blossom (Lab 9, window.LAB_FX = "peach"). A correct answer sends a
+       peach bouncing up out of the point in a puff of blossom: five-petalled
+       flowers fly out, spin and fade, and loose petals flutter down. o.count
+       blossoms; o.peach false leaves the peach out. */
+    _peach: function (ox, oy, o) {
+      var n = o.count || 5, scale = o.scale || 1, life = o.life || 1, i;
+      for (i = 0; i < n; i++) {
+        var a = -Math.PI / 2 + (i - (n - 1) / 2) * 0.62 + (Math.random() - 0.5) * 0.3, sp = (2.6 + Math.random() * 2.2) * scale;
+        this._ps.push({ kind: "blossom", x: ox, y: oy, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp,
+          r: (6.5 + Math.random() * 2.5) * Math.sqrt(scale), rot: Math.random() * 6.28, vr: (Math.random() - 0.5) * 0.12,
+          t: 0, life: 62 * life, max: 62 * life });
+      }
+      for (i = 0; i < (o.petals || 9); i++) {
+        this._ps.push({ kind: "petal", x: ox + (Math.random() - 0.5) * 20, y: oy, vx: (Math.random() - 0.5) * 5 * scale,
+          vy: -(2 + Math.random() * 3.5) * scale, s: (3.6 + Math.random() * 2.2) * Math.sqrt(scale),
+          rot: Math.random() * 6.28, vr: (Math.random() - 0.5) * 0.1, fl: Math.random() * 6.28,
+          t: 0, life: 120 * life, max: 120 * life, delay: Math.random() * 6 });
+      }
+      if (o.peach !== false) {
+        this._ps.push({ kind: "peachf", x: ox, y: oy, vx: (Math.random() - 0.5) * 1.4, vy: -6.6 * Math.sqrt(scale),
+          r: 13 * Math.sqrt(scale), rot: 0, vr: (Math.random() - 0.5) * 0.05, t: 0, life: 78 * life, max: 78 * life });
+      }
+      this._run();
+    },
+    BLOSSOM: ["#FFC9D8", "#FFB3C9", "#FFD6E2"],
+    _drawBlossom: function (ctx, x, y, r, rot, alpha, k) {
+      if (r <= 0.3) return;
+      ctx.save();
+      ctx.globalAlpha *= alpha;                       // inside the tree, its fade still applies
+      ctx.translate(x, y);
+      ctx.rotate(rot);
+      ctx.fillStyle = this.BLOSSOM[(k || 0) % 3];
+      ctx.strokeStyle = "rgba(214,84,124,.55)";
+      ctx.lineWidth = Math.max(0.6, r * 0.08);
+      for (var i = 0; i < 5; i++) {
+        ctx.save();
+        ctx.rotate(i * 1.2566);
+        ctx.beginPath();
+        ctx.moveTo(0, 0);
+        ctx.bezierCurveTo(-r * 0.62, -r * 0.35, -r * 0.5, -r * 1.05, -r * 0.1, -r * 1.02);
+        ctx.lineTo(0, -r * 0.88);                       // the notch at the petal's tip
+        ctx.lineTo(r * 0.1, -r * 1.02);
+        ctx.bezierCurveTo(r * 0.5, -r * 1.05, r * 0.62, -r * 0.35, 0, 0);
+        ctx.fill(); ctx.stroke();
+        ctx.restore();
+      }
+      ctx.fillStyle = "#E8577F";
+      ctx.beginPath(); ctx.arc(0, 0, r * 0.26, 0, 6.29); ctx.fill();
+      ctx.fillStyle = "#FFD45C";
+      for (var j = 0; j < 5; j++) {
+        var a = j * 1.2566 + 0.63;
+        ctx.beginPath(); ctx.arc(Math.cos(a) * r * 0.36, Math.sin(a) * r * 0.36, r * 0.07 + 0.4, 0, 6.29); ctx.fill();
+      }
+      ctx.restore();
+    },
+    _drawPetal: function (ctx, p) {
+      var a = Math.max(0, Math.min(1, p.t / 6, p.life / 30));
+      ctx.save();
+      ctx.globalAlpha = a;
+      ctx.translate(p.x, p.y);
+      ctx.rotate(p.rot);
+      ctx.scale(Math.cos(p.fl), 1);                     // the flutter: the petal turns edge-on and back
+      ctx.fillStyle = "#FFBACB";
+      ctx.beginPath();
+      ctx.moveTo(0, p.s);
+      ctx.bezierCurveTo(-p.s * 0.9, p.s * 0.3, -p.s * 0.6, -p.s, 0, -p.s * 0.75);
+      ctx.bezierCurveTo(p.s * 0.6, -p.s, p.s * 0.9, p.s * 0.3, 0, p.s);
+      ctx.fill();
+      ctx.restore();
+    },
+    /* The peach, drawn from the gem's own outline so the two always match. */
+    _peachPaths: null,
+    _drawPeach: function (ctx, x, y, r, rot, alpha) {
+      if (r <= 0.3 || !w.Path2D) return;
+      var P = this._peachPaths || (this._peachPaths = {
+        body: new Path2D("M18 8.2 C15.8 6.2 9.6 5.6 7 10.4 C5 14.4 6 20.6 10.4 24.4 C12.6 26.3 15.4 27.4 18 27.6 " +
+          "C20.6 27.4 23.4 26.3 25.6 24.4 C30 20.6 31 14.4 29 10.4 C26.4 5.6 20.2 6.2 18 8.2 Z"),
+        blush: new Path2D("M18 8.2 C20.2 6.2 26.4 5.6 29 10.4 C31 14.4 30 20.6 25.6 24.4 C23.4 26.3 20.6 27.4 18 27.6 " +
+          "C22.6 23.2 23.4 13.6 18 8.2 Z"),
+        crease: new Path2D("M18 8.6 C15.4 12.4 15.2 19.2 17.4 26.6"),
+        stem: new Path2D("M18 8.8 C17.8 6.8 18.2 5 19.2 3.6"),
+        leaf: new Path2D("M18.8 5.4 C20.4 2.2 25.2 1.2 28.2 2.6 C26.4 6 22 7.4 18.8 5.4 Z")
+      });
+      var s = r / 11;
+      ctx.save();
+      ctx.globalAlpha *= alpha;
+      ctx.translate(x, y);
+      ctx.rotate(rot);
+      ctx.scale(s, s);
+      ctx.translate(-18, -17);
+      var g = ctx.createLinearGradient(0, 6, 0, 28);
+      g.addColorStop(0, "#FFD3A6"); g.addColorStop(1, "#F7946B");
+      ctx.fillStyle = g; ctx.fill(P.body);
+      ctx.fillStyle = "rgba(210,71,90,.34)"; ctx.fill(P.blush);
+      ctx.strokeStyle = "rgba(178,58,70,.55)"; ctx.lineWidth = 1; ctx.lineCap = "round"; ctx.stroke(P.crease);
+      ctx.strokeStyle = "rgba(178,58,70,.5)"; ctx.lineWidth = 0.9; ctx.stroke(P.body);
+      ctx.fillStyle = "rgba(255,255,255,.65)";
+      ctx.beginPath(); ctx.ellipse(11.8, 13.2, 2.2, 3.8, 0.38, 0, 6.29); ctx.fill();
+      ctx.strokeStyle = "#7A4A22"; ctx.lineWidth = 1.5; ctx.stroke(P.stem);
+      ctx.fillStyle = "#4FA060"; ctx.fill(P.leaf);
+      ctx.restore();
+    },
+
+    /* The finale: a peach tree grows on the bottom edge of the screen. A peach
+       stone drops onto a mound of earth, a sprout comes up and opens its first
+       two leaves, the trunk and branches grow out, leaves unfurl, blossom opens
+       at the tips, and the blossoms turn into peaches while petals drift down;
+       then the tree fades. The shape is built once, from a fixed seed, so it is
+       the same tree every time. u is one hundredth of its size. */
+    _buildTree: function (cx, gy, u) {
+      var seed = 9;
+      function rnd() {                                  // mulberry32
+        seed |= 0; seed = seed + 0x6D2B79F5 | 0;
+        var t = Math.imul(seed ^ seed >>> 15, 1 | seed);
+        t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+        return ((t ^ t >>> 14) >>> 0) / 4294967296;
+      }
+      var T = { branches: [], leaves: [], tips: [], cx: cx, gy: gy, u: u };
+      function grow(x, y, ang, len, wid, depth, t0) {
+        ang = Math.max(-Math.PI + 0.3, Math.min(-0.3, ang));
+        var x1 = x + Math.cos(ang) * len, y1 = y + Math.sin(ang) * len;
+        var bend = (rnd() - 0.5) * 0.28 * len;
+        var b = { x0: x, y0: y, x1: x1, y1: y1, cx: (x + x1) / 2 + Math.cos(ang + 1.5708) * bend,
+          cy: (y + y1) / 2 + Math.sin(ang + 1.5708) * bend, w0: wid, w1: wid * 0.66, depth: depth,
+          t0: t0, t1: t0 + 24 + 8 * (4 - depth), ang: ang };
+        T.branches.push(b);
+        if (depth >= 2) {
+          for (var l = 0; l < 3; l++) {
+            var f = 0.35 + l * 0.27 + rnd() * 0.08, side = l % 2 ? 1 : -1;
+            T.leaves.push({ b: b, f: f, ang: ang + side * (0.75 + rnd() * 0.4), len: (4.4 + rnd() * 1.8) * u,
+              t: b.t0 + (b.t1 - b.t0) * f + 8 + rnd() * 26, k: Math.floor(rnd() * 2) });
+          }
+        }
+        if (depth >= 4) { T.tips.push({ x: x1, y: y1, ang: ang, t: b.t1 }); return; }
+        var kids = depth === 0 ? 3 : rnd() < 0.55 ? 2 : 3;
+        var fan = depth === 0 ? 0.62 : 0.5 + rnd() * 0.16;
+        for (var j = 0; j < kids; j++) {
+          var ca = ang + (j - (kids - 1) / 2) * fan + (rnd() - 0.5) * 0.18;
+          grow(x1, y1, ca, len * (0.7 + rnd() * 0.16), wid * 0.64, depth + 1, b.t1 - 6);
+        }
+        if (depth === 1 || depth === 2) T.tips.push({ x: x1, y: y1, ang: ang, t: b.t1, inner: true });
+      }
+      grow(cx, gy, -Math.PI / 2 + 0.04, 30 * u, 6.2 * u, 0, 78);
+      // blossom at every outer tip and at some forks; about half of them set fruit
+      T.flowers = T.tips.filter(function (tp) { return !tp.inner || rnd() < 0.5; }).map(function (tp, i) {
+        return { x: tp.x + Math.cos(tp.ang) * 0.8 * u, y: tp.y + Math.sin(tp.ang) * 0.8 * u,
+          r: (2.5 + rnd() * 0.9) * u, rot: rnd() * 6.28, t: 222 + rnd() * 70, k: i,
+          fruit: rnd() < 0.5, tf: 298 + rnd() * 46 };
+      });
+      return T;
+    },
+    _drawTree: function (ctx, p) {
+      var T = p.tree, t = p.t, u = T.u, cx = T.cx, gy = T.gy, self = this;
+      var fade = Math.max(0, Math.min(1, (p.max - t) / 40, t / 6));
+      function ease(x) { x = Math.max(0, Math.min(1, x)); return x * x * (3 - 2 * x); }
+      ctx.save();
+      ctx.globalAlpha = fade;
+      // the mound of earth, with a few blades of grass
+      ctx.fillStyle = "#9C6B43";
+      ctx.beginPath(); ctx.ellipse(cx, gy + 2.2 * u, 17 * u, 4.4 * u, 0, Math.PI, 0); ctx.fill();
+      ctx.fillStyle = "#7E5434";
+      ctx.beginPath(); ctx.ellipse(cx, gy + 2.2 * u, 17 * u, 1.6 * u, 0, 0, Math.PI); ctx.fill();
+      ctx.strokeStyle = "#6BAA4F"; ctx.lineWidth = Math.max(1, 0.5 * u); ctx.lineCap = "round";
+      [-13, -11.6, -8, 9, 11.2, 14].forEach(function (gx, i) {
+        var hgt = (2 + (i % 3) * 0.8) * u;
+        ctx.beginPath(); ctx.moveTo(cx + gx * u, gy + 0.6 * u);
+        ctx.quadraticCurveTo(cx + (gx + (i % 2 ? 0.8 : -0.8)) * u, gy - hgt * 0.5, cx + (gx + (i % 2 ? 1.4 : -1.4)) * u, gy - hgt);
+        ctx.stroke();
+      });
+      // the peach stone falls and settles into the earth
+      if (t < 60) {
+        var drop = ease(t / 28), sy = gy - 34 * u + (34 * u - 1.4 * u) * drop * drop;
+        ctx.save();
+        ctx.globalAlpha = fade * Math.min(1, (60 - t) / 16);
+        ctx.translate(cx, sy);
+        ctx.rotate(0.5 - drop * 0.4);
+        ctx.fillStyle = "#A8693D";
+        ctx.beginPath(); ctx.ellipse(0, 0, 1.5 * u, 2.1 * u, 0, 0, 6.29); ctx.fill();
+        ctx.strokeStyle = "#6E3F1E"; ctx.lineWidth = Math.max(0.8, 0.25 * u);
+        ctx.beginPath(); ctx.moveTo(-0.6 * u, -1.4 * u); ctx.quadraticCurveTo(0.4 * u, 0, -0.5 * u, 1.4 * u); ctx.stroke();
+        ctx.restore();
+      }
+      // the sprout: a green stem and its first two leaves, overtaken by the trunk
+      if (t > 26 && t < 112) {
+        var sg = ease((t - 28) / 40), sa = Math.min(1, (112 - t) / 24);
+        var tipx = cx + 0.8 * u, tipy = gy - 9 * u * sg;
+        ctx.save();
+        ctx.globalAlpha = fade * sa;
+        ctx.strokeStyle = "#5DA046"; ctx.lineWidth = Math.max(1.2, 0.8 * u);
+        ctx.beginPath(); ctx.moveTo(cx, gy); ctx.quadraticCurveTo(cx - 0.8 * u, gy - 4.5 * u * sg, tipx, tipy); ctx.stroke();
+        var lo = ease((t - 52) / 20);
+        if (lo > 0) {
+          ctx.fillStyle = "#79BE5C";
+          [-1, 1].forEach(function (sd) {
+            ctx.save();
+            ctx.translate(tipx, tipy);
+            ctx.rotate(sd * (0.5 + 0.7 * lo) - Math.PI / 2);
+            ctx.beginPath(); ctx.ellipse(2.2 * u * lo, 0, 2.3 * u * lo, 1.1 * u * lo, 0, 0, 6.29); ctx.fill();
+            ctx.restore();
+          });
+        }
+        ctx.restore();
+      }
+      // the trunk and branches, each growing out from its fork
+      function qpt(b, f) {
+        var a = 1 - f;
+        return [a * a * b.x0 + 2 * a * f * b.cx + f * f * b.x1, a * a * b.y0 + 2 * a * f * b.cy + f * f * b.y1];
+      }
+      // each branch is one tapering shape along its curve, rounded at the tip, with a
+      // streak of light bark down one side
+      T.branches.forEach(function (b) {
+        var g = (t - b.t0) / (b.t1 - b.t0);
+        if (g <= 0) return;
+        var f = ease(Math.min(1, g)), n = 10, L = [], R = [], M = [], k;
+        for (k = 0; k <= n; k++) {
+          var q = f * k / n, a = 1 - q;
+          var px = a * a * b.x0 + 2 * a * q * b.cx + q * q * b.x1, py = a * a * b.y0 + 2 * a * q * b.cy + q * q * b.y1;
+          var tx = 2 * a * (b.cx - b.x0) + 2 * q * (b.x1 - b.cx), ty = 2 * a * (b.cy - b.y0) + 2 * q * (b.y1 - b.cy);
+          var tl = Math.hypot(tx, ty) || 1, nx = -ty / tl, ny = tx / tl, hw = (b.w0 + (b.w1 - b.w0) * q) / 2;
+          L.push([px + nx * hw, py + ny * hw]); R.push([px - nx * hw, py - ny * hw]); M.push([px, py, hw, nx, ny]);
+        }
+        var end = M[n], a0 = Math.atan2(end[4], end[3]);
+        ctx.fillStyle = "#6E4A2C";
+        ctx.beginPath();
+        ctx.moveTo(L[0][0], L[0][1]);
+        for (k = 1; k <= n; k++) ctx.lineTo(L[k][0], L[k][1]);
+        ctx.arc(end[0], end[1], end[2], a0, a0 - Math.PI, true);
+        for (k = n; k >= 0; k--) ctx.lineTo(R[k][0], R[k][1]);
+        ctx.closePath();
+        ctx.fill();
+        ctx.beginPath(); ctx.arc(M[0][0], M[0][1], M[0][2], 0, 6.29); ctx.fill();
+        if (M[0][2] > 1.1) {
+          ctx.strokeStyle = "rgba(168,124,80,.6)"; ctx.lineCap = "round";
+          ctx.beginPath();
+          for (k = 0; k <= n; k++) {
+            var hx = M[k][0] - M[k][3] * M[k][2] * 0.38, hy = M[k][1] - M[k][4] * M[k][2] * 0.38;
+            if (k) ctx.lineTo(hx, hy); else ctx.moveTo(hx, hy);
+          }
+          ctx.lineWidth = Math.max(0.8, M[0][2] * 0.4);
+          ctx.stroke();
+        }
+      });
+      // leaves, unfurling along the younger branches and stirring a little
+      T.leaves.forEach(function (lf, i) {
+        var g = ease((t - lf.t) / 16);
+        if (g <= 0) return;
+        var at = qpt(lf.b, lf.f), len = lf.len * g, sway = Math.sin(t * 0.05 + i) * 0.08;
+        ctx.save();
+        ctx.translate(at[0], at[1]);
+        ctx.rotate(lf.ang + sway);
+        ctx.fillStyle = lf.k ? "#5FA444" : "#7BBE5A";
+        ctx.beginPath();
+        ctx.moveTo(0, 0);
+        ctx.quadraticCurveTo(len * 0.5, -len * 0.32, len, 0);
+        ctx.quadraticCurveTo(len * 0.5, len * 0.32, 0, 0);
+        ctx.fill();
+        ctx.strokeStyle = "rgba(47,110,52,.5)"; ctx.lineWidth = Math.max(0.5, 0.18 * u);
+        ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(len * 0.85, 0); ctx.stroke();
+        ctx.restore();
+      });
+      // blossom opens; on half the flowers it gives way to a peach
+      T.flowers.forEach(function (fl) {
+        var o = (t - fl.t) / 12;
+        if (o <= 0) return;
+        var pop = o < 1 ? Math.sin(o * 1.9) / Math.sin(1.9) : 1;         // a little overshoot as it opens
+        var ripe = fl.fruit ? ease((t - fl.tf) / 22) : 0;
+        if (ripe < 1) self._drawBlossom(ctx, fl.x, fl.y, fl.r * pop * (1 - ripe), fl.rot, 1 - ripe * 0.6, fl.k);
+        if (ripe > 0) {
+          var swing = Math.sin(t * 0.06 + fl.k) * 0.12;
+          self._drawPeach(ctx, fl.x, fl.y + 2.6 * u * ripe, 3.3 * u * (0.4 + 0.6 * ripe), swing, 1);
+        }
+      });
+      ctx.restore();
+    },
+
+    /* Eggs (Lab 10, window.LAB_FX = "egg"). A correct answer sets a little
+       cream egg at the point: it wobbles, cracks, the top pops off and a
+       yellow chick pops up, cheeps twice (SFX.egg) and fades, with a few
+       fluffs of down. o.scale sizes it. */
+    _egg: function (ox, oy, o) {
+      var scale = o.scale || 1;
+      this._ps.push({ kind: "hatchling", x: ox, y: oy - 8 * scale, s: 1.35 * scale, t: 0, max: 92 * (o.life || 1),
+        dir: Math.random() < 0.5 ? -1 : 1, E: this._eggSpec(12.5, 15.5, false, 0.12) });
+      this._run();
+    },
+    /* An egg's measurements: rx, ry its half width and height; the crack is a
+       zigzag across it at frac of the way from the middle to the top; pivot is
+       the middle of the cap that comes off. */
+    _eggSpec: function (rx, ry, gold, frac) {
+      var yc = -ry * frac, zig = [], n = 8, i;
+      for (i = 0; i <= n; i++) zig.push([-rx * 1.15 + 2.3 * rx * i / n, yc + (i % 2 ? -1 : 1) * ry * 0.09]);
+      return { rx: rx, ry: ry, yc: yc, zig: zig, pivot: (yc - ry) / 2, lw: gold ? 1.5 : 1.3, gold: gold,
+        fill: gold ? ["#FFF4C9", "#FFE48A", "#EDB422", "#A87108"] : ["#FFFFFF", "#FFF6E4", "#F2DDB6", "#D2B07C"],
+        line: gold ? "#9A6406" : "#B08A55" };
+    },
+    _eggPath: function (ctx, rx, ry, keep) {           // narrower at the top; keep adds to the current path
+      if (!keep) ctx.beginPath();
+      for (var i = 0; i <= 48; i++) {
+        var th = i / 48 * 6.2832, c = Math.cos(th), x = rx * Math.sin(th) * (1 - 0.1 * c), y = -ry * c;
+        if (i) ctx.lineTo(x, y); else ctx.moveTo(x, y);
+      }
+      ctx.closePath();
+    },
+    /* The egg whole (crack 0-1 draws that much of the crack) or one part of it:
+       "top" (the cap) or "bottom" (the cup), cut along the zigzag. */
+    _drawShell: function (ctx, E, part, crack) {
+      var rx = E.rx, ry = E.ry, z = E.zig, m = z.length >> 1, i;
+      ctx.save();
+      if (part !== "whole") {
+        var edge = part === "top" ? -ry * 2 : ry * 2;
+        ctx.beginPath();
+        ctx.moveTo(z[0][0], edge);
+        for (i = 0; i < z.length; i++) ctx.lineTo(z[i][0], z[i][1]);
+        ctx.lineTo(z[z.length - 1][0], edge);
+        ctx.closePath();
+        ctx.clip();
+      }
+      this._eggPath(ctx, rx, ry);
+      var g = ctx.createRadialGradient(-rx * 0.35, -ry * 0.4, rx * 0.1, 0, 0, ry * 1.15);
+      E.fill.forEach(function (c, j) { g.addColorStop(j / (E.fill.length - 1), c); });
+      ctx.fillStyle = g; ctx.fill();
+      ctx.lineWidth = E.lw; ctx.strokeStyle = E.line; ctx.lineJoin = "round"; ctx.stroke();
+      ctx.fillStyle = "rgba(255,255,255,.55)";
+      ctx.beginPath(); ctx.ellipse(-rx * 0.42, -ry * 0.4, rx * 0.15, ry * 0.23, 0.35, 0, 6.29); ctx.fill();
+      var reach = part === "whole" ? Math.round((crack || 0) * m) : m;
+      if (reach > 0) {
+        this._eggPath(ctx, rx, ry); ctx.clip();
+        ctx.beginPath();
+        for (i = m - reach; i <= m + reach; i++) {
+          if (i === m - reach) ctx.moveTo(z[i][0], z[i][1]); else ctx.lineTo(z[i][0], z[i][1]);
+        }
+        ctx.lineWidth = E.lw * (part === "whole" ? 1.1 : 1.8); ctx.strokeStyle = E.line; ctx.stroke();
+      }
+      ctx.restore();
+    },
+    /* Clip to all but what the cup hides: inside the egg, or above its rim. */
+    _clipAbove: function (ctx, E) {
+      var z = E.zig, i;
+      this._eggPath(ctx, E.rx, E.ry);
+      ctx.moveTo(z[0][0], -E.ry * 4);
+      ctx.lineTo(z[z.length - 1][0], -E.ry * 4);
+      for (i = z.length - 1; i >= 0; i--) ctx.lineTo(z[i][0], z[i][1]);
+      ctx.closePath();
+      ctx.clip();
+    },
+    _backOut: function (x) { x = Math.max(0, Math.min(1, x)) - 1; return 1 + 2.70158 * x * x * x + 1.70158 * x * x; },
+    _sparkle: function (ctx, x, y, r) {
+      ctx.save();
+      ctx.translate(x, y);
+      ctx.fillStyle = "rgba(255,255,255,.95)";
+      ctx.beginPath();
+      ctx.moveTo(0, -r); ctx.quadraticCurveTo(0, 0, r, 0); ctx.quadraticCurveTo(0, 0, 0, r);
+      ctx.quadraticCurveTo(0, 0, -r, 0); ctx.quadraticCurveTo(0, 0, 0, -r);
+      ctx.fill();
+      ctx.restore();
+    },
+    /* A yellow chick facing right, about 17 wide; beak 0-1 opens it. Every
+       part is outlined first and filled after, so the outline goes round the
+       whole chick and not between its head and body. */
+    _drawChick: function (ctx, beak, wing) {
+      var OL = "#C4870C";
+      function body() { ctx.beginPath(); ctx.ellipse(0, 0, 8.6, 7.6, 0, 0, 6.29); }
+      function head() { ctx.beginPath(); ctx.arc(2.2, -8.4, 6.2, 0, 6.29); }
+      ctx.lineJoin = "round"; ctx.lineCap = "round";
+      ctx.strokeStyle = OL; ctx.lineWidth = 2.2;
+      body(); ctx.stroke(); head(); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(1, -14.2); ctx.quadraticCurveTo(0, -17.5, 2.4, -18); ctx.moveTo(2.6, -14.4);
+      ctx.quadraticCurveTo(3.6, -17, 5.6, -16.4); ctx.lineWidth = 1.1; ctx.stroke();
+      ctx.fillStyle = "#FFD84A";
+      body(); ctx.fill(); head(); ctx.fill();
+      ctx.save(); body(); ctx.clip();
+      ctx.fillStyle = "rgba(255,240,170,.8)"; ctx.beginPath(); ctx.ellipse(1.5, 3.6, 6, 4, 0, 0, 6.29); ctx.fill();
+      ctx.restore();
+      ctx.save(); ctx.translate(-1.5, -0.5); ctx.rotate(wing);
+      ctx.fillStyle = "#F5C02E"; ctx.strokeStyle = OL; ctx.lineWidth = 0.8;
+      ctx.beginPath(); ctx.ellipse(-3, 0.5, 4.4, 2.8, 0, 0, 6.29); ctx.fill(); ctx.stroke();
+      ctx.restore();
+      ctx.fillStyle = "#F39A22"; ctx.strokeStyle = "#B4630C"; ctx.lineWidth = 0.6;
+      ctx.beginPath(); ctx.moveTo(7.6, -9.6); ctx.lineTo(11.8, -8.5 - beak * 0.8); ctx.lineTo(7.8, -7.6); ctx.closePath(); ctx.fill(); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(7.8, -7.6); ctx.lineTo(11.2, -7.4 + beak * 1.6); ctx.lineTo(7.6, -6.4); ctx.closePath(); ctx.fill(); ctx.stroke();
+      ctx.fillStyle = "#2A2622"; ctx.beginPath(); ctx.arc(5, -9.9, 1.05, 0, 6.29); ctx.fill();
+      ctx.fillStyle = "#FFFFFF"; ctx.beginPath(); ctx.arc(5.35, -10.3, 0.38, 0, 6.29); ctx.fill();
+      ctx.fillStyle = "rgba(255,128,110,.45)"; ctx.beginPath(); ctx.ellipse(5.2, -6.6, 1.4, 0.9, 0, 0, 6.29); ctx.fill();
+    },
+    _drawHatchling: function (ctx, p) {
+      var t = p.t, E = p.E, OPEN = 32, self = this;
+      ctx.save();
+      ctx.globalAlpha = Math.max(0, Math.min(1, (p.max - t) / 18));
+      ctx.translate(p.x, p.y);
+      ctx.scale(p.s, p.s);
+      var pin = t < 10 ? Math.max(0.02, Math.sin(t / 10 * 1.9) / Math.sin(1.9)) : 1;
+      var wob = t > 6 && t < OPEN ? Math.sin((t - 6) * 0.8) * 0.17 * Math.min(1, (t - 6) / 5) : 0;
+      ctx.save();
+      ctx.translate(0, E.ry); ctx.rotate(wob); ctx.scale(pin, pin); ctx.translate(0, -E.ry);
+      if (t < OPEN) {
+        this._drawShell(ctx, E, "whole", t < 17 ? 0 : t < 22 ? 0.4 : t < 29 ? 0.7 : 1);
+      } else {
+        var up = this._backOut((t - OPEN) / 9), hop = 0, beak = 0;
+        [37, 46].forEach(function (c) {
+          var q = (t - c) / 7;
+          if (q > 0 && q < 1) { hop += Math.sin(q * Math.PI) * 2.6; beak = Math.sin(q * Math.PI); }
+        });
+        ctx.save();
+        this._clipAbove(ctx, E);
+        ctx.translate(0, 15 - 21 * up - hop);
+        ctx.scale(p.dir, 1);
+        this._drawChick(ctx, beak, -0.3 + Math.sin(t * 0.9) * 0.5);
+        ctx.restore();
+        this._drawShell(ctx, E, "bottom");
+        var ft = t - OPEN;
+        if (ft < 30) {
+          ctx.save();
+          ctx.globalAlpha *= 1 - ft / 30;
+          ctx.translate(-p.dir * 1.5 * ft, E.pivot - 3.2 * ft + 0.15 * ft * ft);
+          ctx.rotate(-p.dir * 0.2 * ft);
+          ctx.translate(0, -E.pivot);
+          self._drawShell(ctx, E, "top");
+          ctx.restore();
+        }
+      }
+      ctx.restore();
+      ctx.restore();
+    },
+    _drawFeather: function (ctx, p) {
+      ctx.save();
+      ctx.globalAlpha = Math.max(0, Math.min(1, p.t / 5, p.life / 25));
+      ctx.translate(p.x, p.y);
+      ctx.rotate(p.rot + Math.sin(p.fl) * 0.5);
+      ctx.fillStyle = p.c; ctx.strokeStyle = p.edge; ctx.lineWidth = Math.max(0.6, p.s * 0.12); ctx.lineCap = "round";
+      ctx.beginPath();
+      ctx.moveTo(0, -p.s);
+      ctx.bezierCurveTo(p.s * 0.6, -p.s * 0.6, p.s * 0.5, p.s * 0.5, 0, p.s);
+      ctx.bezierCurveTo(-p.s * 0.5, p.s * 0.5, -p.s * 0.6, -p.s * 0.6, 0, -p.s);
+      ctx.fill(); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(0, -p.s * 0.7); ctx.lineTo(0, p.s * 1.4); ctx.stroke();
+      ctx.restore();
+    },
+    _fluff: function (x, y, n, sc, white) {
+      for (var i = 0; i < n; i++) {
+        var a = -Math.PI / 2 + (Math.random() - 0.5) * 2.4, sp = (1.6 + Math.random() * 2.4) * Math.sqrt(sc);
+        this._ps.push({ kind: "feather", x: x, y: y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp,
+          s: (2.6 + Math.random() * 1.4) * sc, rot: Math.random() * 6.28, vr: (Math.random() - 0.5) * 0.08,
+          fl: Math.random() * 6.28, t: 0, life: 70 + Math.random() * 40,
+          c: white ? "#FFFFFF" : "#FFE488", edge: white ? "rgba(150,140,122,.7)" : "rgba(196,135,12,.6)" });
+      }
+    },
+
+    /* The finale's hen, facing right, centred on her body (about 50 tall with
+       the comb). h: wing "fold" | "flap" | "wave" | "to" (reaching for wx, wy
+       in her own frame), ph the flap's phase, beak 0-1, blink, hat (the cap
+       of the egg h.E on her head), legs "dangle". */
+    _drawHen: function (ctx, h) {
+      var OL = "#8E8676", sx = 2, sy = -3, len = 15, ang;
+      function tail() {
+        ctx.beginPath();
+        ctx.moveTo(-7, -10);
+        ctx.quadraticCurveTo(-12, -21, -15.5, -28);
+        ctx.quadraticCurveTo(-15.5, -22.5, -15, -20.5);
+        ctx.quadraticCurveTo(-19, -24.5, -23, -25);
+        ctx.quadraticCurveTo(-20.5, -20, -18.5, -17);
+        ctx.quadraticCurveTo(-22.5, -17.5, -25.5, -15.5);
+        ctx.quadraticCurveTo(-20, -6, -12, -2);
+        ctx.closePath();
+      }
+      function body() { ctx.beginPath(); ctx.ellipse(0, 0, 16, 13, 0, 0, 6.29); }
+      function neck() {
+        ctx.beginPath(); ctx.moveTo(0, -9); ctx.quadraticCurveTo(3, -17, 4, -22);
+        ctx.lineTo(15, -18); ctx.quadraticCurveTo(14, -10, 13, -5); ctx.closePath();
+      }
+      function head() { ctx.beginPath(); ctx.arc(9.5, -20, 8.5, 0, 6.29); }
+      var parts = [tail, body, neck, head];
+      ctx.lineJoin = "round"; ctx.lineCap = "round";
+      if (h.legs === "dangle") {
+        ctx.strokeStyle = "#F29B2B"; ctx.lineWidth = 2.2;
+        [[-4, 0.25], [3, -0.15]].forEach(function (l) {
+          var fx = l[0] + Math.sin(l[1]) * 11, fy = 22;
+          ctx.beginPath(); ctx.moveTo(l[0], 9); ctx.lineTo(fx, fy);
+          ctx.moveTo(fx, fy); ctx.lineTo(fx + 3.4, fy + 0.8); ctx.moveTo(fx, fy); ctx.lineTo(fx - 1.8, fy + 1);
+          ctx.stroke();
+        });
+      }
+      // the comb, behind the head
+      var comb = [[4.6, -27.4, 2.8], [8.6, -29.2, 3.4], [12.7, -27.6, 2.9]];
+      ctx.strokeStyle = "#A8261F"; ctx.lineWidth = 2;
+      comb.forEach(function (q) { ctx.beginPath(); ctx.arc(q[0], q[1], q[2], 0, 6.29); ctx.stroke(); });
+      ctx.fillStyle = "#E5403A";
+      comb.forEach(function (q) { ctx.beginPath(); ctx.arc(q[0], q[1], q[2], 0, 6.29); ctx.fill(); });
+      ctx.strokeStyle = OL; ctx.lineWidth = 2.6;
+      parts.forEach(function (f) { f(); ctx.stroke(); });
+      ctx.fillStyle = "#FFFFFF";
+      parts.forEach(function (f) { f(); ctx.fill(); });
+      ctx.strokeStyle = "rgba(142,134,118,.55)"; ctx.lineWidth = 0.9;
+      ctx.beginPath(); ctx.moveTo(-9, -9); ctx.quadraticCurveTo(-13, -16, -15, -21);
+      ctx.moveTo(-10, -6); ctx.quadraticCurveTo(-16, -13, -20, -18); ctx.stroke();
+      ctx.save(); body(); ctx.clip();
+      ctx.fillStyle = "rgba(214,204,186,.5)"; ctx.beginPath(); ctx.ellipse(3, 10.5, 17, 8, 0, 0, 6.29); ctx.fill();
+      ctx.restore();
+      // wattle, beak, eye
+      ctx.fillStyle = "#E5403A"; ctx.strokeStyle = "#A8261F"; ctx.lineWidth = 0.9;
+      ctx.beginPath(); ctx.ellipse(16, -13.4, 2.1, 3.1, -0.2, 0, 6.29); ctx.fill(); ctx.stroke();
+      var b = h.beak || 0;
+      ctx.fillStyle = "#F5A524"; ctx.strokeStyle = "#B36B0C"; ctx.lineWidth = 0.8;
+      ctx.beginPath(); ctx.moveTo(16.4, -22); ctx.lineTo(23.4, -19.4 - b * 1.4); ctx.lineTo(16.8, -18.2); ctx.closePath(); ctx.fill(); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(16.8, -18.2); ctx.lineTo(21.6, -17.8 + b * 2.8); ctx.lineTo(16.4, -16.4); ctx.closePath(); ctx.fill(); ctx.stroke();
+      ctx.fillStyle = "#2A2622";
+      if (h.blink) { ctx.fillRect(10.4, -21.8, 3.2, 0.9); }
+      else {
+        ctx.beginPath(); ctx.arc(12, -21.5, 1.6, 0, 6.29); ctx.fill();
+        ctx.fillStyle = "#FFFFFF"; ctx.beginPath(); ctx.arc(12.5, -22.1, 0.55, 0, 6.29); ctx.fill();
+      }
+      // the wing
+      if (h.wing === "to") { len = Math.hypot(h.wx - sx, h.wy - sy); ang = Math.atan2(h.wy - sy, h.wx - sx); }
+      else if (h.wing === "flap") ang = Math.PI + 0.5 - 0.9 * (0.5 + 0.5 * Math.sin(h.ph));
+      else if (h.wing === "wave") ang = -1.75 + 0.45 * Math.sin(h.ph);
+      else ang = Math.PI - 0.22;
+      ctx.save();
+      ctx.translate(sx, sy); ctx.rotate(ang);
+      ctx.beginPath();
+      ctx.moveTo(0, -5);
+      ctx.bezierCurveTo(len * 0.45, -6.5, len * 0.85, -3.5, len, -0.5);
+      ctx.lineTo(len * 0.86, 0.6); ctx.lineTo(len * 0.97, 2); ctx.lineTo(len * 0.8, 2.6);
+      ctx.bezierCurveTo(len * 0.5, 5.5, len * 0.2, 6, 0, 5);
+      ctx.closePath();
+      ctx.fillStyle = "#F7F4ED"; ctx.fill(); ctx.strokeStyle = OL; ctx.lineWidth = 1.2; ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(len * 0.3, -1); ctx.quadraticCurveTo(len * 0.6, -0.8, len * 0.8, 0.8);
+      ctx.moveTo(len * 0.25, 2.2); ctx.quadraticCurveTo(len * 0.5, 2.8, len * 0.7, 2.6);
+      ctx.lineWidth = 0.8; ctx.strokeStyle = "rgba(142,134,118,.7)"; ctx.stroke();
+      ctx.restore();
+      if (h.hat) {                                     // the cap of her egg, worn like a helmet
+        ctx.save();
+        ctx.translate(8, -27.5); ctx.rotate(-0.12); ctx.translate(0, -h.E.pivot);
+        this._drawShell(ctx, h.E, "top");
+        ctx.restore();
+      }
+    },
+    /* One leg from the hip to the pedal, the knee bent forward. */
+    _henLeg: function (ctx, hx, hy, px, py, col) {
+      var L = 19, dx = px - hx, dy = py - hy, dd = Math.min(Math.hypot(dx, dy), 2 * L - 0.01);
+      var a = Math.atan2(dy, dx), al = Math.acos(dd / (2 * L));
+      var kx = hx + L * Math.cos(a - al), ky = hy + L * Math.sin(a - al);
+      var fx = hx + dd * Math.cos(a), fy = hy + dd * Math.sin(a);
+      ctx.strokeStyle = col; ctx.lineWidth = 2.2; ctx.lineCap = "round"; ctx.lineJoin = "round";
+      ctx.beginPath(); ctx.moveTo(hx, hy); ctx.lineTo(kx, ky); ctx.lineTo(fx, fy);
+      ctx.moveTo(fx, fy); ctx.lineTo(fx + 3.6, fy + 0.4);
+      ctx.moveTo(fx, fy); ctx.lineTo(fx + 3, fy - 1.4);
+      ctx.moveTo(fx, fy); ctx.lineTo(fx - 2, fy + 0.6);
+      ctx.stroke();
+    },
+    /* The bicycle, facing right, its origin on the ground midway between the
+       wheels (about 82 long, 46 tall). wa turns the wheels. */
+    _bikeBack: function (ctx, wa) {
+      var R = 14.5, BB = [-3, -16.5], ST = [-10, -38], HT = [17, -37], HB = [19, -31];
+      ctx.lineCap = "round"; ctx.lineJoin = "round";
+      [[-26, -14.5], [26, -14.5]].forEach(function (c) {
+        ctx.strokeStyle = "#2E3038"; ctx.lineWidth = 2.8;
+        ctx.beginPath(); ctx.arc(c[0], c[1], R, 0, 6.29); ctx.stroke();
+        ctx.strokeStyle = "#C3C8D1"; ctx.lineWidth = 0.9;
+        ctx.beginPath(); ctx.arc(c[0], c[1], R - 1.9, 0, 6.29); ctx.stroke();
+        ctx.strokeStyle = "rgba(120,128,142,.85)"; ctx.lineWidth = 0.45;
+        ctx.beginPath();
+        for (var i = 0; i < 8; i++) {
+          var q = wa + i * Math.PI / 4;
+          ctx.moveTo(c[0], c[1]); ctx.lineTo(c[0] + Math.cos(q) * (R - 2), c[1] + Math.sin(q) * (R - 2));
+        }
+        ctx.stroke();
+        ctx.fillStyle = "#8D94A3"; ctx.beginPath(); ctx.arc(c[0], c[1], 1.6, 0, 6.29); ctx.fill();
+      });
+      ctx.strokeStyle = "#6B7080"; ctx.lineWidth = 0.6;          // the chain
+      ctx.beginPath(); ctx.moveTo(BB[0], BB[1] - 4.6); ctx.lineTo(-26, -16.8); ctx.moveTo(BB[0], BB[1] + 4.6); ctx.lineTo(-26, -12.2); ctx.stroke();
+      ctx.strokeStyle = "#A9AFBA"; ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.moveTo(ST[0], ST[1]); ctx.lineTo(-11, -41.5); ctx.stroke();            // seat post
+      ctx.beginPath(); ctx.moveTo(HT[0], HT[1]); ctx.lineTo(15.5, -43); ctx.stroke();             // stem
+      ctx.lineWidth = 1.9;
+      ctx.beginPath(); ctx.moveTo(15.5, -43); ctx.quadraticCurveTo(13, -45.6, 9.5, -45.4); ctx.stroke();
+      ctx.strokeStyle = "#E0473C"; ctx.lineWidth = 2.6;
+      ctx.beginPath();
+      ctx.moveTo(-26, -14.5); ctx.lineTo(BB[0], BB[1]); ctx.lineTo(ST[0], ST[1]); ctx.closePath();
+      ctx.moveTo(BB[0], BB[1]); ctx.lineTo(HB[0], HB[1]);
+      ctx.moveTo(ST[0], ST[1]); ctx.lineTo(16.4, -35.6);
+      ctx.moveTo(HB[0], HB[1]); ctx.quadraticCurveTo(23.5, -24, 26, -14.5);
+      ctx.stroke();
+      ctx.lineWidth = 3.4;
+      ctx.beginPath(); ctx.moveTo(HT[0], HT[1]); ctx.lineTo(HB[0], HB[1]); ctx.stroke();       // head tube
+      ctx.strokeStyle = "#2F3038"; ctx.lineWidth = 2.6;
+      ctx.beginPath(); ctx.moveTo(9.5, -45.4); ctx.lineTo(7.2, -45.2); ctx.stroke();            // grip
+      ctx.fillStyle = "#2F3038";
+      ctx.beginPath(); ctx.moveTo(-18.5, -42.6); ctx.quadraticCurveTo(-11, -45.4, -4, -42.4);
+      ctx.lineTo(-6, -40.6); ctx.quadraticCurveTo(-12, -41.6, -17.5, -40.4); ctx.closePath(); ctx.fill();   // saddle
+      ctx.fillStyle = "#D8DCE3"; ctx.strokeStyle = "#8D94A3"; ctx.lineWidth = 0.5;
+      ctx.beginPath(); ctx.arc(13.4, -46, 1.8, Math.PI, 0); ctx.closePath(); ctx.fill(); ctx.stroke();   // bell
+      ctx.strokeStyle = "#8D94A3"; ctx.lineWidth = 1.1;
+      ctx.beginPath(); ctx.arc(BB[0], BB[1], 4.6, 0, 6.29); ctx.stroke();                       // chainring
+    },
+    _crank: function (ctx, ca, far) {
+      var BB = [-3, -16.5], sg = far ? -1 : 1, px = BB[0] + sg * 7 * Math.cos(ca), py = BB[1] + sg * 7 * Math.sin(ca);
+      ctx.lineCap = "round";
+      ctx.strokeStyle = far ? "#5C6170" : "#8D94A3"; ctx.lineWidth = far ? 1.6 : 2;
+      ctx.beginPath(); ctx.moveTo(BB[0], BB[1]); ctx.lineTo(px, py); ctx.stroke();
+      ctx.fillStyle = "#3A3D47"; ctx.fillRect(px - 2.2, py - 0.8, 4.4, 1.6);
+      if (!far) { ctx.fillStyle = "#8D94A3"; ctx.beginPath(); ctx.arc(BB[0], BB[1], 1.3, 0, 6.29); ctx.fill(); }
+      return [px, py - 1];
+    },
+    /* The bicycle at bx on the ground line gy, with the hen riding when r is
+       given (r.hen her drawing options, r.bob, r.squash); ring 0-1 shows the
+       bell ringing. */
+    _drawRide: function (ctx, bx, gy, s, wa, ca, r, ring) {
+      ctx.save();
+      ctx.translate(bx, gy); ctx.scale(s, s);
+      ctx.fillStyle = "rgba(70,50,20,.13)";
+      ctx.beginPath(); ctx.ellipse(0, 0.5, 44, 2.8, 0, 0, 6.29); ctx.fill();
+      var hc = r ? [-9, -56 + r.bob] : null;
+      var fp = this._crank(ctx, ca, true);
+      if (r) this._henLeg(ctx, hc[0] - 2, hc[1] + 10, fp[0], fp[1], "#D27F1C");
+      this._bikeBack(ctx, wa);
+      var np = this._crank(ctx, ca, false);
+      if (r) {
+        this._henLeg(ctx, hc[0] + 1, hc[1] + 10, np[0], np[1], "#F29B2B");
+        ctx.save();
+        ctx.translate(hc[0], hc[1]); ctx.scale(1, r.squash || 1);
+        r.hen.wx = 8.6 - hc[0]; r.hen.wy = -45.4 - hc[1];          // the grip, in her own frame
+        this._drawHen(ctx, r.hen);
+        ctx.restore();
+      }
+      if (ring > 0 && ring < 1) {
+        ctx.strokeStyle = "rgba(107,112,128," + (1 - ring) + ")"; ctx.lineWidth = 1; ctx.lineCap = "round";
+        [0, 1, 2].forEach(function (j) {
+          var rr = 3.5 + ring * 6 + j * 2.6;
+          ctx.beginPath(); ctx.arc(13.4, -46.5, rr, -1.25, -0.25); ctx.stroke();
+        });
+      }
+      ctx.restore();
+    },
+    /* The nest under the big egg: the back of it before the egg, the front
+       after, so the egg sits down in it. */
+    _nest: function (ctx, front) {
+      var i;
+      ctx.lineCap = "round";
+      if (!front) {
+        ctx.fillStyle = "rgba(70,50,20,.12)";
+        ctx.beginPath(); ctx.ellipse(0, 3, 35, 3.2, 0, 0, 6.29); ctx.fill();
+        ctx.fillStyle = "#9A6B33";
+        ctx.beginPath(); ctx.ellipse(0, -4, 30, 7, 0, Math.PI, 0); ctx.closePath(); ctx.fill();
+        ctx.strokeStyle = "#C8954C"; ctx.lineWidth = 1.1;
+        ctx.beginPath();
+        for (i = 0; i < 7; i++) { var bx = -24 + i * 8; ctx.moveTo(bx, -4); ctx.quadraticCurveTo(bx + 3, -9.5, bx + 7 - (i % 2) * 3, -10.2 + (i % 3)); }
+        ctx.stroke();
+        return;
+      }
+      ctx.fillStyle = "#C8954C";
+      ctx.beginPath(); ctx.ellipse(0, -4, 31, 7.5, 0, 0, Math.PI); ctx.closePath(); ctx.fill();
+      ctx.lineWidth = 1.1;
+      for (i = 0; i < 12; i++) {
+        var x0 = -28 + i * 5, k = i % 3;
+        ctx.strokeStyle = k === 1 ? "#9A6B33" : "#E6BE6E";
+        ctx.beginPath(); ctx.moveTo(x0, -4.5 + k); ctx.quadraticCurveTo(x0 + 4, 1.5 - k, x0 + 9, -2.5 + k * 1.4); ctx.stroke();
+      }
+    },
+    /* Where the bicycle is at frame t of the finale: it rolls in from the left
+       and stops beside the egg (bell at 160), waits for her, then speeds up
+       and rides out of the right side by about frame 420. */
+    _hatchBx: function (p, t) {
+      if (t < 160) { var q = Math.max(0, (t - 112) / 48); q = 1 - Math.pow(1 - q, 3); return p.x0 + (p.stopX - p.x0) * q; }
+      var tau = t - 196;
+      if (tau <= 0) return p.stopX;
+      return p.stopX + (tau < 30 ? 0.5 * (p.v / 30) * tau * tau : 15 * p.v + p.v * (tau - 30));
+    },
+    /* The finale (FX "hatch"), timed with SFX.hatchRide, in frames of 16 ms:
+       the golden egg pops in on its nest, rocks at three knocks (28, 45, 61),
+       cracks (56-80) and the cap pops off (85); a hen pops up flapping, clucks
+       (100, 114) and the cap lands on her head (112). A bicycle rolls in and
+       stops beside the egg with a ring (160); she turns to look, hops (169)
+       and turns in the air to land on the saddle (189), and rides off to the
+       right (from 196), pedalling, ringing the bell (287) and waving. */
+    _drawHatch: function (ctx, p) {
+      var t = p.t, s = p.s, E = p.E, POP = 85, HAT = 112, HOP = 169, LAND = 189;
+      function ease(x) { x = Math.max(0, Math.min(1, x)); return x * x * (3 - 2 * x); }
+      var ecx = p.ex, ecy = p.gy - (2 + E.ry) * s;
+      var henY = 13 - 39 * (t < POP ? 0 : this._backOut((t - POP) / 13));
+      var dir = t < 154 || t >= HOP ? 1 : Math.cos(Math.PI * ease((t - 154) / 7));
+      var beak = 0;
+      [100, 114].forEach(function (c) { var q = (t - c) / 7; if (q > 0 && q < 1) beak = Math.sin(q * Math.PI); });
+      var blink = [130, 238, 352].some(function (b) { return t > b && t < b + 4; });
+      var squash = 1;
+      if (t > HAT && t < HAT + 7) squash = 1 - 0.09 * Math.sin((t - HAT) / 7 * Math.PI);
+      if (t > LAND && t < LAND + 7) squash = 1 - 0.1 * Math.sin((t - LAND) / 7 * Math.PI);
+      var hen = { beak: beak, blink: blink, hat: t >= HAT, E: E, wing: t < POP + 16 ? "flap" : "fold", ph: t * 1.2 };
+      // where she is until she lands: standing in the cup, then hopping in an arc to
+      // the saddle (straight up at first, so she clears the rim), turning in the air
+      var hx = ecx, hy = ecy + henY * s;
+      if (t >= HOP && t < LAND) {
+        var hu = (t - HOP) / (LAND - HOP), hs = hu * hu * (3 - 2 * hu);
+        hx = ecx + (p.stopX - 9 * s - ecx) * hs;
+        hy = ecy - 26 * s + (p.gy - 56 * s - (ecy - 26 * s)) * hu - 40 * s * 4 * hu * (1 - hu);
+        dir = -Math.cos(Math.PI * ease((hu - 0.35) / 0.3));
+        hen.wing = "flap"; hen.ph = t * 1.4; hen.legs = "dangle";
+      }
+      var inEgg = t >= POP && t < HOP + 3;
+      ctx.save();
+      ctx.globalAlpha = Math.max(0, Math.min(1, (p.max - t) / 40, t / 6));
+      ctx.save(); ctx.translate(ecx, p.gy); ctx.scale(s, s); this._nest(ctx, false); ctx.restore();
+      var pin = t < 16 ? Math.sin(t / 16 * 1.9) / Math.sin(1.9) : 1, rock = 0;
+      [28, 45, 61].forEach(function (kt, j) {
+        if (t > kt) rock += (j % 2 ? -1 : 1) * 0.12 * Math.exp(-(t - kt) / 9) * Math.sin((t - kt) * 0.5);
+      });
+      ctx.save();
+      ctx.translate(ecx, p.gy - 2 * s); ctx.rotate(rock); ctx.scale(s * pin, s * pin); ctx.translate(0, -E.ry);
+      if (t < POP) {
+        this._drawShell(ctx, E, "whole", t < 56 ? 0 : t < 66 ? 0.25 : t < 75 ? 0.5 : t < 80 ? 0.75 : 1);
+        this._sparkle(ctx, E.rx * 0.48, -E.ry * 0.46, 3.6 * (0.6 + 0.4 * Math.sin(t * 0.25)));
+      } else {
+        if (inEgg) {
+          ctx.save();
+          this._clipAbove(ctx, E);
+          ctx.translate((hx - ecx) / s, (hy - ecy) / s); ctx.scale(dir, squash);
+          this._drawHen(ctx, hen);
+          ctx.restore();
+        }
+        this._drawShell(ctx, E, "bottom");
+      }
+      ctx.restore();
+      ctx.save(); ctx.translate(ecx, p.gy); ctx.scale(s, s); this._nest(ctx, true); ctx.restore();
+      // the cap, flying up and over onto her head
+      if (t >= POP && t < HAT) {
+        var u = (t - POP) / (HAT - POP), x0 = ecx, y0 = ecy + E.pivot * s, x1 = ecx + 8 * s, y1 = ecy - 53.5 * s;
+        ctx.save();
+        ctx.translate(x0 + (x1 - x0) * u, y0 + (y1 - y0) * u - 62 * s * 4 * u * (1 - u));
+        ctx.rotate(u * (Math.PI * 2 - 0.12));
+        ctx.scale(s, s); ctx.translate(0, -E.pivot);
+        this._drawShell(ctx, E, "top");
+        ctx.restore();
+      }
+      // the bicycle, and then her on it
+      if (t >= 112) {
+        var bx = this._hatchBx(p, t), R = 14.5;
+        var wa = (bx - p.x0) / (R * s), ca = 0.6 + Math.max(0, bx - p.stopX) / (R * s) / 1.3;
+        var ring = t >= 160 && t < 180 ? (t - 160) / 20 : t >= 287 && t < 307 ? (t - 287) / 20 : 0;
+        var rider = null;
+        if (t >= LAND) {
+          hen.wing = t >= 300 && t < 340 ? "wave" : "to";
+          hen.ph = (t - 300) * 0.35;
+          rider = { hen: hen, bob: t > 196 ? 0.7 * Math.sin(2 * ca) : 0, squash: squash };
+        }
+        this._drawRide(ctx, bx, p.gy, s, wa, ca, rider, ring);
+        if (!inEgg && t >= HOP && t < LAND) {
+          ctx.save();
+          ctx.translate(hx, hy); ctx.scale(s * dir, s);
+          this._drawHen(ctx, hen);
+          ctx.restore();
+        }
+      }
+      ctx.restore();
+    },
+
     _run: function () {
       if (this._running) return;
       var host = this._host(), ctx = host.getContext("2d");
@@ -1214,6 +2569,128 @@
         });
 
         self._ps.forEach(function (p) {
+          if (p.kind === "ghost") {
+            if (p.delay > 0) { p.delay -= k; alive++; return; }
+            p.t += k; p.life -= k;
+            if (p.life <= 0) return;
+            if (p.orbit) {
+              var O = p.orbit, lap = 175;
+              if (p.t < lap) {
+                p.ang += 0.034 * k;
+                p.x = O.cx + Math.cos(p.ang) * O.R;
+                p.y = O.cy + Math.sin(p.ang) * O.R * 0.55 + Math.sin(p.t * 0.1 + p.ph) * 6;
+              } else {
+                p.y -= 4.2 * k; p.x += Math.cos(p.ang) * 1.6 * k;
+              }
+              if (p.y < -p.r * 3) return;
+            } else {
+              p.x += Math.sin(p.t * 0.07 + p.ph) * p.sway * k;
+              p.y += p.vy * k;
+              if (p.y < -p.r * 3) return;
+            }
+            alive++;
+            self._drawGhost(ctx, p);
+            return;
+          }
+          if (p.kind === "tree") {
+            p.t += k;
+            if (p.t >= p.max) return;
+            alive++;
+            // once the blossom is out, a petal drifts down now and then
+            if (p.t > 240 && p.t < p.max - 60 && Math.random() < 0.09 * k) {
+              var fl = p.tree.flowers[Math.floor(Math.random() * p.tree.flowers.length)];
+              if (fl) self._ps.push({ kind: "petal", x: fl.x, y: fl.y, vx: (Math.random() - 0.5) * 1.6, vy: 0.3,
+                s: p.tree.u * (0.9 + Math.random() * 0.5), rot: Math.random() * 6.28, vr: (Math.random() - 0.5) * 0.08,
+                fl: Math.random() * 6.28, t: 0, life: 150, max: 150, delay: 0 });
+            }
+            self._drawTree(ctx, p);
+            return;
+          }
+          if (p.kind === "blossom") {
+            p.t += k; p.life -= k;
+            if (p.life <= 0) return;
+            p.vx *= Math.pow(0.93, k); p.vy = p.vy * Math.pow(0.93, k) + 0.04 * k;
+            p.x += p.vx * k; p.y += p.vy * k; p.rot += p.vr * k;
+            alive++;
+            self._drawBlossom(ctx, p.x, p.y, p.r * (0.5 + 0.5 * Math.min(1, p.t / 8)), p.rot, Math.min(1, p.life / 20), Math.floor(p.r));
+            return;
+          }
+          if (p.kind === "petal") {
+            if (p.delay > 0) { p.delay -= k; alive++; return; }
+            p.t += k; p.life -= k;
+            if (p.life <= 0 || p.y > host.height + 20) return;
+            p.vy = Math.min(1.3, p.vy + 0.05 * k);
+            p.vx = p.vx * Math.pow(0.97, k) + Math.sin(p.t * 0.08 + p.fl) * 0.05 * k;
+            p.x += p.vx * k; p.y += p.vy * k; p.rot += p.vr * k; p.fl += 0.12 * k;
+            alive++;
+            self._drawPetal(ctx, p);
+            return;
+          }
+          if (p.kind === "peachf") {
+            p.t += k; p.life -= k;
+            if (p.life <= 0) return;
+            p.vy += 0.15 * k; p.x += p.vx * k; p.y += p.vy * k; p.rot += p.vr * k;
+            alive++;
+            self._drawPeach(ctx, p.x, p.y, p.r, p.rot, Math.min(1, p.t / 4, p.life / 18));
+            return;
+          }
+          if (p.kind === "hatchling") {
+            p.t += k;
+            if (p.t >= p.max) return;
+            alive++;
+            if (!p.fluffed && p.t >= 32) { p.fluffed = true; self._fluff(p.x, p.y - 4 * p.s, 5, p.s * 0.9, false); }
+            self._drawHatchling(ctx, p);
+            return;
+          }
+          if (p.kind === "hatch") {
+            p.t += k;
+            if (p.t >= p.max) return;
+            alive++;
+            if (!p.popped && p.t >= 85) {
+              p.popped = true;
+              self._fluff(p.ex, p.gy - (2 + p.E.ry * 1.6) * p.s, 9, p.s * 1.1, true);
+            }
+            if (p.t > 198 && p.t < 425) {
+              p.dust = (p.dust || 0) + k;
+              if (p.dust > 4) {
+                p.dust = 0;
+                self._ps.push({ kind: "dust", x: self._hatchBx(p, p.t) - 33 * p.s, y: p.gy - 2.5 * p.s, r: 2.2 * p.s,
+                  vx: -0.4 - Math.random() * 0.7, vy: -0.2 - Math.random() * 0.35, t: 0, life: 34 });
+              }
+            }
+            self._drawHatch(ctx, p);
+            return;
+          }
+          if (p.kind === "feather") {
+            p.t += k; p.life -= k;
+            if (p.life <= 0 || p.y > host.height + 20) return;
+            p.vy = Math.min(1.1, p.vy + 0.06 * k);
+            p.vx = p.vx * Math.pow(0.96, k) + Math.sin(p.t * 0.09 + p.fl) * 0.06 * k;
+            p.x += p.vx * k; p.y += p.vy * k; p.rot += p.vr * k; p.fl += 0.1 * k;
+            alive++;
+            self._drawFeather(ctx, p);
+            return;
+          }
+          if (p.kind === "dust") {
+            p.t += k;
+            if (p.t >= p.life) return;
+            p.x += p.vx * k; p.y += p.vy * k;
+            alive++;
+            var dq = p.t / p.life;
+            ctx.save();
+            ctx.globalAlpha = 0.42 * (1 - dq);
+            ctx.fillStyle = "#CDB894";
+            ctx.beginPath(); ctx.arc(p.x, p.y, p.r * (1 + 1.6 * dq), 0, 6.29); ctx.fill();
+            ctx.restore();
+            return;
+          }
+          if (p.kind === "skeleton") {
+            p.t += k; p.life -= k;
+            if (p.life <= 0) return;
+            alive++;
+            self._drawSkeleton(ctx, p);
+            return;
+          }
           if (p.kind === "moon" || p.kind === "lantern") {
             p.t += k; p.life -= k;
             if (p.life <= 0) return;
@@ -1483,6 +2960,57 @@
         }, 900);
         return;
       }
+      if (w.LAB_FX === "peach") {
+        /* A peach tree grows from a seed on the bottom edge of the screen to a
+           tree full of peaches (FX._drawTree), then fades; a little puff of
+           blossom at the chest as it starts. */
+        var Hp = innerHeight, cont = d.querySelector(".content");
+        var cr = cont ? cont.getBoundingClientRect() : { left: 0, width: innerWidth };
+        var u = Math.min(Hp * 0.66, cr.width * 0.86) / 100;
+        this._ps.push({ kind: "tree", tree: this._buildTree(cr.left + cr.width / 2, Hp - 3 * u - 8, u), t: 0, max: 440 });
+        this._run();
+        setTimeout(function () {
+          self._fire(c[0], c[1], { count: 5, scale: 1.1, life: 1.1 });
+        }, 300);
+        return;
+      }
+      if (w.LAB_FX === "egg") {
+        /* A big golden egg on a nest along the bottom of the lesson area hatches
+           a hen, who wears the cap as a helmet, hops onto a bicycle that rolls
+           up, and rides off to the right (FX._drawHatch, about 7 s); a little
+           egg hatches at the chest as it starts. The egg and the parked bicycle
+           together are centred on the lesson area, not the window. */
+        var He = innerHeight, We = innerWidth, ce = d.querySelector(".content");
+        var cre = ce ? ce.getBoundingClientRect() : { left: 0, width: We };
+        var se = Math.max(0.8, Math.min(cre.width * (cre.width < 600 ? 0.7 : 0.42) / 146, He * 0.3 / 85));
+        var eggX = cre.left + cre.width / 2 + 47 * se, parkX = eggX - 78 * se;
+        this._ps.push({ kind: "hatch", t: 0, max: 450, s: se, ex: eggX, gy: He - 10 - 4 * se, stopX: parkX,
+          x0: -60 * se, v: (We + 70 * se - parkX) / 209, E: this._eggSpec(26, 33, true, 0.68) });
+        this._run();
+        setTimeout(function () {
+          self._fire(c[0], c[1], { scale: 1.1 });
+        }, 300);
+        return;
+      }
+      if (w.LAB_FX === "ghosts") {
+        /* Three skeletons rise from the bottom of the screen and dance while a
+           ring of ghosts circles above them, then the ghosts fly off and the
+           skeletons sink back down; one more little group of ghosts at the
+           chest. The skeletons are drawn behind the ghosts. */
+        var Wg = innerWidth, Hg = innerHeight;
+        var sz = Math.max(0.7, Math.min(1.45, Hg * 0.3 / 165, Wg / 3 / 120));
+        [0.2, 0.5, 0.8].forEach(function (fx, q) {
+          self._ps.push({ kind: "skeleton", x: Wg * fx, base: Hg - 34 * sz, s: q === 1 ? sz * 1.08 : sz,
+            t: -q * 6, ph: q * 1.3, life: 300, max: 300 });
+        });
+        this._fire(0, 0, { count: 8, scale: 1.3, life: 2.2, orbit: { cx: Wg / 2, cy: Hg * 0.32, R: Math.min(Wg * 0.36, 380) },
+          delay: 20 });
+        this._run();
+        setTimeout(function () {
+          self._fire(c[0], c[1], { count: 3, scale: 1.1, life: 1.1 });
+        }, 1300);
+        return;
+      }
       if (w.LAB_FX === "bats") {
         /* A harvest moon rises in the middle, three jack-o'-lanterns light up
            along the bottom, and a whole flock pours out of them, past the moon
@@ -1602,7 +3130,7 @@
         self.legY.push(y);
         y += self.LEG_GAP;
         for (var i = 0; i < leg.items.length; i++) {
-          var t = li * PER + i;
+          var t = tOf(li, i);
           var x = self.W / 2 + self.AMP * Math.sin(t * 0.66 + li * 1.15);
           self.pts.push({ x: x, y: y, t: t, li: li });
           y += self.NODE_GAP;
@@ -1634,7 +3162,7 @@
       /* One fill per leg, each in that leg's own colour, so a finished leg keeps
          its identity instead of being repainted by whatever leg comes next. */
       LEGS.forEach(function (leg, li) {
-        var from = li * PER, to = from + leg.items.length - 1;
+        var from = tOf(li, 0), to = from + leg.items.length - 1;
         fills += '<path class="path-fill" data-legfill="' + li + '" data-leg="' + leg.id +
           '" d="' + self.dSpan(Math.max(0, from - 1), to) + '"/>';
       });
@@ -1667,7 +3195,7 @@
       this.svg.appendChild(probe);
       this.legFills = $$("[data-legfill]", this.svg);
       this.legSpans = LEGS.map(function (leg, li) {
-        var from = Math.max(0, li * PER - 1), to = li * PER + leg.items.length - 1;
+        var from = Math.max(0, tOf(li, 0) - 1), to = tOf(li, leg.items.length - 1);
         var steps = [];
         for (var k = from; k <= to; k++) {
           probe.setAttribute("d", self.dSpan(from, k));
@@ -1712,7 +3240,7 @@
       LEGS.forEach(function (leg, li) {
         out += "<li>" + esc(UNIT + " " + leg.n + ", " + leg.title) + "<ol>";
         leg.items.forEach(function (_, i) {
-          out += '<li id="pl-' + (li * PER + i) + '">Item ' + (i + 1) + " of " + leg.items.length + ", not yet answered.</li>";
+          out += '<li id="pl-' + tOf(li, i) + '">Item ' + (i + 1) + " of " + leg.items.length + ", not yet answered.</li>";
         });
         out += "</ol></li>";
       });
@@ -1741,7 +3269,7 @@
         g.classList.toggle("is-now", k === pos);
         var li = d.getElementById("pl-" + k);
         if (li) {
-          li.textContent = "Item " + ((k % PER) + 1) + " of " + PER + ", " +
+          li.textContent = "Item " + (iOf(k) + 1) + " of " + LEGS[liOf(k)].items.length + ", " +
             (done
               ? (isCorrect(k) ? "answered correctly, one gem."
                 : isAlternate(k) ? "a near miss, half a gem."
@@ -1752,7 +3280,7 @@
       });
 
       $$("[data-legmark]", this.svg).forEach(function (g) {
-        g.classList.toggle("is-active", +g.getAttribute("data-legmark") === Math.floor(pos / PER));
+        g.classList.toggle("is-active", +g.getAttribute("data-legmark") === liOf(pos));
       });
 
       var p = this.pts[pos];
@@ -1792,12 +3320,16 @@
      ============================================================ */
   var KEY = (BANK.store_key || "phonetics_lab" + BANK.lab) + "_" + MODE;
 
-  function itemAt(t) { return LEGS[Math.floor(t / PER)].items[t % PER]; }
+  function itemAt(t) { return LEGS[liOf(t)].items[iOf(t)]; }
 
   /* ------------------------------------------------------------
      Item-order shuffle. A bank that sets shuffle_items presents
-     each trail's questions in a per-student random order (the
-     answer buttons are never shuffled). The order must survive a
+     each trail's questions in a per-student random order. The
+     answer buttons stay put, except that a bank setting
+     shuffle_options also reorders each multiple-choice question's
+     options (Lab 10); an option keeps its own value, so answers are
+     stored and reported by it, and only the letter shown on screen
+     follows the new order. The order must survive a
      reload, because saved answers are stored by position, so the
      seed is written into the suspend data (the R segment) and the
      same permutation is rebuilt from it on resume. A seed of 0
@@ -1838,6 +3370,19 @@
         var j = Math.floor(rnd() * (i + 1));
         var tmp = a[i]; a[i] = a[j]; a[j] = tmp;
       }
+    });
+    if (!BANK.shuffle_options) return;
+    // a stream of its own, so the question order is the same with or without it
+    var orn = mulberry32(seed ^ 0x5BD1E995);
+    LEGS.forEach(function (leg) {
+      leg.items.forEach(function (it) {
+        if (it.type !== "mc" || !it.options) return;
+        var o = it.options;
+        for (var i = o.length - 1; i > 0; i--) {
+          var j = Math.floor(orn() * (i + 1));
+          var tmp = o[i]; o[i] = o[j]; o[j] = tmp;
+        }
+      });
     });
   }
 
@@ -1958,8 +3503,8 @@
     // rail position: the item being worked on, or the boundary of the current leg
     var pos;
     if (sc.k === "item") pos = sc.t;
-    else if (sc.k === "concept") pos = sc.leg * PER;
-    else if (sc.k === "checkpoint") pos = sc.leg * PER + PER - 1;
+    else if (sc.k === "concept") pos = tOf(sc.leg, 0);
+    else if (sc.k === "checkpoint") pos = tOf(sc.leg, LEGS[sc.leg].items.length - 1);
     else if (sc.k === "finish") pos = TOTAL - 1;
     else pos = 0;
     RAIL.update(pos, false);
@@ -2003,7 +3548,7 @@
   function reportInteractions() {
     if (!(w.SCORM && w.SCORM.isAvailable())) return;
     for (var t = 0; t < TOTAL; t++) {
-      var li = Math.floor(t / PER), i = t % PER;
+      var li = liOf(t), i = iOf(t);
       var it = LEGS[li].items[i];
       var given = S.given[t];
       var isBool = it.type === "boolean";
@@ -2164,7 +3709,7 @@
 
   /* Public surface used by lab-screens.js */
   w.LAB = {
-    mode: MODE, bank: BANK, meta: META, legs: LEGS, per: PER, total: TOTAL,
+    mode: MODE, bank: BANK, meta: META, legs: LEGS, per: PER, total: TOTAL, tOf: tOf, liOf: liOf, iOf: iOf,
     state: S, screens: SCREENS, reduced: REDUCED,
     audio: AUDIO, sfx: SFX, fx: FX, rail: RAIL,
     el: el, esc: esc, $: $, $$: $$, tieIPA: tieIPA, tieText: tieText,
@@ -2172,6 +3717,7 @@
     alternates: alternates, keyOf: keyOf, creditOf: creditOf, graded: graded,
     fmtGems: fmtGems, altCredit: ALT_CREDIT, completion: COMPLETION,
     isCorrect: isCorrect, isAlternate: isAlternate, isCredited: isCredited,
+    verdict: verdict, verdictOf: verdictOf,
     scoreOf: scoreOf, pointsOf: pointsOf,
     itemOf: itemOf, legOf: legOf,
     go: go, next: next, answer: submitAnswer, save: save,

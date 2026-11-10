@@ -94,6 +94,19 @@ main{ padding:clamp(30px,5vw,52px) 0 20px }
 .open:hover{ filter:brightness(1.12) }
 .open:active{ transform:translateY(4px); box-shadow:0 0 0 var(--violet-deep) }
 
+/* the reference: one wide card below the labs, set apart from them */
+.ref-card{ display:flex; align-items:center; gap:18px 28px; background:var(--card); border:1px solid var(--line);
+  border-radius:var(--radius); padding:22px 24px 22px 28px; box-shadow:var(--shadow); position:relative;
+  overflow:hidden; margin:0 0 34px; transition:transform .18s var(--spring), box-shadow .18s var(--ease) }
+.ref-card::before{ content:""; position:absolute; inset:0 auto 0 0; width:5px; background:var(--violet-soft) }
+.ref-card:hover{ transform:translateY(-3px); box-shadow:var(--shadow-lift) }
+.ref-card > div{ flex:1; min-width:0 }
+.ref-card .num{ display:block; font-family:var(--mono); font-size:.68rem; letter-spacing:.14em; text-transform:uppercase;
+  color:var(--violet-soft); margin-bottom:7px }
+.ref-card h3{ font-size:1.1rem; margin:0 0 8px; color:var(--ink) }
+.ref-card .blurb{ font-size:.92rem; color:var(--ink-soft); margin:0 }
+.ref-card .open{ margin-top:0; align-self:center; flex:none }
+
 /* ---- footer ---- */
 .site-foot{ border-top:1px solid var(--line); background:var(--paper-2);
   padding:26px 0 40px; margin-top:20px }
@@ -103,8 +116,10 @@ main{ padding:clamp(30px,5vw,52px) 0 20px }
 
 @media (max-width:560px){
   .grid{ grid-template-columns:1fr }
+  .ref-card{ flex-direction:column; align-items:stretch }
+  .ref-card .open{ align-self:flex-start }
 }
 @media (prefers-reduced-motion:reduce){
   *,*::before,*::after{ animation-duration:.001ms!important; transition-duration:.001ms!important }
-  .card:hover{ transform:none }
+  .card:hover, .ref-card:hover{ transform:none }
 }

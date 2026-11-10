@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Phonetics Lab 9: Mark the Stress</title>
+<meta name="description" content="Phonetics Lab 9: listen to fifteen words, from one syllable to eight, and write each one in IPA with its primary and secondary stress marks.">
+<link rel="stylesheet" href="css/lab.css">
+<style>
+  /* Lab 9's gem is a peach. The shared sheet's cyan stays the series default. */
+  :root{ --gem:#F7946B; --gem-lite:#FFE9D9; --gem-deep:#D2475A; }
+</style>
+<script>
+  window.LAB_MODE = "site";
+  // Draw affricates and diphthongs with a tie bar: /t͡ʃ/, /o͡ʊ/. Set false for the plain form.
+  window.LAB_TIE = true;
+  // This lab's gem: a peach, the Monkey King's fruit.
+  window.LAB_GEM = "peach";
+  // This lab's celebration: peach blossom and a peach, and for full credit a peach tree growing
+  // from a seed to a tree full of fruit, after the fireworks of Labs 1-2, Lab 3's balloons,
+  // Lab 4's confetti, Lab 5's dragon, Lab 6's Snake, Lab 7's bats and Lab 8's ghosts.
+  window.LAB_FX = "peach";
+  window.LAB_META = {
+    course: "Phonetics",
+    lab: 9,
+    home: "../"
+  };
+</script>
+</head>
+<body>
+<a class="skip" href="#stage">Skip to the activity</a>
+
+
+<div class="lab">
+
+  <!-- ============ the path ============ -->
+  <aside class="rail" id="rail" aria-label="Your progress through the lab">
+    <div class="rail-head">
+      <span class="rail-course">Phonetics Lab 9</span>
+      <span class="rail-title">Mark the Stress</span>
+    </div>
+    <div class="rail-scroll" id="railScroll">
+      <div class="path-wrap" id="pathWrap"></div>
+    </div>
+  </aside>
+  <div class="rail-scrim" id="railScrim"></div>
+
+  <!-- ============ everything else ============ -->
+  <div class="content">
+    <header class="hud">
+      <button type="button" class="map-btn" id="mapBtn" aria-expanded="false" aria-controls="rail">
+        &#9776; Map
+      </button>
+      <h1 class="hud-leg" id="hudLeg"><span class="leg-dot"></span><span>Mark the Stress</span></h1>
+      <span class="hud-spacer"></span>
+      <button type="button" class="fx-btn" id="fxBtn" aria-pressed="true">
+        &#9834;<span class="vh">Effect sounds on</span>
+      </button>
+      <p class="gem-tally" id="gemTally">
+        <svg class="gem-ico" viewBox="0 0 36 28" aria-hidden="true" focusable="false">
+          <linearGradient id="gemHud" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#FFD3A6"/><stop offset="1" stop-color="#F7946B"/>
+          </linearGradient>
+          <path d="M18 8.2 C15.8 6.2 9.6 5.6 7 10.4 C5 14.4 6 20.6 10.4 24.4 C12.6 26.3 15.4 27.4 18 27.6 C20.6 27.4 23.4 26.3 25.6 24.4 C30 20.6 31 14.4 29 10.4 C26.4 5.6 20.2 6.2 18 8.2 Z" fill="url(#gemHud)"/>
+          <path d="M18 8.2 C20.2 6.2 26.4 5.6 29 10.4 C31 14.4 30 20.6 25.6 24.4 C23.4 26.3 20.6 27.4 18 27.6 C22.6 23.2 23.4 13.6 18 8.2 Z" fill="#D2475A" opacity=".32"/>
+          <path d="M18 8.6 C15.4 12.4 15.2 19.2 17.4 26.6" fill="none" stroke="#D2475A" stroke-width="1" stroke-linecap="round" opacity=".5"/>
+          <ellipse cx="11.8" cy="13.2" rx="2.2" ry="3.8" transform="rotate(22 11.8 13.2)" fill="#FFFFFF" opacity=".7"/>
+          <path d="M18 8.8 C17.8 6.8 18.2 5 19.2 3.6" fill="none" stroke="#7A4A22" stroke-width="1.5" stroke-linecap="round"/>
+          <path d="M18.8 5.4 C20.4 2.2 25.2 1.2 28.2 2.6 C26.4 6 22 7.4 18.8 5.4 Z" fill="#4FA060"/>
+        </svg>
+        <span id="gemCount">0</span>
+        <span class="vh">gems earned</span>
+      </p>
+    </header>
+
+    <main class="stage" id="stage" tabindex="-1"></main>
+    <footer class="site-foot">
+      <p><a href="../">&larr; Back to the Phonetics Lab</a></p>
+      <p>Created by <a href="https://mengyang.dev">Mengyang Qiu</a> in collaboration with Siena Sun. Built with the help of Claude (Anthropic) and GPT (OpenAI).</p>
+      <p class="foot-notice">Except where otherwise noted, original instructional content &copy; 2026 Mengyang Qiu and Siena Sun is licensed under <a href="https://creativecommons.org/licenses/by-nc/4.0/">CC BY-NC 4.0</a>. Site source code is licensed under the <a href="https://opensource.org/license/mit">MIT License</a>. Third-party media retain their original rights and licenses; see <a href="../../credits.html#phonetics">Credits</a>.</p>
+    </footer>
+  </div>
+</div>
+
+<script src="js/lab-art.js"></script>
+<script src="js/items.js"></script>
+<script src="js/lab-audio-manifest.js"></script>
+<script src="js/lab-engine.js"></script>
+<script src="js/lab-screens.js"></script>
+</body>
+</html>

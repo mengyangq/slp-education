@@ -245,7 +245,7 @@
      tally, the rail nodes, the checkpoint rows, follows. Lab 1
      is the cyan diamond (the default); Lab 2 sets "amber", Lab 3
      "ruby", Lab 4 "carrot", Lab 5 "pearl", Lab 6 "apple", Lab 7
-     "pumpkin".
+     "pumpkin", Lab 8 "candycorn", Lab 9 "peach", Lab 10 "goldegg".
      --------------------------------------------------------- */
   var GEMS = {
     diamond: { lite: "#7BE0F0", base: "#1FB6D4", deep: "#0E7E96", pale: "#A6ECF7", flat: "#BFF1FA" },
@@ -254,7 +254,10 @@
     carrot:  { lite: "#FFB066", base: "#F2752B", deep: "#A8450C", pale: "#FFD2A8", flat: "#FFE0C2" },
     pearl:   { lite: "#FFFFFF", base: "#D9C7EA", deep: "#7A5E9E", pale: "#F5EFFB", flat: "#EDE3F7" },
     apple:   { lite: "#FF8A73", base: "#E0392B", deep: "#961C12", pale: "#FFC2B5", flat: "#FFD9D0" },
-    pumpkin: { lite: "#FFBE5C", base: "#F28A1C", deep: "#A84E06", pale: "#FFDDA6", flat: "#FFE6BF" }
+    pumpkin: { lite: "#FFBE5C", base: "#F28A1C", deep: "#A84E06", pale: "#FFDDA6", flat: "#FFE6BF" },
+    candycorn: { lite: "#FFA24A", base: "#F2731B", deep: "#B04A08", pale: "#FFF8EC", flat: "#FFE9D2" },
+    peach:   { lite: "#FFD3A6", base: "#F7946B", deep: "#D2475A", pale: "#FFE6CF", flat: "#FFE9D9" },
+    goldegg: { lite: "#FFE48A", base: "#EDB422", deep: "#A87108", pale: "#FFF4C9", flat: "#FFF0B8" }
   };
   function gemTheme() {
     return GEMS[w.LAB_GEM] || GEMS.diamond;
@@ -264,6 +267,82 @@
      is a rose-red teardrop, point up. */
   function gemCut() {
     var c = gemTheme();
+    if (w.LAB_GEM === "goldegg") {
+      /* Lab 10: a golden egg, for the chicken's lab. Narrower at the top, a
+         shadow down its right side, a bright highlight and a small sparkle. */
+      var egg = "M18 2.2 C23.6 2.2 27.6 10.4 27.6 17 C27.6 23 23.4 27.4 18 27.4 C12.6 27.4 8.4 23 8.4 17 " +
+        "C8.4 10.4 12.4 2.2 18 2.2 Z";
+      var side = "M18 2.2 C23.6 2.2 27.6 10.4 27.6 17 C27.6 23 23.4 27.4 18 27.4 C22.4 25 24.6 20 24.4 15 " +
+        "C24.2 9.4 21.6 4.4 18 2.2 Z";
+      return {
+        outline: egg,
+        round: true,
+        facets:
+          '<path d="' + side + '" fill="' + c.deep + '" opacity=".3"/>' +
+          '<ellipse cx="13.6" cy="10.8" rx="2.2" ry="4.2" transform="rotate(20 13.6 10.8)" fill="#FFFFFF" opacity=".85"/>' +
+          '<circle cx="12.4" cy="17.6" r="1" fill="#FFFFFF" opacity=".5"/>' +
+          '<path d="M29.6 3.2 l.7 1.8 1.8 .7 -1.8 .7 -.7 1.8 -.7 -1.8 -1.8 -.7 1.8 -.7 z" fill="#FFF6C8"/>',
+        flat:
+          '<path d="' + egg + '" fill="' + c.lite + '"/>' +
+          '<path d="' + side + '" fill="' + c.base + '"/>'
+      };
+    }
+    if (w.LAB_GEM === "peach") {
+      /* Lab 9: a peach, the Monkey King's fruit. Round with a dip at the top, a
+         crease down one side, a rosy blush over the other, and a stem with one
+         leaf; like the apple's stalk, the stem and leaf are the cut's crown, drawn
+         on every version. */
+      var body = "M18 8.2 C15.8 6.2 9.6 5.6 7 10.4 C5 14.4 6 20.6 10.4 24.4 C12.6 26.3 15.4 27.4 18 27.6 " +
+        "C20.6 27.4 23.4 26.3 25.6 24.4 C30 20.6 31 14.4 29 10.4 C26.4 5.6 20.2 6.2 18 8.2 Z";
+      var blush = "M18 8.2 C20.2 6.2 26.4 5.6 29 10.4 C31 14.4 30 20.6 25.6 24.4 C23.4 26.3 20.6 27.4 18 27.6 " +
+        "C22.6 23.2 23.4 13.6 18 8.2 Z";
+      var leaf =
+        '<path d="M18 8.8 C17.8 6.8 18.2 5 19.2 3.6" fill="none" stroke="#7A4A22" stroke-width="1.5" stroke-linecap="round"/>' +
+        '<path d="M18.8 5.4 C20.4 2.2 25.2 1.2 28.2 2.6 C26.4 6 22 7.4 18.8 5.4 Z" fill="#4FA060"/>' +
+        '<path d="M19.8 5 C22.2 4 24.6 3.2 27 2.8" fill="none" stroke="#2F7A45" stroke-width=".8" stroke-linecap="round" opacity=".7"/>';
+      return {
+        outline: body,
+        crown: leaf,
+        round: true,
+        facets:
+          '<path d="' + blush + '" fill="' + c.deep + '" opacity=".32"/>' +
+          '<ellipse cx="24" cy="13.4" rx="4.6" ry="3.8" fill="#E8505B" opacity=".28"/>' +
+          '<path d="M18 8.6 C15.4 12.4 15.2 19.2 17.4 26.6" fill="none" stroke="' + c.deep + '" stroke-width="1" ' +
+          'stroke-linecap="round" opacity=".5"/>' +
+          '<ellipse cx="11.8" cy="13.2" rx="2.2" ry="3.8" transform="rotate(22 11.8 13.2)" fill="#FFFFFF" opacity=".7"/>' +
+          leaf,
+        flat:
+          '<path d="' + body + '" fill="' + c.lite + '"/>' +
+          '<path d="' + blush + '" fill="' + c.base + '"/>' + leaf
+      };
+    }
+    if (w.LAB_GEM === "candycorn") {
+      /* Lab 8: a candy corn, for Halloween. A rounded triangle, point up, in its
+         three bands: a white tip, the orange middle (the stone's own colour, so
+         the half gem and the flat node read as orange) and a yellow base. The
+         bands are drawn on the whole gem and the flat node; the half gem keeps
+         them inside its filled half (inHalf). */
+      var kernel = "M18 1.8 C19.7 1.8 21 3.1 22 5.3 L29.7 22.2 C30.8 24.6 29.5 26.7 26.6 26.9 " +
+        "C21 27.4 15 27.4 9.4 26.9 C6.5 26.7 5.2 24.6 6.3 22.2 L14 5.3 C15 3.1 16.3 1.8 18 1.8 Z";
+      var tip = "M18 1.8 C19.7 1.8 21 3.1 22 5.3 L24.4 10.6 C20.2 11.6 15.8 11.6 11.6 10.6 L14 5.3 " +
+        "C15 3.1 16.3 1.8 18 1.8 Z";
+      var base = "M7.8 19.2 C14.4 20.5 21.6 20.5 28.2 19.2 L29.7 22.2 C30.8 24.6 29.5 26.7 26.6 26.9 " +
+        "C21 27.4 15 27.4 9.4 26.9 C6.5 26.7 5.2 24.6 6.3 22.2 Z";
+      var bands = '<path d="' + tip + '" fill="#FFFBF2"/><path d="' + base + '" fill="#FFD23F"/>';
+      return {
+        outline: kernel,
+        round: true,
+        inHalf: bands,
+        facets:
+          bands +
+          '<path d="M22 5.3 L29.7 22.2 C30.8 24.6 29.5 26.7 26.6 26.9 C24.8 27.1 23 27.2 21.2 27.2 ' +
+          'C24.4 21 24.6 12 22 5.3 Z" fill="' + c.deep + '" opacity=".22"/>' +
+          '<path d="M13.2 8.6 C11.6 12.4 10.2 16.4 9.4 20.2" fill="none" stroke="#FFFFFF" stroke-width="1.5" ' +
+          'stroke-linecap="round" opacity=".7"/>',
+        flat:
+          '<path d="' + kernel + '" fill="' + c.base + '"/>' + bands
+      };
+    }
     if (w.LAB_GEM === "pumpkin") {
       /* Lab 7: a pumpkin, for Halloween. Five lobes split by four grooves, a
          stubby stem with a leaf and a curl of vine; like the apple's stalk, the
@@ -420,7 +499,7 @@
       '</linearGradient>' +
       '<clipPath id="' + id + 'c"><rect x="0" y="0" width="18" height="28"/></clipPath></defs>' +
       '<g clip-path="url(#' + id + 'c)">' +
-      '<path d="' + cut.outline + '" fill="url(#' + id + ')"/>' +
+      '<path d="' + cut.outline + '" fill="url(#' + id + ')"/>' + (cut.inHalf || "") +
       "</g>" +
       '<path d="' + cut.outline + '" fill="none" stroke="' + c.base + '" ' +
       'stroke-width="1.6" stroke-linejoin="round"/>' +
@@ -450,7 +529,7 @@
     return '<g transform="translate(' + cx + ',' + cy + ') scale(' + (s * 0.26) + ') translate(-18,-14)">' +
       '<clipPath id="' + id + '"><rect x="0" y="0" width="18" height="28"/></clipPath>' +
       '<g clip-path="url(#' + id + ')">' +
-      '<path d="' + cut.outline + '" fill="' + c.lite + '"/>' +
+      '<path d="' + cut.outline + '" fill="' + c.lite + '"/>' + (cut.inHalf || "") +
       (cut.crown || cut.round ? "" : '<path d="M12 3 l6 8 -12 0 z" fill="' + c.flat + '"/>') + "</g>" +
       '<path d="' + cut.outline + '" fill="none" stroke="' + c.lite + '" stroke-width="2"/>' +
       (cut.crown || "") + "</g>";
@@ -1197,10 +1276,11 @@
     ey: [74, 117], er: [158, 114], axr: [216, 114], ow: [300, 117],
     ax: [188, 158],
     eh: [108, 185], ah: [250, 185], ao: [300, 185],
-    ae: [130, 228], aa: [300, 254]
+    ae: [130, 228], aa: [300, 254],
+    a: [196, 254]            // Lab 8: the open [a] of the made-up words, not an English vowel
   };
   var VC_IPA = { iy: "i", ih: "ɪ", ey: "e", eh: "ɛ", ae: "æ", er: "ɝ", axr: "ɚ", ax: "ə", ah: "ʌ",
-    uw: "u", uh: "ʊ", ow: "o", ao: "ɔ", aa: "ɑ" };
+    uw: "u", uh: "ʊ", ow: "o", ao: "ɔ", aa: "ɑ", a: "a" };
   function vowelChart(opts) {
     opts = opts || {};
     var tl = [40, 48], tr = [300, 48], br = [300, 254], bl = [142, 254];

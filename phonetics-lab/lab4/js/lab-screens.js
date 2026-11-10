@@ -51,10 +51,11 @@
   }
 
   /* Phoneme chips with the letters that spell each one. */
-  function phonemeChips(item, playable) {
+  function phonemeChips(item, playable, br) {
+    br = br || ["/", "/"];
     var out = '<div class="chips">';
     item.chips.forEach(function (c, i) {
-      var main = "/" + esc(c.ipa) + "/";
+      var main = br[0] + esc(c.ipa) + br[1];
       if (playable && L.audio.has("ipa_" + c.slug)) {
         main = '<button type="button" class="spk round" data-play="ipa_' + c.slug +
           '" aria-label="Play the sound ' + esc(c.ipa) + '" style="margin-bottom:2px">' +
@@ -200,7 +201,15 @@
     wp: demoProcs,
     sp: demoProcs,
     cc: demoClues,
-    tr: demoTranscribe
+    tr: demoTranscribe,
+    nw: demoMadeUp,
+    st: demoStress,
+    ds: demoTranscribe,
+    sm: demoTranscribe,
+    sf: demoTranscribe,
+    lw: demoTranscribe,
+    cw: demoTranscribe,
+    np: demoMC
   };
 
   function concept(host, sc) {
@@ -628,6 +637,8 @@
     if (it.type === "procs") return itemProcs(host, sc);
     if (it.type === "read") return itemRead(host, sc);
     if (it.type === "transcribe") return itemTranscribe(host, sc);
+    if (it.type === "stress") return itemStress(host, sc);
+    if (it.type === "mc") return itemMC(host, sc);
     var already = L.state.given[sc.t] != null;
     var isBool = it.type === "boolean";
 
@@ -781,11 +792,19 @@
     var given = L.state.given[sc.t];
     var exact = L.isCorrect(sc.t), alt = L.isAlternate(sc.t);
     var givenKey = L.keyOf(it, given);
-    var aim = alt
+    var V = L.verdict(sc.t);
+    var aim = alt && it.accept && it.accept[givenKey]
       ? '<div class="fb-aim">' + it.accept[givenKey] + "</div>"
       : (it.miss && it.miss[givenKey]
         ? '<div class="fb-aim"><b>Where that came from:</b> ' + it.miss[givenKey] + "</div>"
         : "");
+    if (V && !exact) {
+      // a transcription with stress marks, judged by rule: say what the rule found
+      var jt = judgeText(it, V);
+      if (V.kinds[0] === "sounds" && it.miss && it.miss[V.segKey]) {
+        aim = '<div class="fb-aim"><b>Where that came from:</b> ' + it.miss[V.segKey] + (jt ? " " + jt : "") + "</div>";
+      } else if (jt) aim = '<div class="fb-aim">' + jt + "</div>";
+    }
     var note = it.note
       ? '<div class="callout c-info" style="margin:14px 0 0"><span class="ic" aria-hidden="true">&#9432;</span>' +
         "<p style=\"margin:0\">" + it.note + "</p></div>"
@@ -803,6 +822,36 @@
       '<div class="fb-head"><span class="mark">' + mark + "</span>" + headline + badge + "</div>" +
       '<div class="fb-body"><p>' + it.explain + "</p>" + aim + "</div>" +
       (revealHTML || "") + note + "</div>";
+  }
+
+  /* What the stress judge found, in words (Lab 9). The sentences are the bank's
+     (judge_text), with the item's own syllables put in: {main} the syllable with
+     the main stress, {given} the one the student marked instead, {missing} and
+     {extra} secondary stresses left out or added, {misplaced} a syllable whose
+     mark was not at its start, written as it should be. */
+  function judgeText(it, V) {
+    var T = L.bank.judge_text || {}, S = it.sylls || [];
+    function bare(k) { return String(S[k] || "").replace(/[ˈˌ]/g, ""); }
+    function sl(list) { return list.map(function (x) { return "/" + x + "/"; }).join(" and "); }
+    var given = V.givenMain >= 0 ? bare(V.givenMain) : "";
+    var fill = {
+      word: it.word || "",
+      Word: it.word ? it.word.charAt(0).toUpperCase() + it.word.slice(1) : "",
+      main: V.main >= 0 ? sl([S[V.main]]) : "",
+      given: given ? sl([given]) : "",
+      missing: sl(V.missing.map(function (k) { return "ˌ" + bare(k); })),
+      extra: sl(V.extra.map(bare)),
+      // shown with the mark the student typed there, at the syllable's start
+      misplaced: sl(V.misplaced.map(function (k) { return (V.misLv[k] === 1 ? "ˌ" : "ˈ") + bare(k); }))
+    };
+    var order = V.kinds[0] === "sounds"
+      ? (V.kinds.indexOf("stress_ok") >= 0 ? ["stress_ok"] : [])
+      : V.kinds.slice();
+    // said once, ahead of what is wrong with the lighter beats
+    if (V.main >= 0 && (order.indexOf("sec_missing") >= 0 || order.indexOf("sec_extra") >= 0)) order.unshift("main_ok");
+    return order.map(function (k) {
+      return (T[k] || "").replace(/\{(\w+)\}/g, function (_, n) { return fill[n] != null ? fill[n] : ""; });
+    }).filter(Boolean).join(" ");
   }
 
   function armContinue(sc) {
@@ -1653,19 +1702,21 @@
   /* Line up what was written against the answer (fewest edits), so a
      missing or extra sound shows as a gap rather than shifting the rest. */
   function alignSeq(a, b) {
+    // a stress mark is never paired with a sound: a moved mark shows as a gap on each row
+    function sub(x, y) { return x === y ? 0 : !MARK_NAME[x] !== !MARK_NAME[y] ? 2 : 1; }
     var n = a.length, m = b.length, D = [], i, j;
     for (i = 0; i <= n; i++) { D.push([]); for (j = 0; j <= m; j++) D[i].push(0); }
     for (i = 0; i <= n; i++) D[i][0] = i;
     for (j = 0; j <= m; j++) D[0][j] = j;
     for (i = 1; i <= n; i++) {
       for (j = 1; j <= m; j++) {
-        D[i][j] = Math.min(D[i - 1][j] + 1, D[i][j - 1] + 1, D[i - 1][j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1));
+        D[i][j] = Math.min(D[i - 1][j] + 1, D[i][j - 1] + 1, D[i - 1][j - 1] + sub(a[i - 1], b[j - 1]));
       }
     }
     var out = [];
     i = n; j = m;
     while (i > 0 || j > 0) {
-      if (i > 0 && j > 0 && D[i][j] === D[i - 1][j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1)) {
+      if (i > 0 && j > 0 && D[i][j] === D[i - 1][j - 1] + sub(a[i - 1], b[j - 1])) {
         out.unshift([a[i - 1], b[j - 1]]); i--; j--;
       } else if (i > 0 && D[i][j] === D[i - 1][j] + 1) {
         out.unshift([a[i - 1], null]); i--;
@@ -1723,28 +1774,128 @@
       list.forEach(function (t, i) {
         if (i === 0 || t.g !== g) html += (i ? "</span>" : "") + '<span class="key-grp">';
         g = t.g;
-        html += '<button type="button" class="tile key"' + (locked ? " disabled" : "") + ' data-slug="' + t.slug +
-          '" aria-label="Type ' + esc(t.ipa) + '">' + esc(t.ipa) + "</button>";
+        html += '<button type="button" class="tile key' + (t.cap ? " key-mark" : "") + '"' + (locked ? " disabled" : "") +
+          ' data-slug="' + t.slug + '" aria-label="' + esc(t.aria || "Type " + t.ipa) + '">' + esc(t.ipa) +
+          (t.cap ? '<small class="key-cap" aria-hidden="true">' + esc(t.cap) + "</small>" : "") + "</button>";
       });
       html += "</span>";
       return '<div class="tile-row" role="group" aria-label="' + label + '">' +
         '<span class="tile-row-lab" aria-hidden="true">' + label + "</span>" +
         '<span class="tile-row-tiles">' + html + "</span></div>";
     }
-    return row("c", "Consonants") + row("v", "Vowels");
+    return row("c", "Consonants") + row("v", "Vowels") + row("s", "Stress");
   }
 
-  function lineHTML(seq, IPA_OF, locked) {
+  var MARK_NAME = { pri: "main stress mark", sec: "secondary stress mark" };
+  function lineHTML(seq, IPA_OF, locked, br) {
+    br = br || ["/", "/"];
     var syms = seq.map(function (s, i) {
-      return '<button type="button" class="tr-sym" data-i="' + i + '"' + (locked ? " disabled" : "") +
-        ' aria-label="' + esc(IPA_OF[s]) + (locked ? "" : ", press to take it out") + '">' + esc(IPA_OF[s]) + "</button>";
+      var mark = MARK_NAME[s];
+      return '<button type="button" class="tr-sym' + (mark ? " tr-mark" : "") + '" data-i="' + i + '"' + (locked ? " disabled" : "") +
+        ' aria-label="' + esc(mark || IPA_OF[s]) + (locked ? "" : ", press to take it out") + '">' + esc(IPA_OF[s]) + "</button>";
     }).join("");
-    return '<span class="tr-slash" aria-hidden="true">/</span>' +
+    return '<span class="tr-slash" aria-hidden="true">' + br[0] + "</span>" +
       (seq.length || locked ? syms : '<span class="tr-hint">tap the symbols below</span>') +
       (locked ? "" : '<span class="tr-caret" aria-hidden="true"></span>') +
-      '<span class="tr-slash" aria-hidden="true">/</span>' +
+      '<span class="tr-slash" aria-hidden="true">' + br[1] + "</span>" +
       '<button type="button" class="tr-back" aria-label="Take back the last symbol" aria-keyshortcuts="Backspace"' +
       (locked || !seq.length ? " disabled" : "") + ">&#9003;</button>";
+  }
+
+  /* Lab 8 widens the transcriber. A trail may write in square brackets (leg.brackets:
+     what was actually said, not the sounds of a word); an item may offer only a few keys
+     (it.keys), may have no spelling at all (a made-up word, played from a big Hear it
+     button), or may be a word said with an error (it.align: the meant and the said
+     forms, lined up, with the change named, as in the Phonological Processes Lab). */
+  function trBr(leg) { return leg.brackets ? ["[", "]"] : ["/", "/"]; }
+  function trTiles(leg, it) {
+    if (!it || !it.keys) return leg.tiles;
+    return leg.tiles.filter(function (t) { return it.keys.indexOf(t.slug) >= 0; });
+  }
+  function trTarget(leg, it, opts) {
+    opts = opts || {};
+    var big = opts.big || "";
+    if (!it.word) {
+      return '<div class="target tr-target tr-noword"' + big + ">" +
+        '<span class="tr-made">' + esc(it.label || leg.word_label || "A made-up word") + "</span>" +
+        (it.video && hasVideo(it.video) ? videoHTML(it.video) : L.audio.btn(it.audio, "Hear it", "big")) + "</div>";
+    }
+    return '<div class="target wb-target tr-target"' + big + '>' +
+      '<span class="target-word wb-word' + (it.word.length > 11 ? " wb-long" : "") + '">' + esc(it.word) +
+      L.audio.btn(it.audio, "Hear it") + "</span>" +
+      (leg.word_caption ? '<span class="tr-cap">' + esc(leg.word_caption) + "</span>" : "") + "</div>";
+  }
+  /* Lab 8's made-up words are videos of a speaker saying them (the Moodle version
+     only). The build lists the videos it ships in window.LAB_VIDEO. The video plays
+     once when the question opens; Watch and listen replays it, Slow plays it at
+     0.6 speed with the pitch kept. Audio clips stop while it plays, and it stops when
+     a clip starts. */
+  function hasVideo(slug) { return (w.LAB_VIDEO || []).indexOf(slug) >= 0; }
+  function videoHTML(slug) {
+    // MP4 first; WebM for browsers without H.264 (open-source Chromium builds)
+    return '<div class="nw-video"><video class="nw-v" playsinline preload="auto" disablepictureinpicture ' +
+      'aria-label="A speaker says the made-up word"><source src="video/' + slug + '.mp4" type="video/mp4">' +
+      '<source src="video/' + slug + '.webm" type="video/webm"></video></div>' +
+      '<div class="nw-ctl"><button type="button" class="spk big nw-play">' + ART.speaker() +
+      "<span>Watch and listen</span></button>" +
+      '<button type="button" class="spk nw-slow" aria-label="Watch and listen slowly">' + ART.speaker() +
+      "<span>Slow</span></button></div>";
+  }
+  function wireVideo(root, autoplay) {
+    var v = $(".nw-v", root);
+    if (!v) return;
+    var bPlay = $(".nw-play", root), bSlow = $(".nw-slow", root);
+    function paint() {
+      [bPlay, bSlow].forEach(function (b) { b.classList.remove("playing"); });
+      if (!v.paused && !v.ended) (v.playbackRate < 1 ? bSlow : bPlay).classList.add("playing");
+    }
+    function go(rate) {
+      L.audio.stop();
+      v.pause();
+      v.currentTime = 0;
+      v.preservesPitch = v.mozPreservesPitch = v.webkitPreservesPitch = true;
+      v.playbackRate = rate;
+      var pr = v.play();
+      if (pr && pr.catch) pr.catch(function () { paint(); });
+      paint();
+    }
+    v.addEventListener("play", paint);
+    v.addEventListener("pause", paint);
+    v.addEventListener("ended", paint);
+    bPlay.addEventListener("click", function () { go(1); });
+    bSlow.addEventListener("click", function () { go(0.6); });
+    // a clip played from anywhere else on the page stops the video
+    root.ownerDocument.addEventListener("click", function stopOnClip(e) {
+      if (!v.isConnected) { root.ownerDocument.removeEventListener("click", stopOnClip, true); return; }
+      if (e.target.closest && e.target.closest("[data-play], .key")) v.pause();
+    }, true);
+    if (autoplay) setTimeout(function () { if (v.isConnected) go(1); }, 250);
+  }
+
+  /* The sounds of a made-up word, one chip each, every chip naming its sound. */
+  function soundsHTML(it, br) {
+    var n = it.chips.length;
+    return '<div class="collapse">' + phonemeChips(it, true, br) +
+      '<div class="tick">' + n + (n === 1 ? " sound" : " sounds") + "</div></div>";
+  }
+  /* A word said with an error: the meant and the said forms lined up, the change
+     named, and what that change is. */
+  /* Lab 10 marks a child's changes in Trail 1 without naming them (a column whose process is
+     "?"), since naming them is Trail 2's question; it.target is the adult form with its stress
+     marks, and leg.align_labels can rename the two rows. */
+  function errorHTML(it, leg) {
+    var p = PP_OPT[it.process] || {}, lab = (leg && leg.align_labels) || { top: "Meant", bottom: "Said" };
+    var n = it.align.filter(function (c) { return c[2]; }).length;
+    return '<div class="ds-reveal">' +
+      '<p class="pp-line"><span class="pp-tr">/' + esc(it.target || ppTarget(it.align)) + '/</span>' +
+      '<span class="pp-arrow" aria-hidden="true">&rarr;</span><span class="pp-tr heard">[' +
+      esc(ppHeard(it.align, it.heard)) + "]</span>" +
+      '<span class="vh">The word that was meant, then what was said.</span></p>' +
+      ppAlign(it.align, lab) +
+      (it.process ? '<div class="ds-proc f-' + ppFam(it.process) + '"><b>' + esc(p.label || it.process) + ".</b> " +
+        (it.process_note || p.def || "") + "</div>" : "") +
+      '<div class="pp-again"><button type="button" class="tapper pp-replay">Replay the change' + (n > 1 ? "s" : "") +
+      "</button></div></div>";
   }
 
   function itemTranscribe(host, sc) {
@@ -1752,15 +1903,14 @@
     var already = L.state.given[sc.t] != null;
     var locked = false;
     var MAX = leg.max_len || 12;
-    var IPA_OF = {};
+    var IPA_OF = {}, BR = trBr(leg);
     leg.tiles.forEach(function (t) { IPA_OF[t.slug] = t.ipa; });
     var seq = already ? String(L.state.given[sc.t]).split(".") : [];
 
     host.innerHTML = itemHead(sc, leg) +
       '<div class="card">' +
       '<p class="prompt">' + esc(leg.prompt) + "</p>" +
-      '<div class="target wb-target tr-target">' +
-      '<span class="target-word wb-word">' + esc(it.word) + L.audio.btn(it.audio, "Hear it") + "</span></div>" +
+      trTarget(leg, it) +
       '<div class="tr-line" id="trLine" role="group" aria-label="Your transcription"></div>' +
       '<p class="tr-full" id="trFull" role="status"></p>' +
       '<div class="tilebank tr-keys" id="trKeys" role="group" aria-label="The IPA keyboard"></div>' +
@@ -1772,7 +1922,7 @@
     var fullEl = $("#trFull", host);
 
     function paint() {
-      lineEl.innerHTML = lineHTML(seq, IPA_OF, locked);
+      lineEl.innerHTML = lineHTML(seq, IPA_OF, locked, BR);
       lineEl.classList.toggle("locked", locked);
       if (!locked) {
         $$(".tr-sym", lineEl).forEach(function (b) {
@@ -1801,7 +1951,8 @@
       paint();
     }
 
-    keysEl.innerHTML = keyboardHTML(leg.tiles, already);
+    keysEl.innerHTML = keyboardHTML(trTiles(leg, it), already);
+    keysEl.classList.toggle("few", !!it.keys);
     $$(".key", keysEl).forEach(function (b) {
       b.addEventListener("click", function () { type(b.getAttribute("data-slug")); });
     });
@@ -1820,63 +1971,89 @@
       seq = given;
       paint();
       $$(".key", keysEl).forEach(function (b) { b.disabled = true; });
-      var exact = L.isCorrect(sc.t);
-      // a transcription that matched one of the item's other right answers is set against that one
-      var ref = exact ? given : it.answer.split(".");
+      var exact = L.isCorrect(sc.t), V = L.verdict(sc.t);
+      // a transcription that matched one of the item's other right answers is set against that one;
+      // one judged by rule is set against the answer as the student would have written it
+      var ref = exact ? given : V ? V.ref : it.answer.split(".");
       if (!exact && !silent) shake(stageCard);
+      var after = it.judge === "stress" ? stressRevealHTML(it) : it.align ? errorHTML(it, leg)
+        : it.word ? collapseHTML(it) : soundsHTML(it, BR);
       $("#fbHost", host).innerHTML = fbHTML(sc, it,
-        '<div class="reveal">' + trCompare(given, ref, IPA_OF, exact) + collapseHTML(it) + "</div>");
+        '<div class="reveal">' + trCompare(given, ref, IPA_OF, exact) + after + "</div>");
       L.tieIPA($("#fbHost", host));
+      var rv = $(".ds-reveal", host);
+      if (rv) {
+        ppPlay(rv, silent);
+        $(".pp-replay", rv).addEventListener("click", function () { ppPlay(rv, false); });
+      }
       armContinue(sc);
     }
 
     paint();
-    if (already) lock(true);
+    if (already) { if ($(".nw-v", host)) wireVideo($(".target", host), false); lock(true); }
     else {
       onAct(function () {
         if (locked || !seq.length) return;
         L.answer(sc, mergeKey(leg, seq).join("."), lineEl);
         lock(false);
       });
-      // the word plays once on arrival
-      var spk = $(".target .spk", host);
-      if (spk) L.audio.play(it.audio, spk);
+      // the word (or the video of it) plays once on arrival
+      if ($(".nw-v", host)) wireVideo($(".target", host), true);
+      else {
+        var spk = $(".target .spk", host);
+        if (spk) L.audio.play(it.audio, spk);
+      }
     }
   }
 
   function demoTranscribe(host, leg) {
-    var D = leg.demo;
+    var D = leg.demo, BR = trBr(leg);
     var IPA_OF = {};
     D.tiles.forEach(function (t) { IPA_OF[t.slug] = t.ipa; });
     var seq = [];
     host.innerHTML =
-      '<div class="demo"><h4>Worked example, write the word</h4>' +
+      '<div class="demo"><h4>' + esc(D.title || "Worked example, write the word") + "</h4>" +
       '<div class="demo-stage" style="padding:16px 12px">' +
       '<div class="target wb-target tr-target" style="padding:4px 0 6px">' +
       '<span class="target-word wb-word" style="font-size:1.7rem">' + esc(D.word) +
-      L.audio.btn(D.audio, "Hear it") + "</span></div>" +
+      L.audio.btn(D.audio, "Hear it") + "</span>" +
+      (leg.word_caption ? '<span class="tr-cap">' + esc(leg.word_caption) + "</span>" : "") + "</div>" +
       '<div class="tr-line" id="dLine"></div>' +
       '<div class="tilebank tr-keys" id="dKeys" style="flex-direction:row;flex-wrap:wrap;justify-content:center">' +
       D.tiles.map(function (t) {
-        return '<button type="button" class="tile key" data-slug="' + t.slug + '" aria-label="Type ' + esc(t.ipa) +
-          '">' + esc(t.ipa) + "</button>";
+        return '<button type="button" class="tile key' + (t.cap ? " key-mark" : "") + '" data-slug="' + t.slug +
+          '" aria-label="' + esc(t.aria || "Type " + t.ipa) + '">' + esc(t.ipa) +
+          (t.cap ? '<small class="key-cap" aria-hidden="true">' + esc(t.cap) + "</small>" : "") + "</button>";
       }).join("") + "</div>" +
       '<p class="dcap" id="dCap">' + D.cap + "</p></div></div>";
     var lineEl = $("#dLine", host), cap = $("#dCap", host);
     function paint() {
-      lineEl.innerHTML = lineHTML(seq, IPA_OF, false);
+      lineEl.innerHTML = lineHTML(seq, IPA_OF, false, BR);
       $$(".tr-sym", lineEl).forEach(function (b) {
         b.addEventListener("click", function () { seq.splice(+b.getAttribute("data-i"), 1); paint(); });
       });
       $(".tr-back", lineEl).addEventListener("click", function () { seq.pop(); paint(); });
-      if (seq.join(".") === D.want.join(".")) cap.innerHTML = D.ok;
+      var bare = function (x) { return x.filter(function (s) { return !MARK_NAME[s]; }).join("."); };
+      var wants = [D.want].concat(D.also || []);
+      var done = wants.some(function (x) { return x.join(".") === seq.join("."); });
+      if (done) {
+        cap.innerHTML = D.ok + (D.align ? errorHTML(D, leg) : "") + (D.sylls ? stressRevealHTML(D) : "");
+        var rv = $(".ds-reveal", cap);
+        if (rv) {
+          ppPlay(rv, false);
+          $(".pp-replay", rv).addEventListener("click", function () { ppPlay(rv, false); });
+        }
+        L.tieIPA(cap);
+      }
+      else if (D.mark_hint && seq.length >= D.want.length &&
+        wants.some(function (x) { return bare(seq) === bare(x); })) cap.innerHTML = D.mark_hint;
       else if (seq.length >= D.want.length) cap.innerHTML = "Not this word yet. Take a symbol back out and listen again.";
       else cap.innerHTML = D.cap;
       L.tieIPA(lineEl);
     }
     $$(".key", host).forEach(function (b) {
       b.addEventListener("click", function () {
-        if (seq.length >= 8) return;
+        if (seq.length >= (D.max_len || 8)) return;
         var s = b.getAttribute("data-slug");
         seq.push(s);
         if (L.audio.has("ipa_" + s)) L.audio.play("ipa_" + s);
@@ -1894,7 +2071,7 @@
     var leg = L.legs[li], C = leg.chart;
     var IPA_OF = {}, MARK = {};
     leg.tiles.forEach(function (t) { IPA_OF[t.slug] = t.ipa; });
-    leg.items.forEach(function (it, i) { MARK[it.answer] = recapMark(li * L.per + i); });
+    leg.items.forEach(function (it, i) { MARK[it.answer] = recapMark(L.tOf(li, i)); });
     var CELL = {};
     C.cells.forEach(function (c) { CELL[c[0] + "|" + c[1]] = [c[2], c[3]]; });
     function sym(s) {
@@ -1940,23 +2117,329 @@
     });
   }
 
-  /* Trail 2: the fifteen words, each answer beside what was written. */
+  /* The transcriber's recap: every word, the answer beside what was written. A
+     made-up word is listed by a play button; a word said with an error also shows the
+     word that was meant and names the change. */
   function recapTranscribe(li) {
-    var leg = L.legs[li];
+    var leg = L.legs[li], BR = trBr(leg);
     var IPA_OF = {};
     leg.tiles.forEach(function (t) { IPA_OF[t.slug] = t.ipa; });
-    function ipa(key) { return "/" + key.split(".").map(function (s) { return IPA_OF[s] || s; }).join("") + "/"; }
+    function ipa(key) { return BR[0] + key.split(".").map(function (s) { return IPA_OF[s] || s; }).join("") + BR[1]; }
+    var errs = leg.items.some(function (it) { return it.align; });
     var rows = leg.items.map(function (it, i) {
-      var t = li * L.per + i, given = L.state.given[t];
+      var t = L.tOf(li, i), given = L.state.given[t];
       var also = (it.also || []).length ? ' <small>or ' + it.also.map(ipa).join(" or ") + "</small>" : "";
-      return "<tr><td><b>" + esc(it.word) + "</b></td><td class=\"rc-ipa\">" + esc(ipa(it.answer)) + also +
+      var name = it.word ? "<b>" + esc(it.word) + "</b>" + (errs ? ' <span class="rc-meant">/' + esc(it.target || ppTarget(it.align)) + "/</span>" : "")
+        : (L.audio.has(it.audio) ? '<button type="button" class="spk round" data-play="' + it.audio +
+          '" aria-label="Play this word">' + ART.speaker() + "</button>" : "");
+      return "<tr><td>" + name + "</td><td class=\"rc-ipa\">" + esc(ipa(it.answer)) + also +
+        (errs && it.process ? '<br><small class="rc-proc">' + esc(ppLabel(it.process)) + "</small>" : "") +
         "</td><td class=\"rc-ipa\" style=\"font-weight:600;color:var(--ink-soft)\">" +
         (given == null ? "" : esc(ipa(String(given)))) + "</td><td>" + recapMark(t) + "</td></tr>";
     }).join("");
-    return '<div class="recap"><h3>Fifteen words, transcribed</h3>' +
-      '<p class="recap-note">Each answer beside what you wrote, with your marks.</p>' +
-      '<div class="table-wrap"><table class="recap-table"><thead><tr><th>Word</th><th>Answer</th>' +
-      "<th>You wrote</th><th></th></tr></thead><tbody>" + rows + "</tbody></table></div></div>";
+    var n = leg.items.length;
+    var head = leg.recap_title || ({ 5: "Five", 10: "Ten", 15: "Fifteen" }[n] || n) + " words, transcribed";
+    return '<div class="recap"><h3>' + esc(head) + "</h3>" +
+      '<p class="recap-note">' + (leg.recap_note || "Each answer beside what you wrote, with your marks.") + "</p>" +
+      '<div class="table-wrap"><table class="recap-table"><thead><tr><th>' + (errs ? "Word meant" : "Word") +
+      "</th><th>" + (errs ? "Said" : "Answer") + "</th><th>You wrote</th><th></th></tr></thead><tbody>" + rows +
+      "</tbody></table></div></div>";
+  }
+
+  /* ---------------------------------------------------------
+     Lab 8, Trail 2: lexical stress (type "stress")
+     The word as its syllables, each one a button. Tap the syllable
+     that carries the main stress and it is underlined, as on paper.
+     The answer is the syllable's index. The reveal draws the word's
+     rhythm as beats (large for the main stress, middle-sized for a
+     secondary one, small for the rest) over the transcription with
+     its stress marks.
+     --------------------------------------------------------- */
+  function beatsHTML(it, ipa) {
+    var syl = ipa ? it.sylls : it.syll;
+    return '<div class="st-beats' + (ipa ? " st-beats-ipa" : "") + '" role="img" aria-label="' + esc(syl.map(function (sy, k) {
+      return sy + (it.levels[k] === 2 ? " (main stress)" : it.levels[k] === 1 ? " (secondary stress)" : "");
+    }).join(", ")) + '">' + syl.map(function (sy, k) {
+      var lv = it.levels[k];
+      return '<span class="st-beat lv' + lv + '"><span class="st-dot"></span><span class="st-syl">' +
+        esc(sy) + "</span></span>";
+    }).join("") + "</div>" +
+      '<p class="st-legend" aria-hidden="true"><span class="st-key lv2"></span>main stress' +
+      (it.levels.indexOf(1) >= 0 ? '<span class="st-key lv1"></span>secondary' : "") +
+      '<span class="st-key lv0"></span>unstressed</p>';
+  }
+  /* Lab 9's reveal: the word's beats, each labelled with its syllable in IPA,
+     stress mark and all, then the whole transcription. */
+  function stressRevealHTML(it) {
+    return '<div class="st-reveal ms-reveal">' + beatsHTML(it, true) +
+      '<p class="st-ipa"><span class="ipa-keep">/' + esc(it.ipa) + "/</span> " +
+      (it.audio ? L.audio.btn(it.audio, "Hear it again") : "") + "</p></div>";
+  }
+  function syllButtons(it, demo) {
+    return '<div class="st-sylls" role="group" aria-label="The syllables of ' + esc(it.word) + '">' +
+      it.syll.map(function (sy, k) {
+        return (k ? '<span class="st-sep" aria-hidden="true">&middot;</span>' : "") +
+          '<button type="button" class="opt st-syl-btn" data-v="' + k + '"' +
+          (demo ? "" : ' aria-keyshortcuts="' + (k + 1) + '"') +
+          ' aria-label="Syllable ' + (k + 1) + ", " + esc(sy) + '">' + esc(sy) + "</button>";
+      }).join("") + "</div>";
+  }
+  function itemStress(host, sc) {
+    var leg = L.legs[sc.leg], it = leg.items[sc.i];
+    var already = L.state.given[sc.t] != null, picked = null, locked = false;
+    host.innerHTML = itemHead(sc, leg) +
+      '<div class="card">' +
+      '<p class="prompt">' + esc(leg.prompt) + "</p>" +
+      '<div class="target st-target">' + L.audio.btn(it.audio, "Hear it", "big") + "</div>" +
+      syllButtons(it) +
+      '<div id="fbHost"></div>' +
+      "</div>" +
+      actionBar("Check", { disabled: true });
+    var stageCard = $(".card", host), btns = $$(".st-syl-btn", host);
+    btns.forEach(function (b) {
+      b.addEventListener("click", function () {
+        if (locked || b.disabled) return;
+        picked = b.getAttribute("data-v");
+        btns.forEach(function (x) { x.classList.toggle("sel", x === b); });
+        $("#actBtn").disabled = false;
+      });
+    });
+    function lock(silent) {
+      locked = true;
+      var given = String(L.state.given[sc.t]);
+      var exact = L.isCorrect(sc.t), alt = L.isAlternate(sc.t);
+      btns.forEach(function (b) {
+        var v = b.getAttribute("data-v");
+        b.disabled = true;
+        b.classList.remove("sel");
+        if (v === it.answer) b.classList.add("is-good");
+        else if (v === given) b.classList.add(alt ? "is-alt" : "is-bad");
+      });
+      var reveal = '<div class="reveal st-reveal">' + beatsHTML(it) +
+        '<p class="st-ipa"><span class="ipa-keep">/' + esc(it.ipa) + "/</span> " +
+        L.audio.btn(it.audio, "Hear it again") + "</p></div>";
+      if (!exact && !alt && !silent) shake(stageCard);
+      $("#fbHost", host).innerHTML = fbHTML(sc, it, reveal);
+      L.tieIPA($("#fbHost", host));
+      armContinue(sc);
+    }
+    L.tieIPA(host);
+    if (already) lock(true);
+    else {
+      var spk = $(".st-target .spk", host);
+      if (spk) L.audio.play(it.audio, spk);
+      onAct(function () {
+        if (picked == null || locked) return;
+        L.answer(sc, picked, $('.st-syl-btn[data-v="' + picked + '"]', host));
+        lock(false);
+      });
+    }
+  }
+
+  /* ---------------------------------------------------------
+     Lab 10, Trail 2: name the process (type "mc")
+     The word, its recording, the adult form and the child's form,
+     a question and four written answers, A to D, in the order the
+     bank gives (never shuffled). The answer is the letter. The
+     reveal lines the two forms up, each change tagged with the
+     process that made it, as in the Phonological Processes Lab.
+     --------------------------------------------------------- */
+  var LETTERS = "abcdefgh";
+  function mcForms(it) {
+    return '<p class="pp-line mc-forms"><span class="pp-tr">/' + esc(it.target) + '/</span>' +
+      '<span class="pp-arrow" aria-hidden="true">&rarr;</span><span class="pp-tr heard">[' + esc(it.said) + "]</span>" +
+      '<span class="vh">The adult form, then what the child said.</span></p>';
+  }
+  function mcOpts(it, demo) {
+    return '<div class="mc-opts" role="group" aria-label="Answers">' + it.options.map(function (o, k) {
+      return '<button type="button" class="opt mc-opt" data-v="' + o.v + '"' +
+        (demo ? "" : ' aria-keyshortcuts="' + (k + 1) + '"') + '><span class="mc-let" aria-hidden="true">' +
+        "ABCDEFGH".charAt(k) + '</span><span class="mc-txt">' + o.text + "</span></button>";
+    }).join("") + "</div>";
+  }
+  function mcReveal(it) {
+    var n = it.align.filter(function (c) { return c[2]; }).length;
+    return '<div class="reveal ds-reveal mc-reveal">' + ppAlign(it.align, { top: "Adult", bottom: "Child" }) +
+      '<div class="pp-again"><button type="button" class="tapper pp-replay">Replay the change' + (n > 1 ? "s" : "") +
+      "</button></div></div>";
+  }
+  function itemMC(host, sc) {
+    var leg = L.legs[sc.leg], it = leg.items[sc.i];
+    var already = L.state.given[sc.t] != null, picked = null;
+    host.innerHTML = itemHead(sc, leg) +
+      '<div class="card">' +
+      '<div class="target mc-target"><span class="target-word">' + esc(it.word) + "</span>" +
+      L.audio.btn(it.audio, "Hear it") + ppSlowBtn(it.audio) + "</div>" +
+      mcForms(it) +
+      '<p class="prompt mc-stem">' + it.stem + "</p>" +
+      mcOpts(it) + ppGuide() +
+      '<div id="fbHost"></div>' +
+      "</div>" +
+      actionBar("Check", { disabled: true });
+    var stageCard = $(".card", host), btns = $$(".mc-opt", host);
+    btns.forEach(function (b) {
+      b.addEventListener("click", function () {
+        if (b.disabled) return;
+        picked = b.getAttribute("data-v");
+        btns.forEach(function (x) { x.classList.toggle("sel", x === b); });
+        $("#actBtn").disabled = false;
+      });
+    });
+    function lock(silent) {
+      var given = String(L.state.given[sc.t]);
+      var exact = L.isCorrect(sc.t), alt = L.isAlternate(sc.t);
+      btns.forEach(function (b) {
+        var v = b.getAttribute("data-v");
+        b.disabled = true;
+        b.classList.remove("sel");
+        if (v === it.answer) b.classList.add("is-good");
+        else if (v === given) b.classList.add(alt ? "is-alt" : "is-bad");
+      });
+      if (!exact && !alt && !silent) shake(stageCard);
+      $("#fbHost", host).innerHTML = fbHTML(sc, it, mcReveal(it));
+      L.tieIPA($("#fbHost", host));
+      var rv = $(".mc-reveal", host);
+      ppPlay(rv, silent);
+      $(".pp-replay", rv).addEventListener("click", function () { ppPlay(rv, false); });
+      armContinue(sc);
+    }
+    L.tieIPA(host);
+    if (already) lock(true);
+    else {
+      var spk = $(".mc-target .spk", host);
+      if (spk) L.audio.play(it.audio, spk);
+      onAct(function () {
+        if (picked == null) return;
+        L.answer(sc, picked, $('.mc-opt[data-v="' + picked + '"]', host));
+        lock(false);
+      });
+    }
+  }
+  /* Its worked example: the same question on a word that is not one of the fifteen. */
+  function demoMC(host, leg) {
+    var D = leg.demo;
+    host.innerHTML =
+      '<div class="demo"><h4>' + esc(D.title || "Worked example, name the process") + "</h4>" +
+      '<div class="demo-stage" style="padding:16px 12px">' +
+      '<div class="target mc-target"><span class="target-word" style="font-size:1.7rem">' + esc(D.word) + "</span>" +
+      L.audio.btn(D.audio, "Hear it") + "</div>" + mcForms(D) +
+      '<p class="mc-stem">' + D.stem + "</p>" + mcOpts(D, true) +
+      '<p class="dcap" id="mcCap">' + D.cap + "</p></div></div>";
+    var cap = $("#mcCap", host), btns = $$(".mc-opt", host);
+    btns.forEach(function (b) {
+      b.addEventListener("click", function () {
+        var v = b.getAttribute("data-v"), right = v === D.answer;
+        btns.forEach(function (x) { x.classList.remove("sel", "is-good"); if (x === b) x.classList.add(right ? "is-good" : "sel"); });
+        cap.innerHTML = right ? D.ok + mcReveal(D) : (D.no[v] || D.cap);
+        L.tieIPA(cap);
+        var rv = $(".mc-reveal", cap);
+        if (rv) {
+          ppPlay(rv, false);
+          $(".pp-replay", rv).addEventListener("click", function () { ppPlay(rv, false); });
+        }
+      });
+    });
+    L.tieIPA(host);
+  }
+  /* Its recap: each word with both forms, the answer, and what was picked. */
+  function recapMC(li) {
+    var leg = L.legs[li];
+    // the letter is the option's place on screen, which a shuffle may have moved
+    function text(it, v) {
+      var k = it.options.map(function (x) { return x.v; }).indexOf(v);
+      return k < 0 ? "" : "ABCDEFGH".charAt(k) + ". " + it.options[k].text;
+    }
+    var rows = leg.items.map(function (it, i) {
+      var t = L.tOf(li, i), given = L.state.given[t];
+      return "<tr><td><b>" + esc(it.word) + '</b><br><span class="rc-meant">/' + esc(it.target) + "/ &rarr; [" +
+        esc(it.said) + "]</span></td><td>" + text(it, it.answer) + '</td><td style="color:var(--ink-soft)">' +
+        (given == null ? "" : text(it, String(given))) + "</td><td>" + recapMark(t) + "</td></tr>";
+    }).join("");
+    var n = leg.items.length;
+    return '<div class="recap"><h3>' + esc(leg.recap_title || n + " words, analysed") + "</h3>" +
+      '<p class="recap-note">' + (leg.recap_note || "Each answer beside the one you picked, with your marks.") + "</p>" +
+      '<div class="table-wrap"><table class="recap-table"><thead><tr><th>Word</th><th>Answer</th><th>You picked</th>' +
+      "<th></th></tr></thead><tbody>" + rows + "</tbody></table></div></div>";
+  }
+
+  /* The stress demo: hear a word, tap the syllable that stands out. */
+  function demoStress(host, leg) {
+    var D = leg.demo;
+    host.innerHTML =
+      '<div class="demo"><h4>Worked example, find the stress</h4>' +
+      '<div class="demo-stage" style="padding:16px 12px">' +
+      '<div class="target st-target">' + L.audio.btn(D.audio, "Hear it", "big") + "</div>" +
+      syllButtons(D, true) +
+      '<p class="dcap" id="stCap">' + D.cap + "</p></div></div>";
+    var cap = $("#stCap", host), btns = $$(".st-syl-btn", host);
+    btns.forEach(function (b) {
+      b.addEventListener("click", function () {
+        var v = b.getAttribute("data-v"), right = v === D.answer;
+        btns.forEach(function (x) {
+          x.classList.remove("sel", "is-good", "is-bad");
+          if (x === b) x.classList.add(right ? "is-good" : "sel");
+        });
+        cap.innerHTML = right
+          ? D.ok + beatsHTML(D) + '<p class="st-ipa"><span class="ipa-keep">/' + esc(D.ipa) + "/</span></p>"
+          : D.no;
+        L.tieIPA(cap);
+      });
+    });
+    L.tieIPA(host);
+  }
+
+  /* The stress recap: each word with its stressed syllable in capitals, the
+     transcription, and the syllable the student picked. */
+  function recapStress(li) {
+    var leg = L.legs[li];
+    var rows = leg.items.map(function (it, i) {
+      var t = L.tOf(li, i), given = L.state.given[t];
+      var word = it.syll.map(function (sy, k) {
+        return k === +it.answer ? "<b>" + esc(sy.toUpperCase()) + "</b>" : esc(sy);
+      }).join("&middot;");
+      return "<tr><td>" + word + '</td><td class="rc-ipa">/' + esc(it.ipa) + "/</td>" +
+        '<td style="font-weight:600;color:var(--ink-soft)">' + (given == null ? "" : esc(it.syll[+given] || "")) +
+        "</td><td>" + recapMark(t) + "</td></tr>";
+    }).join("");
+    return '<div class="recap"><h3>Ten words, stressed</h3>' +
+      '<p class="recap-note">The main stress in capitals, the transcription with its stress marks, and the ' +
+      "syllable you picked.</p>" +
+      '<div class="table-wrap"><table class="recap-table"><thead><tr><th>Word</th><th>Transcription</th>' +
+      "<th>You picked</th><th></th></tr></thead><tbody>" + rows + "</tbody></table></div></div>";
+  }
+
+  /* ---------------------------------------------------------
+     Lab 8, Trail 1's worked example: the sounds of the made-up
+     words that English spelling never writes. The seven vowels on
+     the vowel chart, each with what it sounds like and, where the
+     course has a recording that helps, an English vowel to compare;
+     then the glottal stop.
+     --------------------------------------------------------- */
+  function demoMadeUp(host, leg) {
+    var D = leg.demo, V = {};
+    D.vowels.forEach(function (v) { V[v.pos] = v; });
+    host.innerHTML =
+      '<div class="demo"><h4>' + esc(D.title) + "</h4>" +
+      '<div class="demo-stage" style="padding:14px 10px">' +
+      '<div class="vf-chart-wrap nw-chart">' + chartHTML(D.vowels.map(function (v) { return v.pos; }), { cls: "nw-vo" }) + "</div>" +
+      '<div class="demo-tap" style="margin-top:8px"><button type="button" class="tapper nw-gs">' +
+      esc(D.glottal.btn) + '<span class="hintdot"></span></button></div>' +
+      '<p class="dcap" id="nwCap">' + D.cap + "</p></div></div>";
+    var cap = $("#nwCap", host);
+    function say(html, el) {
+      $$(".nw-vo, .nw-gs", host).forEach(function (x) { x.classList.toggle("on", x === el); });
+      cap.innerHTML = html;
+      L.tieIPA(cap);
+    }
+    $$(".nw-vo", host).forEach(function (b) {
+      b.addEventListener("click", function () {
+        var v = V[b.getAttribute("data-v")];
+        say(v.say + (v.compare && L.audio.has(v.compare)
+          ? " " + L.audio.btn(v.compare, v.compare_label || "Compare") : ""), b);
+      });
+    });
+    $(".nw-gs", host).addEventListener("click", function () { say(D.glottal.say, this); });
+    L.tieIPA(host);
   }
 
   /* ---------------------------------------------------------
@@ -2330,7 +2813,7 @@
   function recapVowelChart(li) {
     var leg = L.legs[li];
     var mark = {};
-    leg.items.forEach(function (it, i) { mark[it.answer] = li * L.per + i; });
+    leg.items.forEach(function (it, i) { mark[it.answer] = L.tOf(li, i); });
     var chart = chartHTML(leg.chart, { inert: true, asked: Object.keys(mark) });
     var res = "";
     leg.chart.forEach(function (v) {
@@ -2352,7 +2835,7 @@
     for (var i = 0; i < leg.items.length; i += 2) {
       var a = leg.items[i], b = leg.items[i + 1];
       var hi = a.step === "height" ? a : b, pl = a.step === "height" ? b : a;
-      var ti = li * L.per + i + (a.step === "height" ? 0 : 1), tp = li * L.per + i + (a.step === "height" ? 1 : 0);
+      var ti = L.tOf(li, i) + (a.step === "height" ? 0 : 1), tp = L.tOf(li, i) + (a.step === "height" ? 1 : 0);
       rows += '<tr><td class="rc-ipa">/' + esc(hi.ipa) + "/</td><td>" + esc(hi.height) + " " + recapMark(ti) +
         "</td><td>" + esc(pl.place) + " " + recapMark(tp) + "</td><td>" +
         (ART.vowelPose[hi.vowel].round > 0.3 ? "rounded" : "unrounded") + "</td></tr>";
@@ -2399,7 +2882,7 @@
     cells += '<span class="pa-lab" style="grid-row:1;grid-column:1">' + esc(opts.top || "Target") + "</span>";
     cells += '<span class="pa-lab" style="grid-row:2;grid-column:1">' + esc(opts.bottom || "Recording") + "</span>";
     for (k = 0; k < n; k++) {
-      var c = al[k], ch = !!c[2], fam = ch ? ppFam(c[2]) : "";
+      var c = al[k], ch = !!c[2], fam = !ch ? "" : c[2] === "?" ? "chg" : ppFam(c[2]);
       cells += '<span class="pa-t' + (ch ? " ch" : "") + '" style="grid-row:1;grid-column:' + (k + 2) + '">' +
         esc(c[0] || " ") + "</span>";
       cells += '<span class="pa-h' + (ch ? " ch f-" + fam + (c[1] ? "" : " del") : "") + '" data-k="' + k +
@@ -2412,7 +2895,7 @@
     // names never overlap
     var lastEnd = -9, lastRow = 4;
     for (k = 0; k < n; k++) {
-      if (!al[k][2]) continue;
+      if (!al[k][2] || al[k][2] === "?") continue;
       var p = al[k][2], j = k;
       while (j + 1 < n && al[j + 1][2] === p) j++;
       var row = k - lastEnd <= 2 && lastRow === 3 ? 4 : 3;
@@ -2632,7 +3115,7 @@
     var leg = L.legs[li], rows = "", extra = {};
     var byProc = {};
     leg.items.forEach(function (it, i) {
-      var t = li * L.per + i;
+      var t = L.tOf(li, i);
       var given = String(L.state.given[t] || "").split(".");
       it.answer.split(".").forEach(function (p) {
         (byProc[p] = byProc[p] || []).push({ word: it.word, hit: given.indexOf(p) >= 0 });
@@ -2682,7 +3165,7 @@
       var chips = "";
       leg.items.forEach(function (it, i) {
         if (it.answer !== c.v) return;
-        chips += '<span class="recap-chip">' + esc(it.word) + recapMark(li * L.per + i) + "</span>";
+        chips += '<span class="recap-chip">' + esc(it.word) + recapMark(L.tOf(li, i)) + "</span>";
       });
       return '<div class="recap-bin"><div class="recap-bin-head">' + ART.systemIcon(c.icon) +
         "<b>" + esc(c.label) + "</b><small>" + esc(c.tag) + "</small></div>" +
@@ -2713,7 +3196,7 @@
       lines += '<line x1="' + lx + '" y1="' + ly + '" x2="' + a[0] + '" y2="' + a[1] + '"/>' +
         '<circle cx="' + a[0] + '" cy="' + a[1] + '" r="3.4"/>';
       labels += '<span class="recap-label ' + lane[0] + '" style="top:' +
-        (ly / ART.sagH * 100).toFixed(2) + '%">' + esc(it.word) + recapMark(li * L.per + i) + "</span>";
+        (ly / ART.sagH * 100).toFixed(2) + '%">' + esc(it.word) + recapMark(L.tOf(li, i)) + "</span>";
     });
     return '<div class="recap"><h3>The whole pathway</h3>' +
       '<p class="recap-note">Every stop on the road from the lungs to the lips, with your answers marked.</p>' +
@@ -2739,7 +3222,7 @@
           return k.split(".").sort(function (a, b) { return order.indexOf(a) - order.indexOf(b); })
             .map(function (v) { return LABEL[v]; }).join(" + ");
         }).join(" or ")) + "</small>" +
-        recapMark(li * L.per + i) + "</button>";
+        recapMark(L.tOf(li, i)) + "</button>";
     }).join("");
     return '<div class="recap"><h3>The whole mouth</h3>' +
       '<p class="recap-note">Every articulator on the map, and the ten sounds with your answers marked. ' +
@@ -2785,7 +3268,7 @@
       return '<tr><td class="rc-ipa"><button type="button" class="cc-s cc-tap t" data-s="' + it.answer +
         '" aria-label="Show and play ' + esc(IPA_OF[it.answer]) + '">/' + esc(IPA_OF[it.answer]) + "/</button></td><td>" +
         esc(it.panel.place) + "</td><td>" + esc(it.panel.manner) + "</td><td>" + (it.panel.voiced ? "voiced" : "voiceless") +
-        "</td><td>" + recapMark(li * L.per + i) + "</td></tr>";
+        "</td><td>" + recapMark(L.tOf(li, i)) + "</td></tr>";
     }).join("");
     return '<div class="recap"><h3>The ten sounds, solved</h3>' +
       '<p class="recap-note">Where, how, and voice, with your answers marked. <b>Tap a sound</b> to watch it ' +
@@ -2814,7 +3297,9 @@
 
   var RECAPS = { ss: recapSystems, pw: recapPathway, af: recapArticulators, sd: recapDetective,
     vf: recapVowelChart, tm: recapTongue, wp: recapProcs, sp: recapProcs,
-    cc: recapConsonants, tr: recapTranscribe };
+    cc: recapConsonants, tr: recapTranscribe, nw: recapTranscribe, st: recapStress, ds: recapTranscribe,
+    sm: recapTranscribe, sf: recapTranscribe, lw: recapTranscribe,
+    cw: recapTranscribe, np: recapMC };
   /* recaps that need wiring once they are on the page */
   var RECAP_WIRE = { cc: wireConsonants, af: wireArticulators, sd: wireDetective };
 

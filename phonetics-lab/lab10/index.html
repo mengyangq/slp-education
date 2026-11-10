@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Phonetics Lab 10: What the Child Said</title>
+<meta name="description" content="Phonetics Lab 10: listen to a child saying fifteen words, write what the child said in IPA, then name the phonological processes in fifteen more.">
+<link rel="stylesheet" href="css/lab.css">
+<style>
+  /* Lab 10's gem is a golden egg. The shared sheet's cyan stays the series default. */
+  :root{ --gem:#EDB422; --gem-lite:#FFF0B8; --gem-deep:#A87108; }
+</style>
+<script>
+  window.LAB_MODE = "site";
+  // Draw affricates and diphthongs with a tie bar: /t͡ʃ/, /o͡ʊ/. Set false for the plain form.
+  window.LAB_TIE = true;
+  // This lab's gem: a golden egg, for the chicken.
+  window.LAB_GEM = "goldegg";
+  // This lab's celebration: a little egg hatches a chick, and for full credit a big golden egg
+  // hatches a hen who rides off on a bicycle, after the fireworks of Labs 1-2, Lab 3's balloons,
+  // Lab 4's confetti, Lab 5's dragon, Lab 6's Snake, Lab 7's bats, Lab 8's ghosts and Lab 9's
+  // peach tree.
+  window.LAB_FX = "egg";
+  window.LAB_META = {
+    course: "Phonetics",
+    lab: 10,
+    home: "../"
+  };
+</script>
+</head>
+<body>
+<a class="skip" href="#stage">Skip to the activity</a>
+
+
+<div class="lab">
+
+  <!-- ============ the path ============ -->
+  <aside class="rail" id="rail" aria-label="Your progress through the lab">
+    <div class="rail-head">
+      <span class="rail-course">Phonetics Lab 10</span>
+      <span class="rail-title">What the Child Said</span>
+    </div>
+    <div class="rail-scroll" id="railScroll">
+      <div class="path-wrap" id="pathWrap"></div>
+    </div>
+  </aside>
+  <div class="rail-scrim" id="railScrim"></div>
+
+  <!-- ============ everything else ============ -->
+  <div class="content">
+    <header class="hud">
+      <button type="button" class="map-btn" id="mapBtn" aria-expanded="false" aria-controls="rail">
+        &#9776; Map
+      </button>
+      <h1 class="hud-leg" id="hudLeg"><span class="leg-dot"></span><span>What the Child Said</span></h1>
+      <span class="hud-spacer"></span>
+      <button type="button" class="fx-btn" id="fxBtn" aria-pressed="true">
+        &#9834;<span class="vh">Effect sounds on</span>
+      </button>
+      <p class="gem-tally" id="gemTally">
+        <svg class="gem-ico" viewBox="0 0 36 28" aria-hidden="true" focusable="false">
+          <linearGradient id="gemHud" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#FFE48A"/><stop offset="1" stop-color="#EDB422"/>
+          </linearGradient>
+          <path d="M18 2.2 C23.6 2.2 27.6 10.4 27.6 17 C27.6 23 23.4 27.4 18 27.4 C12.6 27.4 8.4 23 8.4 17 C8.4 10.4 12.4 2.2 18 2.2 Z" fill="url(#gemHud)"/>
+          <path d="M18 2.2 C23.6 2.2 27.6 10.4 27.6 17 C27.6 23 23.4 27.4 18 27.4 C22.4 25 24.6 20 24.4 15 C24.2 9.4 21.6 4.4 18 2.2 Z" fill="#A87108" opacity=".3"/>
+          <path d="M18 2.2 C23.6 2.2 27.6 10.4 27.6 17 C27.6 23 23.4 27.4 18 27.4 C12.6 27.4 8.4 23 8.4 17 C8.4 10.4 12.4 2.2 18 2.2 Z" fill="none" stroke="#A87108" stroke-width="1" opacity=".55"/>
+          <ellipse cx="13.6" cy="10.8" rx="2.2" ry="4.2" transform="rotate(20 13.6 10.8)" fill="#FFFFFF" opacity=".85"/>
+          <path d="M29.6 3.2 l.7 1.8 1.8 .7 -1.8 .7 -.7 1.8 -.7 -1.8 -1.8 -.7 1.8 -.7 z" fill="#F0B020"/>
+        </svg>
+        <span id="gemCount">0</span>
+        <span class="vh">gems earned</span>
+      </p>
+    </header>
+
+    <main class="stage" id="stage" tabindex="-1"></main>
+    <footer class="site-foot">
+      <p><a href="../">&larr; Back to the Phonetics Lab</a></p>
+      <p>Created by <a href="https://mengyang.dev">Mengyang Qiu</a> in collaboration with Siena Sun. Built with the help of Claude (Anthropic) and GPT (OpenAI).</p>
+      <p class="foot-notice">Except where otherwise noted, original instructional content &copy; 2026 Mengyang Qiu and Siena Sun is licensed under <a href="https://creativecommons.org/licenses/by-nc/4.0/">CC BY-NC 4.0</a>. Site source code is licensed under the <a href="https://opensource.org/license/mit">MIT License</a>. Third-party media retain their original rights and licenses; see <a href="../../credits.html#phonetics">Credits</a>.</p>
+    </footer>
+  </div>
+</div>
+
+<script src="js/lab-art.js"></script>
+<script src="js/items.js"></script>
+<script src="js/lab-audio-manifest.js"></script>
+<script src="js/lab-engine.js"></script>
+<script src="js/lab-screens.js"></script>
+</body>
+</html>

@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Phonetics Lab 8: Listening Closely</title>
+<meta name="description" content="Phonetics Lab 8: find the main stress in ten words, and write five words exactly as they were said, speech errors included.">
+<link rel="stylesheet" href="css/lab.css">
+<style>
+  /* Lab 8's gem is a candy corn. The shared sheet's cyan stays the series default. */
+  :root{ --gem:#F2731B; --gem-lite:#FFE9D2; --gem-deep:#B04A08; }
+</style>
+<script>
+  window.LAB_MODE = "site";
+  // Draw affricates and diphthongs with a tie bar: /t͡ʃ/, /o͡ʊ/. Set false for the plain form.
+  window.LAB_TIE = true;
+  // This lab's gem: a candy corn, for Halloween week.
+  window.LAB_GEM = "candycorn";
+  // This lab's celebration: ghosts, and for full credit a skeleton dance, after the fireworks
+  // of Labs 1-2, Lab 3's balloons, Lab 4's confetti, Lab 5's dragon, Lab 6's Snake and Lab 7's bats.
+  window.LAB_FX = "ghosts";
+  window.LAB_META = {
+    course: "Phonetics",
+    lab: 8,
+    home: "../"
+  };
+</script>
+</head>
+<body>
+<a class="skip" href="#stage">Skip to the activity</a>
+
+
+<div class="lab">
+
+  <!-- ============ the path ============ -->
+  <aside class="rail" id="rail" aria-label="Your progress through the lab">
+    <div class="rail-head">
+      <span class="rail-course">Phonetics Lab 8</span>
+      <span class="rail-title">Listening Closely</span>
+    </div>
+    <div class="rail-scroll" id="railScroll">
+      <div class="path-wrap" id="pathWrap"></div>
+    </div>
+  </aside>
+  <div class="rail-scrim" id="railScrim"></div>
+
+  <!-- ============ everything else ============ -->
+  <div class="content">
+    <header class="hud">
+      <button type="button" class="map-btn" id="mapBtn" aria-expanded="false" aria-controls="rail">
+        &#9776; Map
+      </button>
+      <h1 class="hud-leg" id="hudLeg"><span class="leg-dot"></span><span>Listening Closely</span></h1>
+      <span class="hud-spacer"></span>
+      <button type="button" class="fx-btn" id="fxBtn" aria-pressed="true">
+        &#9834;<span class="vh">Effect sounds on</span>
+      </button>
+      <p class="gem-tally" id="gemTally">
+        <svg class="gem-ico" viewBox="0 0 36 28" aria-hidden="true" focusable="false">
+          <linearGradient id="gemHud" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#FFA24A"/><stop offset="1" stop-color="#F2731B"/>
+          </linearGradient>
+          <path d="M18 1.8 C19.7 1.8 21 3.1 22 5.3 L29.7 22.2 C30.8 24.6 29.5 26.7 26.6 26.9 C21 27.4 15 27.4 9.4 26.9 C6.5 26.7 5.2 24.6 6.3 22.2 L14 5.3 C15 3.1 16.3 1.8 18 1.8 Z" fill="url(#gemHud)"/>
+          <path d="M18 1.8 C19.7 1.8 21 3.1 22 5.3 L24.4 10.6 C20.2 11.6 15.8 11.6 11.6 10.6 L14 5.3 C15 3.1 16.3 1.8 18 1.8 Z" fill="#FFFBF2"/>
+          <path d="M7.8 19.2 C14.4 20.5 21.6 20.5 28.2 19.2 L29.7 22.2 C30.8 24.6 29.5 26.7 26.6 26.9 C21 27.4 15 27.4 9.4 26.9 C6.5 26.7 5.2 24.6 6.3 22.2 Z" fill="#FFD23F"/>
+          <path d="M13.2 8.6 C11.6 12.4 10.2 16.4 9.4 20.2" fill="none" stroke="#FFFFFF" stroke-width="1.5" stroke-linecap="round" opacity=".7"/>
+        </svg>
+        <span id="gemCount">0</span>
+        <span class="vh">gems earned</span>
+      </p>
+    </header>
+
+    <main class="stage" id="stage" tabindex="-1"></main>
+    <footer class="site-foot">
+      <p><a href="../">&larr; Back to the Phonetics Lab</a></p>
+      <p>Created by <a href="https://mengyang.dev">Mengyang Qiu</a> in collaboration with Siena Sun. Built with the help of Claude (Anthropic) and GPT (OpenAI).</p>
+      <p class="foot-notice">Except where otherwise noted, original instructional content &copy; 2026 Mengyang Qiu and Siena Sun is licensed under <a href="https://creativecommons.org/licenses/by-nc/4.0/">CC BY-NC 4.0</a>. Site source code is licensed under the <a href="https://opensource.org/license/mit">MIT License</a>. Third-party media retain their original rights and licenses; see <a href="../../credits.html#phonetics">Credits</a>.</p>
+    </footer>
+  </div>
+</div>
+
+<script src="js/lab-art.js"></script>
+<script src="js/items.js"></script>
+<script src="js/lab-audio-manifest.js"></script>
+<script src="js/lab-engine.js"></script>
+<script src="js/lab-screens.js"></script>
+</body>
+</html>

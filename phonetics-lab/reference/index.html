@@ -1,0 +1,1424 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<style>:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0;font:14px system-ui,sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>Phonological Processes Reference</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="description" content="Phonological processes for speech sound disorders: every process with its example lined up sound by sound, practice rounds, and what to expect by age.">
+<style>
+/* Layout: a field guide. A sticky bar switches three views; Explore is a family-banded index of
+   cards, each showing its change sound by sound; Practice is one question at a time; Age check is a
+   timeline and a consonant chart under one age slider. */
+:root{
+  --bg:#F5F6F8; --surface:#FFFFFF; --sunk:#ECEFF3; --ink:#17202B; --muted:#56616F; --faint:#8A94A1; --line:#DCE1E7;
+  --audio:#10857A; --audio-bg:#E3F4F1; --info:#2E6CB0; --info-bg:#E8F0FA; --warn:#B4600B; --warn-bg:#FCEFDD;
+  --good:#1F7A3E; --good-bg:#E5F4EA; --bad:#B3261E; --bad-bg:#FBE9E7;
+  --syl:#E2992F; --syl-deep:#8F560A; --syl-bg:#FDF2E0;
+  --sub:#5B62D6; --sub-deep:#363DA0; --sub-bg:#EDEEFC;
+  --asm:#D04F96; --asm-deep:#972D63; --asm-bg:#FBECF4;
+  --voi:#DD5F3D; --voi-deep:#9E371B; --voi-bg:#FCEBE5;
+  --vow:#8859C8; --vow-deep:#5A3496; --vow-bg:#F3EDFB;
+  --aty:#5D6B7B; --aty-deep:#36414D; --aty-bg:#DCE2EA;
+  --on:#FFFFFF; --syl-on:#2B1B03;
+  --yes:#2F4A7A; --yes-t:#FFFFFF; --now:#D6E0F2; --now-b:#2F4A7A; --hatch:rgba(23,32,43,.18);
+  --display:"Bricolage Grotesque", "Avenir Next", "Segoe UI", system-ui, sans-serif;
+  --body:"Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif;
+  --ipa:"Gentium Plus","Charis SIL","Doulos SIL",-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,Roboto,"Helvetica Neue",Arial,sans-serif;
+  --r:10px;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --bg:#11161D; --surface:#19202A; --sunk:#222A35; --ink:#E9EDF2; --muted:#A3AEBB; --faint:#748090; --line:#2E3845;
+  --audio:#43C2B3; --audio-bg:#123532; --info:#7DB3F0; --info-bg:#172A40; --warn:#F2A54E; --warn-bg:#3A2A14;
+  --good:#5FD08A; --good-bg:#16321F; --bad:#F2837A; --bad-bg:#3A1C1A;
+  --syl:#EFB24F; --syl-deep:#F6CD85; --syl-bg:#3A2C14;
+  --sub:#8D93F0; --sub-deep:#BCC0F8; --sub-bg:#22254A;
+  --asm:#E676B2; --asm-deep:#F4AAD0; --asm-bg:#3D1E30;
+  --voi:#EF8263; --voi-deep:#F7B29D; --voi-bg:#3E2119;
+  --vow:#AF88E6; --vow-deep:#CFB6F2; --vow-bg:#2D2242;
+  --aty:#9AA8B8; --aty-deep:#C9D2DC; --aty-bg:#303A47; --yes:#9DB4DC; --yes-t:#0F151D; --now:#2A3A56; --now-b:#9DB4DC; --hatch:rgba(233,237,242,.16); --on:#11161D; --syl-on:#11161D; color-scheme:dark }}
+:root[data-theme="dark"]{
+  --bg:#11161D; --surface:#19202A; --sunk:#222A35; --ink:#E9EDF2; --muted:#A3AEBB; --faint:#748090; --line:#2E3845;
+  --audio:#43C2B3; --audio-bg:#123532; --info:#7DB3F0; --info-bg:#172A40; --warn:#F2A54E; --warn-bg:#3A2A14;
+  --good:#5FD08A; --good-bg:#16321F; --bad:#F2837A; --bad-bg:#3A1C1A;
+  --syl:#EFB24F; --syl-deep:#F6CD85; --syl-bg:#3A2C14;
+  --sub:#8D93F0; --sub-deep:#BCC0F8; --sub-bg:#22254A;
+  --asm:#E676B2; --asm-deep:#F4AAD0; --asm-bg:#3D1E30;
+  --voi:#EF8263; --voi-deep:#F7B29D; --voi-bg:#3E2119;
+  --vow:#AF88E6; --vow-deep:#CFB6F2; --vow-bg:#2D2242;
+  --aty:#9AA8B8; --aty-deep:#C9D2DC; --aty-bg:#303A47; --yes:#9DB4DC; --yes-t:#0F151D; --now:#2A3A56; --now-b:#9DB4DC; --hatch:rgba(233,237,242,.16); --on:#11161D; --syl-on:#11161D; color-scheme:dark }
+
+*{ box-sizing:border-box }
+html{ -webkit-text-size-adjust:100% }
+body{ background:var(--bg); color:var(--ink); font-family:var(--body); font-size:clamp(15.5px, 15px + .2vw, 17px); line-height:1.55 }
+body::before{ content:""; position:fixed; inset:0 0 auto; height:env(safe-area-inset-top, 0px); z-index:10; background:var(--surface) }
+.wrap{ max-width:1180px; margin:0 auto; padding-left:max(16px, env(safe-area-inset-left, 0px)); padding-right:max(16px, env(safe-area-inset-right, 0px)) }
+h1,h2,h3{ font-family:var(--display); font-weight:700; line-height:1.15; text-wrap:balance; margin:0 }
+h1{ font-size:clamp(1.9rem, 1.4rem + 2vw, 2.8rem); letter-spacing:-.01em }
+h2{ font-size:clamp(1.3rem, 1.1rem + .8vw, 1.65rem) }
+h3{ font-size:1.12rem }
+p{ margin:0 }
+.ipa{ font-family:var(--ipa); font-feature-settings:"kern" 1 }
+button{ font:inherit; color:inherit }
+:focus-visible{ outline:3px solid var(--info); outline-offset:2px; border-radius:6px }
+.eyebrow{ font-family:var(--body); font-weight:700; font-size:.72rem; letter-spacing:.12em; text-transform:uppercase; color:var(--muted) }
+
+/* ---------- top bar */
+header.top{ position:sticky; top:env(safe-area-inset-top, 0px); z-index:9; background:var(--surface); border-bottom:1px solid var(--line) }
+header.top .wrap{ display:flex; align-items:center; justify-content:space-between; gap:12px; padding-block:10px; flex-wrap:wrap }
+.brand{ display:flex; align-items:baseline; gap:10px; min-width:0 }
+.brand b{ font-family:var(--display); font-size:1.05rem }
+.brand span{ color:var(--muted); font-size:.85rem }
+.tabs{ display:flex; gap:4px; background:var(--sunk); padding:4px; border-radius:999px }
+.tabs a{ text-decoration:none; color:var(--muted); font-weight:700; font-size:.92rem; padding:7px 14px; border-radius:999px; white-space:nowrap }
+.tabs a[aria-current="page"]{ background:var(--surface); color:var(--ink); box-shadow:0 1px 3px rgba(0,0,0,.12) }
+@media (max-width:560px){ .brand span{ display:none } .tabs{ width:100% } .tabs a{ flex:1; text-align:center; padding:7px 6px } }
+
+main{ padding-block:24px 40px }
+.nojs{ margin:0 0 20px; background:var(--info-bg); color:var(--ink); border-radius:10px; padding:12px 14px; font-size:1rem }
+.nojs b{ color:var(--info) }
+.view[hidden]{ display:none }
+.lede{ max-width:62ch; color:var(--muted); margin-top:10px; font-size:1.03rem }
+
+/* ---------- families */
+.f-syl{ --fc:var(--syl); --fd:var(--syl-deep); --fb:var(--syl-bg); --fo:var(--syl-on) }
+.f-sub{ --fo:var(--on); --fc:var(--sub); --fd:var(--sub-deep); --fb:var(--sub-bg) }
+.f-asm{ --fo:var(--on); --fc:var(--asm); --fd:var(--asm-deep); --fb:var(--asm-bg) }
+.f-voi{ --fo:var(--on); --fc:var(--voi); --fd:var(--voi-deep); --fb:var(--voi-bg) }
+.f-vow{ --fo:var(--on); --fc:var(--vow); --fd:var(--vow-deep); --fb:var(--vow-bg) }
+.f-aty{ --fo:var(--on); --fc:var(--aty); --fd:var(--aty-deep); --fb:var(--aty-bg) }
+.swatch{ display:inline-block; width:.8em; height:.8em; border-radius:3px; background:var(--fc); flex:none }
+
+/* ---------- the guide */
+.guide{ margin-top:26px; background:var(--surface); border:1px solid var(--line); border-radius:14px; padding:18px 18px 16px }
+.guide h2{ font-size:1.15rem }
+.guide p.sub{ color:var(--muted); font-size:.92rem; margin-top:4px }
+.steps{ list-style:none; margin:14px 0 0; padding:0; display:grid; grid-template-columns:repeat(5, minmax(0,1fr)); gap:10px; counter-reset:st }
+.steps li{ counter-increment:st; position:relative; padding:12px 12px 12px; border-radius:10px; background:var(--fb); min-width:0; display:flex; flex-direction:column }
+.steps li::before{ content:counter(st); position:absolute; top:10px; right:12px; font-family:var(--display); font-weight:700; color:var(--fd); opacity:.55; font-size:1.3rem; line-height:1 }
+.steps .q{ font-weight:700; padding-right:22px; display:block }
+.steps .h{ color:var(--muted); font-size:.86rem; display:block; margin-top:4px }
+.steps a{ display:inline-flex; align-items:center; gap:6px; margin-top:auto; padding-top:10px; color:var(--fd); font-weight:700; font-size:.85rem; text-decoration:none; align-self:flex-start }
+.steps a:hover{ text-decoration:underline }
+.guide .also{ margin-top:12px; font-size:.88rem; color:var(--muted) }
+@media (max-width:900px){ .steps{ grid-template-columns:1fr 1fr } }
+@media (max-width:520px){ .steps{ grid-template-columns:1fr } }
+
+/* ---------- filters */
+.filters{ position:sticky; top:calc(env(safe-area-inset-top, 0px) + var(--topH, 58px)); z-index:5; margin-top:22px; background:var(--bg); padding-block:10px; display:flex; flex-wrap:wrap; gap:8px; align-items:center }
+.chip{ display:inline-flex; align-items:center; gap:7px; border:1px solid var(--line); background:var(--surface); border-radius:999px; padding:6px 12px; font-size:.88rem; font-weight:700; cursor:pointer; color:var(--ink) }
+.chip[aria-pressed="true"]{ background:var(--ink); color:var(--surface); border-color:var(--ink) }
+.chip[aria-pressed="true"] .swatch{ outline:2px solid var(--surface) }
+.search{ margin-left:auto; flex:1 1 200px; max-width:280px; min-width:0 }
+.search input{ width:100%; border:1px solid var(--line); background:var(--surface); color:var(--ink); border-radius:999px; padding:8px 14px; font:inherit; font-size:.92rem }
+@media (max-width:640px){ .search{ margin-left:0; max-width:none; flex-basis:100% } .filters{ position:static } }
+
+/* ---------- explore: the names down the side, one process beside them */
+.tag{ font-size:.72rem; font-weight:700; letter-spacing:.06em; text-transform:uppercase; padding:2px 8px; border-radius:999px; background:var(--fb); color:var(--fd); white-space:nowrap }
+.tag.age{ background:var(--sunk); color:var(--muted); text-transform:none; letter-spacing:0; font-size:.78rem }
+.tag.atyp{ background:var(--aty-bg); color:var(--aty-deep); background-image:repeating-linear-gradient(135deg, transparent 0 5px, rgba(127,127,127,.14) 5px 7px) }
+.aka{ color:var(--muted); font-size:.88rem; font-style:italic; margin-top:2px }
+.def{ margin-top:6px }
+.agenote{ margin-top:6px; font-size:.86rem; color:var(--muted) }
+.watch{ margin-top:12px; font-size:.88rem; background:var(--warn-bg); color:var(--ink); border-radius:8px; padding:8px 10px }
+.watch b{ color:var(--warn) }
+.ex{ margin-top:12px; padding-top:12px; border-top:1px dashed var(--line) }
+.ex-h{ display:flex; flex-wrap:wrap; align-items:baseline; gap:6px 10px }
+.ex-h .w{ font-style:italic; font-weight:700 }
+.ex-h .forms{ font-family:var(--ipa); font-size:1.08rem }
+.ex-h .forms .arr{ color:var(--faint); margin:0 .3em; font-family:var(--body) }
+.change{ margin-top:8px; font-size:.9rem; color:var(--muted) }
+.change b{ color:var(--fd) }
+.empty{ margin-top:30px; color:var(--muted) }
+
+.split{ display:grid; grid-template-columns:280px minmax(0,1fr); gap:20px; margin-top:16px; align-items:start; scroll-margin-top:calc(var(--topH, 58px) + var(--filtH, 52px) + 12px) }
+.index{ position:sticky; top:calc(env(safe-area-inset-top, 0px) + var(--topH, 58px) + var(--filtH, 52px) + 8px); max-height:calc(100vh - var(--topH, 58px) - var(--filtH, 52px) - 24px); overflow-y:auto; background:var(--surface); border:1px solid var(--line); border-radius:var(--r); padding:6px 8px 10px; overscroll-behavior:contain }
+.ix-group h3{ display:flex; align-items:center; gap:7px; font-family:var(--body); font-size:.72rem; text-transform:uppercase; letter-spacing:.1em; color:var(--fd); padding:12px 10px 4px }
+.ix-group ul{ list-style:none; margin:0; padding:0 }
+.ix{ width:100%; text-align:left; border:0; background:none; padding:6px 10px; border-radius:7px; cursor:pointer; font-size:.92rem; color:var(--ink); display:flex; justify-content:space-between; gap:6px; align-items:baseline; line-height:1.3 }
+@media (hover:hover){ .ix:hover{ background:var(--sunk) } }
+.ix[aria-current="true"]{ background:var(--fb); color:var(--fd); font-weight:700; box-shadow:inset 3px 0 0 var(--fc) }
+.ix-aty{ font-size:.66rem; color:var(--faint); text-transform:uppercase; letter-spacing:.06em; font-weight:700 }
+.pane{ background:var(--surface); border:1px solid var(--line); border-radius:var(--r); padding:20px 26px 18px; min-height:420px; min-width:0 }
+.pane .back{ display:none }
+.detail .d-top{ display:flex; flex-wrap:wrap; gap:6px 10px; align-items:center }
+.famlab{ display:inline-flex; align-items:center; gap:6px; font-size:.8rem; font-weight:700; color:var(--fd); margin-right:4px }
+.d-name{ font-size:clamp(1.4rem, 1.2rem + .8vw, 1.75rem); margin-top:8px }
+.detail .def{ font-size:1.02rem }
+.d-pairs{ margin-top:16px; padding-top:12px; border-top:1px solid var(--line) }
+.d-pairs h4{ margin:0; font-size:.74rem; letter-spacing:.1em; text-transform:uppercase; color:var(--muted) }
+.d-pairs ul{ list-style:none; padding:0; margin:8px 0 0; display:grid; gap:8px }
+.d-pairs li{ font-size:.9rem; color:var(--muted); padding-left:10px; border-left:3px solid var(--fc) }
+.d-pairs a{ font-weight:700; color:var(--ink) }
+.famnote{ margin-top:16px; padding:10px 12px; border-radius:8px; background:var(--sunk); font-size:.85rem; color:var(--muted) }
+.famnote > b:first-child{ color:var(--fd) }
+.famnote a{ color:var(--ink) }
+.pane-nav{ display:flex; justify-content:space-between; gap:10px; margin-top:20px; padding-top:14px; border-top:1px solid var(--line) }
+.pane-nav .btn{ font-size:.86rem; max-width:48%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap }
+@media (max-width:760px){
+  .split{ grid-template-columns:minmax(0,1fr) }
+  .index{ position:static; max-height:none }
+  .split.picked .index, .split:not(.picked) .pane{ display:none }
+  .split:not(.picked) .ix[aria-current="true"]{ background:none; color:var(--ink); font-weight:400; box-shadow:none }
+  .pane{ padding:14px 16px; min-height:0 }
+  .pane .back{ display:inline-flex; border:0; background:var(--sunk); color:var(--ink); border-radius:999px; padding:6px 14px; font-weight:700; font-size:.88rem; cursor:pointer; margin-bottom:12px }
+  .pane .back::before{ content:"‹ "; white-space:pre }
+}
+
+/* ---------- the alignment */
+.al{ display:flex; gap:3px; margin-top:10px; overflow-x:auto; padding-bottom:10px; align-items:stretch }
+@media (max-width:420px){ .cell{ min-width:1.6em; padding:0 .2em; font-size:1rem } .al .lab{ padding-right:3px; font-size:.6rem } }
+.al .lab{ display:flex; flex-direction:column; justify-content:space-around; gap:3px; padding-right:6px; font-size:.68rem; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--faint) }
+.al .lab span{ height:2.1em; display:flex; align-items:center }
+.col{ display:flex; flex-direction:column; gap:3px; border:0; background:none; padding:0; border-radius:8px; flex:none }
+.cell{ min-width:2.1em; height:2.1em; padding:0 .35em; display:flex; align-items:center; justify-content:center; font-family:var(--ipa); font-size:1.12rem; border-radius:6px; background:var(--sunk); color:var(--ink) }
+.cell.top{ color:var(--muted) }
+.cell.gap{ background:transparent; border:1.5px dashed var(--line); color:transparent }
+.col.ch .cell{ background:var(--fb); }
+.col.ch .cell.bot{ background:var(--fc); color:var(--fo); font-weight:700 }
+.col.ch .cell.gap{ background:transparent; border-color:var(--fc) }
+.al.neutral .col.ch .cell{ background:var(--sunk); box-shadow:inset 0 0 0 2px var(--ink) }
+.al.neutral .col.ch .cell.bot{ background:var(--sunk); color:var(--ink); font-weight:700 }
+.al.neutral .col.ch .cell.gap{ background:transparent; box-shadow:none; border-color:var(--ink) }
+.col.trig .cell{ outline:2px dashed var(--fc); outline-offset:-2px }
+
+button.col{ cursor:pointer; position:relative }
+button.col.ch::after{ content:""; position:absolute; left:50%; bottom:-7px; width:6px; height:6px; margin-left:-3px; border-radius:50%; background:var(--audio) }
+button.col:hover .cell{ outline:2px solid var(--audio); outline-offset:-2px }
+button.col.playing .cell{ outline:2px solid var(--audio); outline-offset:-2px }
+.al-wrap{ position:relative }
+.hear-hint{ margin-top:10px; font-size:.78rem; color:var(--audio); display:flex; align-items:center; gap:6px }
+.hear-hint::before{ content:""; width:6px; height:6px; border-radius:50%; background:var(--audio) }
+
+/* the place strip and the vowel chart */
+.viz{ margin-top:10px; max-width:100% }
+.viz svg{ display:block; width:100%; height:auto; max-width:400px }
+.viz text{ font-family:var(--body); font-size:11.5px; fill:var(--muted) }
+.viz .tick{ stroke:var(--line); stroke-width:1.5 }
+.viz .rail{ stroke:var(--line); stroke-width:3; stroke-linecap:round }
+.viz .from{ fill:var(--surface); stroke:var(--fd); stroke-width:2 }
+.viz .to{ fill:var(--fc); stroke:var(--fd); stroke-width:1 }
+.viz .arrow{ stroke:var(--fd); stroke-width:2; fill:none }
+.viz .head{ fill:var(--fd) }
+.viz .trap{ fill:var(--sunk); stroke:var(--line); stroke-width:1.5 }
+.viz .sym{ font-family:var(--ipa); font-size:15px; fill:var(--ink) }
+.viz .sym.on{ fill:var(--fo) }
+.viz .glide{ stroke:var(--fd); stroke-width:2; stroke-dasharray:4 3; fill:none }
+.viz .from.dropped{ stroke-dasharray:3 2; fill:var(--surface) }
+
+/* ---------- practice */
+.prac{ max-width:720px; margin:0 auto }
+.sets{ display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:18px }
+@media (max-width:520px){ .sets{ grid-template-columns:1fr } }
+.set{ position:relative; text-align:left; border:1.5px solid var(--line); background:var(--surface); border-radius:12px; padding:12px 14px 12px 42px; cursor:pointer; display:grid; gap:2px }
+.set::before{ content:""; position:absolute; left:14px; top:15px; width:16px; height:16px; border-radius:50%; border:2px solid var(--faint); box-sizing:border-box }
+.set b{ font-family:var(--display); font-size:1.02rem }
+.set span{ color:var(--muted); font-size:.88rem }
+.set[aria-pressed="true"]{ border-color:var(--ink); box-shadow:0 0 0 1px var(--ink) }
+.set[aria-pressed="true"]::before{ border-color:var(--ink); background:radial-gradient(circle, var(--ink) 0 4px, transparent 4.5px) }
+.scope{ display:inline-flex; align-items:center; gap:8px; font-weight:700; font-size:.9rem }
+.scope[hidden]{ display:none }
+.prac-bar{ display:flex; flex-wrap:wrap; gap:10px; align-items:center; margin-top:14px; min-height:2.3em }
+.seg{ display:inline-flex; background:var(--sunk); border-radius:999px; padding:4px; gap:4px }
+.seg button{ border:0; background:none; padding:7px 14px; border-radius:999px; font-weight:700; color:var(--muted); cursor:pointer; font-size:.9rem }
+.seg button[aria-pressed="true"]{ background:var(--surface); color:var(--ink); box-shadow:0 1px 3px rgba(0,0,0,.12) }
+select{ font:inherit; font-size:.9rem; padding:7px 10px; border-radius:8px; border:1px solid var(--line); background:var(--surface); color:var(--ink) }
+.progress{ margin-left:auto; font-size:.88rem; color:var(--muted); font-variant-numeric:tabular-nums }
+.qcard{ margin-top:16px; background:var(--surface); border:1px solid var(--line); border-radius:14px; padding:20px }
+.qcard .prompt{ font-size:1.05rem; font-weight:700 }
+.qcard .word{ font-family:var(--display); font-size:1.7rem; font-weight:700; margin-top:6px }
+.qcard .forms{ font-family:var(--ipa); font-size:1.5rem; margin-top:2px }
+.qcard .forms .arr{ color:var(--faint); margin:0 .35em; font-family:var(--body) }
+.reveal-btn{ margin-top:12px; border:1px dashed var(--line); background:none; border-radius:8px; padding:6px 12px; color:var(--muted); cursor:pointer; font-weight:700; font-size:.88rem }
+.opts{ display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:18px }
+@media (max-width:520px){ .opts{ grid-template-columns:1fr } }
+.opt{ text-align:left; border:1.5px solid var(--line); background:var(--surface); border-radius:10px; padding:12px 14px; cursor:pointer; font-weight:700; display:flex; gap:10px; align-items:center }
+.opt:hover:not([disabled]){ border-color:var(--ink) }
+.opt .k{ font-size:.75rem; color:var(--faint); border:1px solid var(--line); border-radius:5px; padding:0 5px; font-weight:700 }
+.opt[disabled]{ cursor:default }
+.opt.right{ border-color:var(--good); background:var(--good-bg) }
+.opt.wrong{ border-color:var(--bad); background:var(--bad-bg) }
+.fb{ margin-top:16px; border-radius:10px; padding:14px 16px; display:grid; gap:8px }
+.fb.good{ background:var(--good-bg) }
+.fb.bad{ background:var(--bad-bg) }
+.fb .verdict{ font-weight:700; font-size:1.05rem }
+.fb.good .verdict{ color:var(--good) }
+.fb.bad .verdict{ color:var(--bad) }
+.fb .line{ font-size:.94rem }
+.fb .line b{ font-weight:700 }
+.fb .guide-line{ font-size:.9rem; color:var(--muted) }
+.dir{ display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin-top:2px }
+.dir .q{ font-weight:700; font-size:.94rem; margin-right:4px }
+.dir button{ border:1.5px solid var(--line); background:var(--surface); border-radius:8px; padding:6px 10px; cursor:pointer; font-size:.88rem; font-weight:700 }
+.dir button.right{ border-color:var(--good) } .dir button.wrong{ border-color:var(--bad) }
+.actions{ display:flex; gap:10px; margin-top:16px; flex-wrap:wrap }
+.btn{ border:0; background:var(--ink); color:var(--surface); border-radius:10px; padding:10px 18px; font-weight:700; cursor:pointer }
+.btn.ghost{ background:var(--sunk); color:var(--ink) }
+.summary h2{ font-size:1.5rem }
+.summary ul{ padding-left:1.1em; margin:10px 0 0 }
+.summary li{ margin-top:4px }
+.summary a{ color:var(--ink); font-weight:700 }
+
+/* ---------- age check */
+.agebar{ margin-top:18px; background:var(--surface); border:1px solid var(--line); border-radius:14px; padding:16px 18px; display:grid; grid-template-columns:auto 1fr; gap:6px 22px; align-items:center }
+.agebar .age{ font-family:var(--display); font-size:2.6rem; font-weight:700; line-height:1; font-variant-numeric:tabular-nums }
+.agebar .age small{ display:block; font-family:var(--body); font-size:.82rem; color:var(--muted); font-weight:400; margin-top:4px }
+.agebar label{ display:block; font-size:.95rem; color:var(--muted) }
+.agebar label b{ color:var(--ink) }
+.agebar input[type=range]{ -webkit-appearance:none; appearance:none; display:block; width:100%; height:30px; margin:6px 0 0; background:transparent; cursor:pointer }
+.agebar input[type=range]::-webkit-slider-runnable-track{ height:8px; border-radius:999px; background:linear-gradient(90deg, var(--ink) var(--fill, 33%), var(--sunk) var(--fill, 33%)) }
+.agebar input[type=range]::-webkit-slider-thumb{ -webkit-appearance:none; width:26px; height:26px; margin-top:-9px; border-radius:50%; background:var(--surface); border:3px solid var(--ink); box-shadow:0 1px 5px rgba(0,0,0,.3) }
+.agebar input[type=range]::-moz-range-track{ height:8px; border-radius:999px; background:var(--sunk) }
+.agebar input[type=range]::-moz-range-progress{ height:8px; border-radius:999px; background:var(--ink) }
+.agebar input[type=range]::-moz-range-thumb{ width:20px; height:20px; border-radius:50%; background:var(--surface); border:3px solid var(--ink); box-shadow:0 1px 5px rgba(0,0,0,.3) }
+.agebar input[type=range]:focus-visible{ outline:2px solid var(--info); outline-offset:3px; border-radius:8px }
+.agebar .scale{ display:flex; justify-content:space-between; font-size:.78rem; color:var(--faint); font-variant-numeric:tabular-nums; padding:0 4px }
+@media (max-width:520px){ .agebar{ grid-template-columns:1fr } }
+.two{ display:grid; grid-template-columns:minmax(0,1.25fr) minmax(0,1fr); gap:18px; margin-top:18px; align-items:start }
+@media (max-width:900px){ .two{ grid-template-columns:minmax(0,1fr) } }
+.panel{ background:var(--surface); border:1px solid var(--line); border-radius:14px; padding:16px 18px; min-width:0 }
+.panel h2{ font-size:1.15rem }
+.panel .sub{ color:var(--muted); font-size:.9rem; margin-top:4px }
+.tl{ margin-top:14px; position:relative }
+.tl-row{ display:grid; grid-template-columns:minmax(0, 13.5em) minmax(0,1fr) 7.6em; gap:10px; align-items:center; padding:5px 0; border-bottom:1px solid var(--line) }
+.tl-row:last-child{ border-bottom:0 }
+.tl-name{ font-size:.88rem; font-weight:700; min-width:0 }
+.tl-name a{ color:var(--ink); text-decoration:none }
+.tl-name a:hover{ text-decoration:underline }
+.tl-name small{ display:block; font-weight:400; color:var(--muted); font-family:var(--ipa); font-size:.86rem }
+.track{ position:relative; height:14px; background:var(--sunk); border-radius:999px }
+.bar{ position:absolute; top:0; bottom:0; left:0; border-radius:999px; background:var(--fc) }
+.bar .fade{ position:absolute; top:0; bottom:0; border-radius:0 999px 999px 0; background:linear-gradient(90deg, var(--fc), transparent) }
+.status{ font-size:.76rem; font-weight:700; padding:3px 8px; border-radius:999px; text-align:center; white-space:nowrap }
+.status.gone{ background:var(--warn-bg); color:var(--warn) }
+.status.going{ background:var(--sunk); color:var(--muted); border:1px dashed var(--faint) }
+.status.common{ background:var(--sunk); color:var(--muted) }
+.tl-axis{ display:grid; grid-template-columns:minmax(0, 13.5em) minmax(0,1fr) 7.6em; gap:10px; margin-top:4px }
+.axlab{ font-size:.74rem; font-weight:700; color:var(--muted); text-align:right; line-height:16px }
+.ticks{ position:relative; height:16px; font-size:.74rem; color:var(--faint); font-variant-numeric:tabular-nums }
+.ticks span{ position:absolute; transform:translateX(-50%) }
+.now{ position:absolute; top:0; bottom:0; width:2px; background:var(--ink); pointer-events:none; border-radius:2px }
+.now::before{ content:""; position:absolute; top:-5px; left:-4px; width:10px; height:10px; border-radius:50%; background:var(--ink) }
+@media (max-width:560px){
+  .tl-row, .tl-axis{ grid-template-columns:minmax(0,1fr) 6.6em; }
+  .tl-row .tl-name{ grid-column:1 / -1 }
+  .tl-axis .axlab{ order:2; text-align:left }
+  .tl-axis > span:last-child{ display:none }
+}
+.callout{ margin-top:14px; background:var(--info-bg); border-radius:10px; padding:12px 14px; font-size:.9rem }
+.callout b{ color:var(--info) }
+.callout ul{ margin:6px 0 0; padding-left:1.1em }
+.atyp-list{ margin-top:12px; font-size:.88rem; color:var(--muted) }
+.atyp-list a{ color:var(--ink) }
+.cons{ margin-top:12px; overflow-x:auto }
+.cons table{ border-collapse:separate; border-spacing:3px; font-size:.82rem }
+@media (max-width:560px){
+  .cons table{ border-spacing:2px }
+  .cons thead th{ vertical-align:bottom; padding:0 }
+  .cons thead th span{ writing-mode:vertical-rl; transform:rotate(180deg); white-space:nowrap; font-size:.66rem; display:inline-block }
+  .cons tbody th{ font-size:.66rem; padding-right:2px }
+  .cons .cbtn{ flex-direction:column; align-items:center; gap:2px }
+  .cons .cb{ min-width:1.95em; height:1.95em; font-size:.95rem; padding:0 .2em }
+  .cons .cb sup{ font-size:.5rem; top:1px; right:2px }
+}
+.cons th{ font-weight:700; color:var(--faint); text-align:left; font-size:.72rem; letter-spacing:.02em; padding:0 2px; white-space:nowrap }
+.cons td{ padding:0 }
+.cbtn{ display:flex; gap:3px; flex-wrap:wrap }
+/* one colour, three looks: dark = most children have it, pale = being acquired this year, hatched = not
+   expected yet; the corner number is the year most children have it by (Shriberg: E, M, L) */
+.cb{ position:relative; min-width:2.2em; height:2.2em; display:inline-flex; align-items:center; justify-content:center; font-family:var(--ipa); font-size:1.08rem; border-radius:7px; border:1.5px solid transparent; cursor:pointer; background:var(--sunk); color:var(--ink); padding:0 .3em }
+span.cb{ cursor:default }
+.cb sup{ position:absolute; top:2px; right:3px; font-family:var(--body); font-size:.56rem; font-weight:700; line-height:1; opacity:.85 }
+.cb.s-yes{ background:var(--yes); color:var(--yes-t); border-color:var(--yes) }
+.cb.s-now{ background:var(--now); color:var(--ink); border-color:var(--now-b) }
+.cb.s-later{ background:var(--surface); color:var(--muted); border-color:var(--line); background-image:repeating-linear-gradient(135deg, transparent 0 4px, var(--hatch) 4px 6px) }
+.cb.s-plain{ background:var(--sunk); color:var(--ink); border-color:var(--sunk) }
+.legend{ display:flex; flex-wrap:wrap; gap:8px 14px; margin-top:10px; font-size:.8rem; color:var(--muted) }
+.legend span{ display:inline-flex; align-items:center; gap:6px }
+.legend i{ display:inline-block; width:16px; height:16px; border-radius:4px; border:1.5px solid transparent; flex:none }
+.legend i.s-yes{ background:var(--yes); border-color:var(--yes) }
+.legend i.s-now{ background:var(--now); border-color:var(--now-b) }
+.legend i.s-later{ background:var(--surface); border-color:var(--line); background-image:repeating-linear-gradient(135deg, transparent 0 3px, var(--hatch) 3px 5px) }
+.legend i.num{ width:auto; height:auto; border:0; font-style:normal; font-weight:700; font-size:.74rem; color:var(--ink) }
+.groups{ margin-top:12px; display:grid; grid-template-columns:auto auto minmax(0,1fr); gap:6px 14px; align-items:center; font-size:.88rem }
+.groups.noage{ grid-template-columns:auto minmax(0,1fr) }
+.gtag{ grid-column:1; align-self:stretch; display:flex; align-items:center; justify-content:center; padding:4px 12px; border-radius:8px; border:1.5px solid var(--line); background:var(--surface); color:var(--ink); font-size:.8rem; font-weight:700; white-space:nowrap }
+.gage{ grid-column:2; white-space:nowrap; color:var(--muted); font-variant-numeric:tabular-nums }
+.gset{ grid-column:3; font-family:var(--ipa); font-size:1.02rem }
+.noage .gset{ grid-column:2 }
+@media (max-width:420px){ .groups{ gap:6px 9px } .gtag{ padding:4px 7px; font-size:.74rem } .gset{ font-size:.96rem } }
+
+/* ---------- footer */
+/* the page fills at least the screen, so the footer sits at the bottom even on a short view */
+body{ min-height:calc(100vh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px)); display:flex; flex-direction:column }
+main.wrap{ flex:1 0 auto; width:100% }
+footer{ flex:none; background:var(--surface); border-top:1px solid var(--line); color:var(--muted); font-size:.84rem; padding-block:18px 22px }
+footer h2{ font-size:1rem; color:var(--ink) }
+footer ul{ padding-left:1.1em; margin:8px 0 0; display:grid; gap:4px }
+footer a{ color:var(--ink) }
+footer .foot-back{ margin:0 0 12px }
+footer .foot-credit{ margin:12px 0 0; max-width:none }
+footer .foot-notice{ margin:6px 0 0; font-size:.8rem }
+
+@media (prefers-reduced-motion: reduce){ *{ transition:none !important; scroll-behavior:auto !important } }
+</style>
+
+</head>
+<body>
+<header class="top" id="top">
+  <div class="wrap">
+    <div class="brand"><b>Phonological Processes</b><span>Speech sound disorders</span></div>
+    <nav class="tabs" aria-label="Views">
+      <a href="#explore" data-view="explore">Explore</a>
+      <a href="#age" data-view="age">Age check</a>
+      <a href="#practice" data-view="practice">Practice</a>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+  <noscript><p class="nojs"><b>Open this page in a web browser.</b> You are seeing a preview, which shows the text but does not run the page. Open the file in Safari, Chrome or another browser to use the reference, the practice and the age check.</p></noscript>
+  <!-- ======================================================== explore -->
+  <section class="view" id="v-explore" aria-labelledby="h-explore">
+    <p class="eyebrow">Reference</p>
+    <h1 id="h-explore">Phonological processes</h1>
+    <p class="lede">Every process, with its example lined up sound by sound: the adult form on top, the child's form below, the change in color. Tap a colored column to hear the sounds that changed. In assimilation, a dashed outline marks the sound that was copied.</p>
+
+    <div class="guide" aria-labelledby="h-guide">
+      <h2 id="h-guide">Naming a change: ask in this order</h2>
+      <p class="sub">The first question that gets a yes tells you the family.</p>
+      <ol class="steps" id="steps"></ol>
+      <p class="also">Any of these can also be <b>atypical</b>: a pattern not usually seen in typical development.</p>
+    </div>
+
+    <div class="filters" id="filters" role="toolbar" aria-label="Show">
+      <div class="search"><label class="eyebrow" for="q" hidden>Search</label><input id="q" type="search" placeholder="Search a process, word or sound" autocomplete="off"></div>
+    </div>
+    <div id="fams"></div>
+    <p class="empty" id="empty" hidden>Nothing matches. Try a process name, a word such as <i>duck</i>, or a sound such as ɹ.</p>
+  </section>
+
+  <!-- ======================================================== practice -->
+  <section class="view prac" id="v-practice" aria-labelledby="h-practice" hidden>
+    <p class="eyebrow">Practice</p>
+    <h1 id="h-practice">Test yourself</h1>
+    <p class="lede">Pick one of two practice sets. Each round is up to ten quick questions: giving the answer yourself, then checking, is what makes it stick.</p>
+    <div class="sets" role="group" aria-label="Practice set">
+      <button type="button" class="set" id="m-name" aria-pressed="true"><b>Name the process</b><span>See a word and the child's form, then pick the process that changed it.</span></button>
+      <button type="button" class="set" id="m-age" aria-pressed="false"><b>Know the ages</b><span>See a process, then pick the age by which it is usually gone.</span></button>
+    </div>
+    <div class="prac-bar">
+      <label class="scope" for="scope">Questions from <select id="scope"></select></label>
+      <span class="progress" id="progress" aria-live="polite"></span>
+    </div>
+    <div id="qhost"></div>
+  </section>
+
+  <!-- ======================================================== age -->
+  <section class="view" id="v-age" aria-labelledby="h-age" hidden>
+    <p class="eyebrow">Age check</p>
+    <h1 id="h-age">What to expect at a given age</h1>
+    <div class="agebar">
+      <div class="age" id="ageOut" aria-live="polite">4;0<small>4 years, 0 months</small></div>
+      <div>
+        <label for="ageIn"><b>Drag the slider to set a child's age</b> and see which processes are usually gone by then and which consonants most children have.</label>
+        <input id="ageIn" type="range" min="24" max="96" step="3" value="48">
+        <div class="scale"><span>2;0</span><span>3;0</span><span>4;0</span><span>5;0</span><span>6;0</span><span>7;0</span><span>8;0</span></div>
+      </div>
+    </div>
+    <div class="two">
+      <div class="panel">
+        <h2>Processes and the age they usually go</h2>
+        <p class="sub">Each bar runs until the age by which the process is usually gone.</p>
+        <div class="tl" id="tl"></div>
+        <div class="callout">
+          <b>Use these ages as guidelines, not cutoffs.</b>
+          <ul>
+            <li>A process still there past its age is a reason to look closer. On its own it does not show a speech sound disorder.</li>
+            <li>Weigh the child's intelligibility, dialect, whole sound system and how consistent the errors are.</li>
+            <li>Children who speak more than one language or dialect may use patterns from them. Dialect differences are not errors.</li>
+          </ul>
+        </div>
+        <p class="atyp-list" id="atypList"></p>
+      </div>
+      <div class="panel">
+        <h2>Consonants</h2>
+        <div class="seg" role="group" aria-label="Which study" style="margin-top:10px">
+          <button type="button" id="c-cm" aria-pressed="true">Crowe &amp; McLeod (2020)</button>
+          <button type="button" id="c-sh" aria-pressed="false">Shriberg (1993)</button>
+        </div>
+        <p class="sub" id="consNote"></p>
+        <div class="cons" id="cons"></div>
+        <div class="legend" id="legend"></div>
+        <div class="groups" id="groups"></div>
+        <p class="sub" style="margin-top:12px">The process ages and these consonant ages come from different studies with different criteria. A child can stop using a pattern, such as stopping /s/, before the sound itself is fully accurate.</p>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+
+<footer>
+  <div class="wrap">
+    <p class="foot-back"><a href="../">&larr; Back to the Phonetics Lab</a></p>
+    <h2>Sources</h2>
+    <ul>
+      <li>Ages: American Speech-Language-Hearing Association (n.d.). <a href="https://www.asha.org/practice-portal/clinical-topics/articulation-and-phonology/selected-phonological-patterns/" target="_blank" rel="noopener">Selected phonological patterns</a> [Practice Portal], compiled from Bowen (2011), Peña-Brooks &amp; Hegde (2015) and Shipley &amp; McAfee (2016).</li>
+      <li>Crowe, K., &amp; McLeod, S. (2020). Children's English consonant acquisition in the United States: A review. <i>American Journal of Speech-Language Pathology, 29</i>(4), 2155–2169. <a href="https://doi.org/10.1044/2020_AJSLP-19-00168" target="_blank" rel="noopener">doi.org/10.1044/2020_AJSLP-19-00168</a></li>
+      <li>Shriberg, L. D. (1993). Four new speech and prosody-voice measures for genetics research and other studies in developmental phonological disorders. <i>Journal of Speech and Hearing Research, 36</i>(1), 105–140. <a href="https://doi.org/10.1044/jshr.3601.105" target="_blank" rel="noopener">doi.org/10.1044/jshr.3601.105</a></li>
+    </ul>
+    <p class="foot-credit">Created by <a href="https://mengyang.dev">Mengyang Qiu</a> in collaboration with Siena Sun. Built with the help of Claude (Anthropic) and GPT (OpenAI).</p>
+    <p class="foot-notice">Except where otherwise noted, original instructional content &copy; 2026 Mengyang Qiu and Siena Sun is licensed under <a href="https://creativecommons.org/licenses/by-nc/4.0/">CC BY-NC 4.0</a>. Site source code is licensed under the <a href="https://opensource.org/license/mit">MIT License</a>. Third-party media retain their original rights and licenses; see <a href="../../credits.html#phonetics">Credits</a>.</p>
+  </div>
+</footer>
+
+<script>
+window.NO_SOUND = true;
+/* Phonological Processes Reference: the content.
+   The processes and examples are this reference list's own (graduate speech
+   sound disorders). Where one change has two names, the two are one
+   card here with "also called". Ages are the ASHA Practice Portal's (Selected Phonological
+   Patterns).
+
+   An example: w the word, a the adult form, c the child's form, al the sound-by-sound alignment,
+   one column per space: "k" unchanged, "t>-" dropped, "->ə" added, "k>t" changed; a column may hold
+   more than one sound ("sw>f"). dir marks which way an assimilation went (reg, prog, both) and trig the
+   column of the sound it copied; no_practice
+   keeps an example that is open to two readings out of the practice rounds. */
+
+var FAMILIES = [
+  { id: "syl", name: "Syllable structure", short: "Structure",
+    blurb: "The shape of the word changes: a sound or syllable is dropped, added, moved, or two sounds merge." },
+  { id: "sub", name: "Substitution", short: "Substitution",
+    blurb: "One kind of sound is replaced by another: the place or the manner of a consonant changes." },
+  { id: "asm", name: "Assimilation", short: "Assimilation",
+    blurb: "A sound changes to become more like another sound in the same word. Also called consonant harmony." },
+  { id: "voi", name: "Voicing", short: "Voicing",
+    blurb: "A consonant changes from voiced to voiceless, or the other way round." },
+  { id: "vow", name: "Vowels and stress", short: "Vowels",
+    blurb: "A vowel changes, a diphthong loses a part, or the stress moves." },
+  { id: "aty", name: "Atypical patterns", short: "Atypical",
+    blurb: "Patterns not usually seen in typical development. They may point to a more unusual sound system and are worth a closer look." }
+];
+
+/* The questions to ask, in order, to name a change. kind is the family a card answers to. */
+var GUIDE = [
+  { kind: "syl", q: "Did the shape of the word change?", hint: "A sound or syllable dropped, added or moved, or two sounds merged into one." },
+  { kind: "asm", q: "Did a consonant change to match another consonant in the word?", hint: "Look for the trigger: the consonant it copied." },
+  { kind: "voi", q: "Did only the voicing change?", hint: "Same place, same manner, voiced and voiceless swapped." },
+  { kind: "vow", q: "Did a vowel or the stress change?", hint: "Higher, lower, front, back, the middle, one part of a diphthong, or the stressed syllable." },
+  { kind: "sub", q: "Otherwise, what kind of consonant replaced it?", hint: "Name what moved: the place (fronting, backing) or the manner (stopping, gliding). If both moved, the process is named for the main change: shoe → [tu] is stopping." }
+];
+
+var PROCESSES = [
+  /* ------------------------------------------------ syllable structure */
+  { id: "fcd", fam: "syl", name: "Final consonant deletion",
+    def: "The last consonant of the word is left off.",
+    age: "3", ex: [{ w: "cat", a: "kæt", c: "kæ", al: "k æ t>-" }, { w: "bus", a: "bʌs", c: "bʌ", al: "b ʌ s>-" }] },
+  { id: "icd", fam: "syl", atypical: true, name: "Initial consonant deletion",
+    def: "A single consonant at the start of the word, not part of a cluster, is left off. This is rare in typical development.",
+    ex: [{ w: "cat", a: "kæt", c: "æt", al: "k>- æ t" }, { w: "ball", a: "bɔl", c: "ɔl", al: "b>- ɔ l" }] },
+  { id: "mcd", fam: "syl", name: "Medial consonant deletion",
+    def: "A consonant in the middle of the word is left off.",
+    ex: [{ w: "puppy", a: "ˈpʌpi", c: "ˈpʌ.i", al: "p ʌ p>- i" }] },
+  { id: "cr", fam: "syl", name: "Cluster reduction",
+    def: "A cluster of consonants is cut down to fewer consonants.",
+    age: "4 to 5", ageNote: "4 without /s/, 5 with /s/",
+    ex: [{ w: "stop", a: "stɑp", c: "tɑp", al: "s>- t ɑ p" }, { w: "blue", a: "blu", c: "bu", al: "b l>- u" },
+         { w: "clean", a: "klin", c: "kin", al: "k l>- i n" }] },
+  { id: "wsd", fam: "syl", name: "Weak syllable deletion",
+    def: "An unstressed syllable is left out, often the one before the stress.",
+    age: "4", ex: [{ w: "banana", a: "bəˈnænə", c: "ˈnænə", al: "b>- ə>- n æ n ə", change: "The weak first syllable /bə/ is left off." }] },
+  { id: "redup", fam: "syl", name: "Reduplication",
+    def: "A syllable, usually the first, is repeated in place of the rest of the word.",
+    ex: [{ w: "bottle", a: "ˈbɑtəl", c: "ˈbɑbɑ", al: "b ɑ t>b ə>ɑ l>-", change: "The first syllable [bɑ] is said twice." }] },
+  { id: "epen", fam: "syl", name: "Epenthesis", aka: "vowel insertion",
+    def: "A vowel, usually [ə], is slipped in between two consonants, often the two of a cluster.",
+    ex: [{ w: "blue", a: "blu", c: "bəˈlu", al: "b ->ə l u" }] },
+  { id: "cins", fam: "syl", name: "Consonant insertion",
+    def: "A consonant that is not in the word is added, without making a cluster.",
+    ex: [{ w: "egg", a: "ɛg", c: "hɛg", al: "->h ɛ g" }] },
+  { id: "meta", fam: "syl", name: "Metathesis",
+    def: "Two sounds in the word swap places.",
+    ex: [{ w: "ask", a: "æsk", c: "æks", al: "æ sk>ks", change: "/s/ and /k/ swap places." }] },
+  { id: "coal", fam: "syl", name: "Coalescence",
+    def: "Two neighboring sounds are replaced by one new sound that has features of both.",
+    ex: [{ w: "swim", a: "swɪm", c: "fɪm", al: "sw>f ɪ m",
+           change: "/s/ and /w/ merge into [f]: the friction of /s/ with the lips of /w/." }] },
+  { id: "syladd", fam: "syl", name: "Syllable addition", aka: "diminutization, when it sounds like a pet form such as doggie",
+    def: "An extra syllable is added at the end of the word.",
+    ex: [{ w: "dog", a: "dɔg", c: "ˈdɔgi", al: "d ɔ g ->i" }] },
+
+  /* ------------------------------------------------ substitution */
+  { id: "vfront", fam: "sub", name: "Velar fronting",
+    def: "A velar /k, g, ŋ/ is made farther forward, usually as an alveolar [t, d, n].",
+    watch: "In goat → [doʊt] and cat → [tæt], the [d] or [t] could be copying the /t/ at the end, which is alveolar assimilation. Fronting is clearest in a word with no alveolar, like key → [ti].",
+    age: "4", ex: [{ w: "key", a: "ki", c: "ti", al: "k>t i" }, { w: "goat", a: "goʊt", c: "doʊt", al: "g>d oʊ t", no_practice: true },
+                   { w: "cat", a: "kæt", c: "tæt", al: "k>t æ t", no_practice: true }] },
+  { id: "pfront", fam: "sub", name: "Palatal fronting", aka: "depalatalization",
+    def: "A postalveolar /ʃ, ʒ, tʃ, dʒ/ is made farther forward, at the alveolar ridge.",
+    ex: [{ w: "shoe", a: "ʃu", c: "su", al: "ʃ>s u" }, { w: "ship", a: "ʃɪp", c: "sɪp", al: "ʃ>s ɪ p" },
+         { w: "chair", a: "tʃɛɹ", c: "tsɛɹ", al: "tʃ>ts ɛ ɹ" }] },
+  { id: "palat", fam: "sub", name: "Palatalization", added: true,
+    def: "An alveolar /s, z/ moves back to the postalveolar [ʃ, ʒ].",
+    ex: [{ w: "house", a: "haʊs", c: "haʊʃ", al: "h aʊ s>ʃ" }] },
+  { id: "back", fam: "sub", atypical: true, name: "Backing",
+    def: "A sound made at the front of the mouth, usually /t, d/, is made at the back as a velar [k, g].",
+    watch: "In dog → [gɔg] the [g] could be copying the /g/ at the end, which is velar assimilation. Backing is clearest in a word with no velar, like tea → [ki].",
+    ex: [{ w: "tea", a: "ti", c: "ki", al: "t>k i" }, { w: "dog", a: "dɔg", c: "gɔg", al: "d>g ɔ g", no_practice: true }] },
+  { id: "stop", fam: "sub", name: "Stopping",
+    def: "A fricative or an affricate is said as a stop.",
+    age: "3 to 5", ageNote: "3 for /f, s/, 4 for /z, v/, 5 for /ʃ, tʃ, dʒ, ð/",
+    ex: [{ w: "sun", a: "sʌn", c: "tʌn", al: "s>t ʌ n" }, { w: "fish", a: "fɪʃ", c: "pɪʃ", al: "f>p ɪ ʃ" },
+         { w: "zoo", a: "zu", c: "du", al: "z>d u" }, { w: "this", a: "ðɪs", c: "dɪs", al: "ð>d ɪ s" },
+         { w: "shoe", a: "ʃu", c: "tu", al: "ʃ>t u" }, { w: "chair", a: "tʃɛɹ", c: "tɛɹ", al: "tʃ>t ɛ ɹ" }] },
+  { id: "glide", fam: "sub", name: "Gliding of liquids",
+    def: "A liquid /ɹ, l/ is said as a glide [w, j].",
+    age: "6 to 7", ex: [{ w: "red", a: "ɹɛd", c: "wɛd", al: "ɹ>w ɛ d" }, { w: "leaf", a: "lif", c: "wif", al: "l>w i f" },
+                        { w: "rabbit", a: "ˈɹæbɪt", c: "ˈwæbɪt", al: "ɹ>w æ b ɪ t" }] },
+  { id: "vocal", fam: "sub", name: "Vocalization of liquids",
+    def: "A liquid /ɹ, l/ after a vowel is said as a vowel.",
+    watch: "Dialects that drop /ɹ/ after a vowel, such as African American English and some Northeastern US English, say car without the /ɹ/. That is not an error.",
+    ex: [{ w: "car", a: "kɑɹ", c: "kɑə", al: "k ɑ ɹ>ə" }, { w: "ball", a: "bɔl", c: "bɔo", al: "b ɔ l>o" }] },
+  { id: "deaff", fam: "sub", name: "Deaffrication",
+    def: "An affricate /tʃ, dʒ/ loses its stop part and is said as a fricative [ʃ, ʒ].",
+    age: "4", ex: [{ w: "chair", a: "tʃɛɹ", c: "ʃɛɹ", al: "tʃ>ʃ ɛ ɹ" }, { w: "jump", a: "dʒʌmp", c: "ʒʌmp", al: "dʒ>ʒ ʌ m p" },
+                   { w: "chip", a: "tʃɪp", c: "ʃɪp", al: "tʃ>ʃ ɪ p" }] },
+  { id: "affric", fam: "sub", name: "Affrication",
+    def: "A fricative gets a stop in front of it and is said as an affricate.",
+    ex: [{ w: "shoe", a: "ʃu", c: "tʃu", al: "ʃ>tʃ u" }] },
+  { id: "alveo", fam: "sub", name: "Alveolarization",
+    def: "A dental or labiodental fricative, usually /θ, ð/, is said at the alveolar ridge as [s, z].",
+    ex: [{ w: "think", a: "θɪŋk", c: "sɪŋk", al: "θ>s ɪ ŋ k" }] },
+  { id: "labial", fam: "sub", name: "Labialization", aka: "fricative simplification, for /θ, ð/ said as [f, v]",
+    def: "A dental /θ, ð/ is said with the lips, as [f, v].",
+    ex: [{ w: "think", a: "θɪŋk", c: "fɪŋk", al: "θ>f ɪ ŋ k" }] },
+  { id: "dental", fam: "sub", name: "Dentalization",
+    def: "An alveolar /s, z/ is said with the tongue at or between the teeth, as [θ, ð].",
+    ex: [{ w: "sun", a: "sʌn", c: "θʌn", al: "s>θ ʌ n" }] },
+  { id: "denas", fam: "sub", name: "Denasalization",
+    def: "A nasal is said as the oral stop made at the same place: /m/ as [b], /n/ as [d].",
+    ex: [{ w: "moon", a: "mun", c: "bud", al: "m>b u n>d" }] },
+  { id: "nasal", fam: "sub", name: "Nasalization",
+    def: "An oral sound is said as a nasal.",
+    ex: [{ w: "bed", a: "bɛd", c: "mɛn", al: "b>m ɛ d>n" }] },
+
+  /* ------------------------------------------------ assimilation */
+  { id: "velasm", fam: "asm", name: "Velar assimilation",
+    def: "A sound becomes velar because of a velar elsewhere in the word.",
+    age: "3", ex: [{ w: "duck", a: "dʌk", c: "gʌk", al: "d>g ʌ k", dir: "reg", trig: 2 }] },
+  { id: "labasm", fam: "asm", name: "Labial assimilation",
+    def: "A sound becomes labial because of a labial elsewhere in the word.",
+    ex: [{ w: "cup", a: "kʌp", c: "pʌp", al: "k>p ʌ p", dir: "reg", trig: 2 }] },
+  { id: "alvasm", fam: "asm", name: "Alveolar assimilation",
+    def: "A sound becomes alveolar because of an alveolar elsewhere in the word.",
+    ex: [{ w: "dog", a: "dɔg", c: "dɔd", al: "d ɔ g>d", dir: "prog", trig: 0 }] },
+  { id: "nasasm", fam: "asm", name: "Nasal assimilation",
+    def: "A sound becomes nasal because of a nasal elsewhere in the word.",
+    age: "3", ex: [{ w: "bunny", a: "ˈbʌni", c: "ˈnʌni", al: "b>n ʌ n i", dir: "reg", trig: 2 }] },
+  { id: "harmony", fam: "asm", name: "Complete consonant harmony",
+    def: "Two or more consonants change so that all the consonants of the word become the same sound.",
+    ex: [{ w: "duck", a: "dʌk", c: "gʌg", al: "d>g ʌ k>g", dir: "both",
+           change: "/d/ takes the velar place of /k/, and /k/ takes the voicing of /d/: both become [g]." }] },
+
+  /* ------------------------------------------------ voicing */
+  { id: "pvv", fam: "voi", name: "Prevocalic voicing", aka: "voicing assimilation, when the consonant takes the voicing of the vowel after it",
+    def: "A voiceless consonant at the start of a word, before a vowel, becomes voiced.",
+    ex: [{ w: "pig", a: "pɪg", c: "bɪg", al: "p>b ɪ g" }, { w: "tea", a: "ti", c: "di", al: "t>d i" },
+         { w: "cat", a: "kæt", c: "gæt", al: "k>g æ t" }] },
+  { id: "fcdv", fam: "voi", name: "Final consonant devoicing",
+    def: "A voiced consonant at the end of the word becomes voiceless.",
+    ex: [{ w: "bed", a: "bɛd", c: "bɛt", al: "b ɛ d>t" }, { w: "dog", a: "dɔg", c: "dɔk", al: "d ɔ g>k" }] },
+  { id: "medv", fam: "voi", name: "Medial consonant voicing",
+    def: "A voiceless consonant between vowels becomes voiced.",
+    ex: [{ w: "happy", a: "ˈhæpi", c: "ˈhæbi", al: "h æ p>b i" }] },
+  { id: "meddv", fam: "voi", name: "Medial consonant devoicing",
+    def: "A voiced consonant between vowels becomes voiceless.",
+    ex: [{ w: "baby", a: "ˈbeɪbi", c: "ˈbeɪpi", al: "b eɪ b>p i" }] },
+
+  /* ------------------------------------------------ vowels and stress */
+  { id: "vneut", fam: "vow", name: "Vowel neutralization",
+    def: "A vowel is replaced by a central vowel such as [ə].",
+    ex: [{ w: "cat", a: "kæt", c: "kət", al: "k æ>ə t" }] },
+  { id: "vlow", fam: "vow", name: "Vowel lowering",
+    def: "A vowel is said lower in the mouth, with the jaw more open.",
+    ex: [{ w: "sit", a: "sɪt", c: "sɛt", al: "s ɪ>ɛ t" }] },
+  { id: "vraise", fam: "vow", name: "Vowel raising",
+    def: "A vowel is said higher in the mouth, with the jaw more closed.",
+    ex: [{ w: "bed", a: "bɛd", c: "bɪd", al: "b ɛ>ɪ d" }] },
+  { id: "vback", fam: "vow", name: "Vowel backing",
+    def: "A vowel is said farther back in the mouth.",
+    ex: [{ w: "cat", a: "kæt", c: "kɑt", al: "k æ>ɑ t" }] },
+  { id: "vfront2", fam: "vow", name: "Vowel fronting",
+    def: "A vowel is said farther forward in the mouth.",
+    ex: [{ w: "boot", a: "but", c: "bit", al: "b u>i t" }] },
+  { id: "diph", fam: "vow", name: "Diphthong reduction", aka: "monophthongization",
+    def: "A diphthong is said as a single vowel.",
+    watch: "In some dialects, such as Southern US English and African American English, /aɪ/ is said as one vowel, so my → [mɑ] is not an error there.",
+    ex: [{ w: "boy", a: "bɔɪ", c: "bɔ", al: "b ɔɪ>ɔ" }, { w: "my", a: "maɪ", c: "mɑ", al: "m aɪ>ɑ" }] },
+  { id: "derhot", fam: "vow", name: "Derhotacization", aka: "loss of r-coloring",
+    def: "An r-colored vowel /ɝ, ɚ/ loses its r-coloring.",
+    ex: [{ w: "bird", a: "bɝd", c: "bəd", al: "b ɝ>ə d" }] },
+  { id: "sshift", fam: "vow", name: "Stress shift",
+    def: "The main stress moves to a different syllable.",
+    ex: [{ w: "banana", a: "bəˈnænə", c: "ˈbænənə", al: "b ə>æ n æ>ə n ə",
+           change: "The stress moves from the second syllable to the first, and the vowels change with it." }] },
+
+  /* ------------------------------------------------ atypical */
+  { id: "xback", fam: "aty", kind: "sub", name: "Extensive backing",
+    def: "Backing reaches sounds it usually does not, so even fricatives such as /s/ come out as velars.",
+    ex: [{ w: "sun", a: "sʌn", c: "kʌn", al: "s>k ʌ n" }] },
+  { id: "glot", fam: "aty", kind: "sub", name: "Glottal replacement",
+    def: "A consonant is replaced by a glottal stop [ʔ].",
+    watch: "In cat → [ʔæʔ], a glottal stop for the final /t/ is common in adult American English; the [ʔ] for /k/ is the atypical part. Glottal and pharyngeal sounds in place of mouth consonants are also a common sign of cleft palate or other velopharyngeal problems.",
+    ex: [{ w: "cat", a: "kæt", c: "ʔæʔ", al: "k>ʔ æ t>ʔ" }] },
+  { id: "phar", fam: "aty", kind: "sub", name: "Pharyngeal substitution",
+    def: "A consonant is made in the throat, as the pharyngeal [ħ].",
+    watch: "Pharyngeal and glottal sounds in place of mouth consonants are a common sign of cleft palate or other velopharyngeal problems.",
+    ex: [{ w: "sun", a: "sʌn", c: "ħʌn", al: "s>ħ ʌ n" }] },
+  { id: "fricstop", fam: "aty", kind: "sub", name: "Fricative replacement of stops",
+    def: "A stop is said as a fricative, the opposite of stopping.",
+    ex: [{ w: "tea", a: "ti", c: "si", al: "t>s i" }] },
+  { id: "ucluster", fam: "aty", kind: "syl", name: "Unusual cluster creation",
+    def: "A cluster is made where the word has a single consonant.",
+    ex: [{ w: "cat", a: "kæt", c: "skæt", al: "->s k æ t" }] },
+  { id: "migr", fam: "aty", kind: "syl", name: "Consonant migration",
+    def: "A sound moves to a different place in the word.",
+    ex: [{ w: "spaghetti", a: "spəˈgɛti", c: "pəˈsgɛti", al: "s>- p ə ->s g ɛ t i",
+           change: "/s/ moves from the start of the word into the middle." }] },
+  { id: "xvowel", fam: "aty", kind: "vow", name: "Extensive vowel errors",
+    def: "Vowels are widely replaced, well beyond an occasional vowel change.",
+    watch: "One word cannot show this pattern: pig → [pug] on its own is a single vowel change. It is the number of vowel errors across many words that makes it atypical.",
+    ex: [{ w: "pig", a: "pɪg", c: "pug", al: "p ɪ>u g", no_practice: true }] },
+  { id: "usyl", fam: "aty", kind: "syl", name: "Unusual syllable deletion",
+    def: "A stressed syllable is dropped, which typical development does not do.",
+    ex: [{ w: "potato", a: "pəˈteɪtoʊ", c: "pəˈtoʊ", al: "p ə t>- eɪ>- t oʊ", change: "The stressed syllable /teɪ/ is left off." }] }
+];
+
+/* Pairs to learn together: opposites, and look-alikes with the question that tells them apart. */
+var PAIRS = [
+  ["fcd", "glot", "Look-alike. Final consonant deletion leaves nothing; glottal replacement leaves [ʔ] in its place."],
+  ["fcd", "icd", "The same change at the other end of the word. Deleting the first consonant is the unusual one."],
+  ["cr", "coal", "Cluster reduction keeps one of the sounds; coalescence makes a new sound that mixes both."],
+  ["cr", "epen", "Two ways to make a cluster easier: drop a consonant, or slip a vowel between them."],
+  ["wsd", "usyl", "Weak syllable deletion drops an unstressed syllable, often the one before the stress; the unusual pattern drops a stressed one."],
+  ["wsd", "sshift", "Stress shift keeps every syllable; weak syllable deletion drops one."],
+  ["redup", "harmony", "Reduplication repeats a whole syllable; consonant harmony only makes the consonants match."],
+  ["epen", "syladd", "Both add a vowel. Epenthesis puts it between two consonants; syllable addition adds a syllable at the end."],
+  ["cins", "ucluster", "Both add a consonant. If the added consonant makes a cluster next to another, it is the unusual pattern."],
+  ["meta", "migr", "Metathesis swaps two sounds; migration moves one sound to a new spot."],
+  ["vfront", "back", "Opposites. Fronting moves velars forward; backing moves front sounds back to velars."],
+  ["vfront", "alvasm", "Look-alike. If a velar becomes alveolar to match an alveolar elsewhere in the word, as in dog → [dɔd], it is assimilation."],
+  ["back", "velasm", "Look-alike. If there is a velar elsewhere in the word, as in duck → [gʌk], the change is more likely velar assimilation."],
+  ["back", "xback", "Both are atypical; extensive backing reaches even fricatives such as /s/."],
+  ["pfront", "palat", "Opposites. Palatal fronting moves /ʃ/ forward to [s]; palatalization moves /s/ back to [ʃ]."],
+  ["stop", "fricstop", "Opposites. Stopping turns fricatives into stops; the atypical pattern turns stops into fricatives."],
+  ["stop", "deaff", "An affricate can lose either part: its friction (stopping, chair → [tɛɹ]) or its stop (deaffrication, chair → [ʃɛɹ])."],
+  ["deaff", "affric", "Opposites. Deaffrication turns an affricate into a fricative; affrication turns a fricative into an affricate."],
+  ["glide", "vocal", "Both change a liquid. Gliding gives a glide, usually before a vowel; vocalization gives a vowel, after one."],
+  ["alveo", "dental", "Opposites. Alveolarization moves /θ/ to [s]; dentalization moves /s/ to [θ]."],
+  ["alveo", "labial", "/θ/ can go two ways: to the ridge as [s] (alveolarization) or to the lips as [f] (labialization)."],
+  ["denas", "nasal", "Opposites. Denasalization takes the nasal away; nasalization adds it."],
+  ["nasal", "nasasm", "Look-alike. If there is a nasal elsewhere in the word, as in bunny → [ˈnʌni], it is nasal assimilation."],
+  ["velasm", "harmony", "Velar assimilation changes one consonant to match another; in complete harmony, as in duck → [gʌg], both consonants change and end up the same."],
+  ["labasm", "alvasm", "Same idea, different place: the sound copies a labial (cup → [pʌp]) or an alveolar (dog → [dɔd])."],
+  ["pvv", "fcdv", "Voicing follows position: voiced at the start before a vowel, voiceless at the end."],
+  ["medv", "meddv", "Opposites, both between two vowels."],
+  ["vraise", "vlow", "Opposites. Raising moves the vowel up; lowering moves it down."],
+  ["vfront2", "vback", "Opposites. Fronting moves the vowel forward; backing moves it back."],
+  ["vfront2", "vfront", "Similar names. Velar fronting is about consonants; vowel fronting is about vowels."],
+  ["vback", "back", "Similar names. Backing is about consonants; vowel backing is about vowels."],
+  ["vneut", "diph", "Neutralization moves a vowel to the middle of the mouth; diphthong reduction drops part of a diphthong."],
+  ["derhot", "vocal", "Both lose the r quality: derhotacization from an r-colored vowel, vocalization from the consonant /ɹ/ after a vowel."],
+  ["xvowel", "vneut", "An occasional vowel change is common; widespread vowel errors are not."],
+  ["glot", "phar", "Both move sounds far back in the throat: to the glottis [ʔ] or the pharynx [ħ]."]
+];
+
+/* Ages by which each pattern is usually gone (ASHA Practice Portal). */
+var AGES = [
+  { p: "velasm", label: "Velar assimilation", ex: "duck → [gʌk]", end: 3 },
+  { p: "nasasm", label: "Nasal assimilation", ex: "bunny → [ˈnʌni]", end: 3 },
+  { p: "fcd", label: "Final consonant deletion", ex: "bus → [bʌ]", end: 3 },
+  { p: "stop", label: "Stopping of /f, s/", ex: "sun → [tʌn]", end: 3 },
+  { p: "vfront", label: "Velar fronting", ex: "key → [ti]", end: 4 },
+  { p: "wsd", label: "Weak syllable deletion", ex: "banana → [ˈnænə]", end: 4 },
+  { p: "deaff", label: "Deaffrication", ex: "chip → [ʃɪp]", end: 4 },
+  { p: "cr", label: "Cluster reduction without /s/", ex: "clean → [kin]", end: 4 },
+  { p: "stop", label: "Stopping of /z, v/", ex: "zoo → [du]", end: 4 },
+  { p: "cr", label: "Cluster reduction with /s/", ex: "stop → [tɑp]", end: 5 },
+  { p: "stop", label: "Stopping of /ʃ, tʃ, dʒ, ð/", ex: "shoe → [tu]", end: 5 },
+  { p: "glide", label: "Gliding of /ɹ, l/", ex: "rabbit → [ˈwæbɪt]", end: 7, from: 6 }
+];
+
+/* Consonant acquisition. Crowe & McLeod (2020): the groups, and the year in which 90% of typically
+   developing American English-speaking children have each sound (CM_YEAR: acquired during the year
+   starting at that age, so by its end). Shriberg (1993): order of mastery in children with speech
+   delays, with no ages. */
+var CM = {
+  early: { label: "Early 13", band: "2;0 to 3;11", set: ["b", "n", "m", "p", "h", "w", "d", "g", "k", "f", "t", "ŋ", "j"] },
+  middle: { label: "Middle 7", band: "4;0 to 4;11", set: ["v", "dʒ", "s", "tʃ", "l", "ʃ", "z"] },
+  late: { label: "Late 4", band: "5;0 to 6;11", set: ["ɹ", "ð", "ʒ", "θ"] }
+};
+var CM_YEAR = { b: 2, n: 2, m: 2, p: 2, h: 2, w: 2, d: 2, g: 3, k: 3, f: 3, t: 3, ŋ: 3, j: 3,
+  v: 4, dʒ: 4, s: 4, tʃ: 4, l: 4, ʃ: 4, z: 4, ɹ: 5, ð: 5, ʒ: 5, θ: 6 };
+var SHRIBERG = {
+  early: { label: "Early 8", set: ["m", "b", "j", "n", "w", "d", "p", "h"] },
+  middle: { label: "Middle 8", set: ["t", "ŋ", "k", "g", "f", "v", "tʃ", "dʒ"] },
+  late: { label: "Late 8", set: ["ʃ", "θ", "s", "z", "ð", "l", "ɹ", "ʒ"] }
+};
+
+/* What each sound is, for the "what changed" line and the charts.
+   Places run front to back. */
+var PLACES = ["lips", "teeth", "ridge", "behind the ridge", "palate", "soft palate", "throat", "glottis"];
+var PLACE_NAME = ["labial", "dental", "alveolar", "postalveolar", "palatal", "velar", "pharyngeal", "glottal"];
+var CONS = {
+  p: [0, "stop", 0], b: [0, "stop", 1], m: [0, "nasal", 1], w: [0, "glide", 1], f: [0, "fricative", 0], v: [0, "fricative", 1],
+  θ: [1, "fricative", 0], ð: [1, "fricative", 1],
+  t: [2, "stop", 0], d: [2, "stop", 1], n: [2, "nasal", 1], s: [2, "fricative", 0], z: [2, "fricative", 1], l: [2, "liquid", 1],
+  ts: [2, "affricate", 0],
+  ɹ: [3, "liquid", 1], ʃ: [3, "fricative", 0], ʒ: [3, "fricative", 1], tʃ: [3, "affricate", 0], dʒ: [3, "affricate", 1],
+  j: [4, "glide", 1], k: [5, "stop", 0], g: [5, "stop", 1], ŋ: [5, "nasal", 1],
+  ħ: [6, "fricative", 0], h: [7, "fricative", 0], ʔ: [7, "stop", 0]
+};
+/* Vowels: x front 0 to back 1, y high 0 to low 1, for the little vowel chart. */
+var VOW = {
+  i: [0, 0], ɪ: [0.14, 0.16], e: [0.08, 0.33], ɛ: [0.2, 0.58], æ: [0.3, 0.92], ə: [0.52, 0.5], ʌ: [0.68, 0.62], ɝ: [0.5, 0.42],
+  ɚ: [0.5, 0.42], u: [1, 0], ʊ: [0.84, 0.16], o: [1, 0.33], ɔ: [1, 0.62], ɑ: [1, 0.96], a: [0.45, 0.96]
+};
+/* The course's sound clips (American IPA Chart), by symbol. */
+var CLIP = {
+  p: "p", b: "b", t: "t", d: "d", k: "k", g: "g", tʃ: "ch", dʒ: "jh", f: "f", v: "v", θ: "th", ð: "dh", s: "s", z: "z",
+  ʃ: "sh", ʒ: "zh", h: "h", m: "m", n: "n", ŋ: "ng", l: "l", ɹ: "r", w: "w", j: "y",
+  i: "iy", ɪ: "ih", ɛ: "eh", æ: "ae", ɑ: "aa", ɔ: "ao", ʊ: "uh", u: "uw", ʌ: "ah", ə: "ax", ɝ: "er", ɚ: "axr",
+  eɪ: "ey", oʊ: "ow", aɪ: "ay", ɑɪ: "ay", aʊ: "aw", ɑʊ: "aw", ɔɪ: "oy"
+};
+
+</script>
+<script>
+(function () {
+  "use strict";
+  var d = document, w = window;
+  function $(id) { return d.getElementById(id); }
+  function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
+  function shuffle(a) { a = a.slice(); for (var i = a.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)), t = a[i]; a[i] = a[j]; a[j] = t; } return a; }
+
+  var FAM = {}, P = {}, PAIR = {};
+  FAMILIES.forEach(function (f) { FAM[f.id] = f; });
+  PROCESSES.forEach(function (p) { P[p.id] = p; PAIR[p.id] = []; });
+  PAIRS.forEach(function (x) { PAIR[x[0]].push({ to: x[1], rel: x[2] }); PAIR[x[1]].push({ to: x[0], rel: x[2] }); });
+  function kindOf(p) { return p.kind || p.fam; }
+  function pairText(a, b) { var r = PAIR[a].filter(function (x) { return x.to === b; })[0]; return r ? r.rel : ""; }
+
+  /* ------------------------------------------------------------ sounds and changes */
+  var DIPH = ["eɪ", "oʊ", "aɪ", "ɔɪ", "aʊ", "ɑɪ", "ɑʊ"];
+  function known(s) { return s in CONS || s in VOW || DIPH.indexOf(s) >= 0; }
+  function phones(s) {
+    var out = [], k = 0;
+    while (k < s.length) {
+      var two = s.slice(k, k + 2);
+      if (known(two)) { out.push(two); k += 2; } else { out.push(s[k]); k += 1; }
+    }
+    return out;
+  }
+  function parseAl(al) {
+    return al.split(" ").map(function (t) {
+      var a = t, c = t;
+      if (t.indexOf(">") >= 0) { a = t.split(">")[0]; c = t.split(">")[1]; }
+      a = a === "-" ? "" : a; c = c === "-" ? "" : c;
+      return { a: a, c: c, ch: a !== c };
+    });
+  }
+  function single(s) { return s && phones(s).length === 1; }
+  function isVowel(s) { return s in VOW || DIPH.indexOf(s) >= 0; }
+  function ipa(s) { return '<span class="ipa">' + esc(s) + "</span>"; }
+  // running text with its /phonemic/ and [phonetic] bits set in the IPA face
+  function rich(t) {
+    return esc(t).replace(/(\/[^\/\s][^\/]*?\/|\[[^\]]+\])/g, function (m) { return '<span class="ipa">' + m + "</span>"; });
+  }
+
+  function describe(col) {
+    var a = col.a, c = col.c;
+    if (!c) return isVowel(a) ? "The vowel " + ipa("/" + a + "/") + " is left off" : ipa("/" + a + "/") + " is left off";
+    if (!a) return ipa("[" + c + "]") + " is added";
+    var head = ipa("/" + a + "/") + " → " + ipa("[" + c + "]");
+    if (!single(a) || !single(c)) return head;
+    if (a in CONS && c in CONS) {
+      var A = CONS[a], C = CONS[c], parts = [];
+      if (A[0] !== C[0]) parts.push("place moves " + (C[0] > A[0] ? "back" : "forward") + ", " + PLACE_NAME[A[0]] + " to " + PLACE_NAME[C[0]]);
+      if (A[1] !== C[1]) parts.push(A[1] + " to " + C[1]);
+      if (A[2] !== C[2]) parts.push(A[2] ? "voiced to voiceless" : "voiceless to voiced");
+      return head + ": " + parts.join("; ");
+    }
+    if (DIPH.indexOf(a) >= 0 && c in VOW) return "The diphthong " + ipa("/" + a + "/") + " is said as one vowel, " + ipa("[" + c + "]");
+    if (a in VOW && c in VOW) {
+      var p = [], dx = VOW[c][0] - VOW[a][0], dy = VOW[c][1] - VOW[a][1];
+      if ((a === "ɝ" || a === "ɚ") && c !== "ɝ" && c !== "ɚ") p.push("it loses its r-coloring");
+      else if (c === "ə") p.push("it moves to the middle of the mouth");
+      else {
+        if (Math.abs(dy) > 0.08) p.push(dy > 0 ? "lower" : "higher");
+        if (Math.abs(dx) > 0.15) p.push(dx > 0 ? "farther back" : "farther forward");
+      }
+      return head + (p.length ? ": " + p.join(" and ") : "");
+    }
+    if (a in CONS && isVowel(c)) return ipa("/" + a + "/") + " is said as the vowel " + ipa("[" + c + "]");
+    return head;
+  }
+  function changeLine(e, noDir) {
+    if (e.change) return rich(e.change);
+    var cols = parseAl(e.al), ci = -1;
+    cols.forEach(function (x, k) { if (x.ch && ci < 0) ci = k; });
+    var line = cols.filter(function (x) { return x.ch; }).map(describe).join(". ");
+    if (e.trig != null && !noDir) line += ", to match the " + ipa("/" + cols[e.trig].a + "/") + (e.trig > ci ? " later" : " earlier") + " in the word";
+    return line + ".";
+  }
+
+  /* the place strip (front of the mouth to the back) and the little vowel chart */
+  var SHORT_PLACE = ["lips", "teeth", "ridge", "behind ridge", "palate", "soft palate", "throat", "glottis"];
+  function placeSVG(a, c) {
+    var x = function (i) { return 20 + i * 46; }, xa = x(CONS[a][0]), xc = x(CONS[c][0]), mid = (xa + xc) / 2;
+    var dirn = xc > xa ? 1 : -1, s = '<svg viewBox="0 0 362 84" role="img" aria-label="Place of articulation moves from ' +
+      PLACE_NAME[CONS[a][0]] + " to " + PLACE_NAME[CONS[c][0]] + '">';
+    s += '<line class="rail" x1="20" y1="34" x2="342" y2="34"/>';
+    SHORT_PLACE.forEach(function (lab, i) {
+      s += '<line class="tick" x1="' + x(i) + '" y1="28" x2="' + x(i) + '" y2="40"/>';
+      s += '<text x="' + Math.min(Math.max(x(i), 16), 346) + '" y="' + (i % 2 ? 80 : 64) + '" text-anchor="middle">' + lab + "</text>";
+    });
+    s += '<path class="arrow" d="M' + xa + " 20 Q" + mid + " 2 " + (xc - dirn * 7) + ' 18"/>';
+    s += '<path class="head" d="M' + xc + " 21 l" + (-dirn * 9) + " -2 l" + (dirn * 3) + ' -7 z"/>';
+    s += '<circle class="from" cx="' + xa + '" cy="34" r="12"/><text class="sym" x="' + xa + '" y="39" text-anchor="middle">' + esc(a) + "</text>";
+    s += '<circle class="to" cx="' + xc + '" cy="34" r="12"/><text class="sym" x="' + xc + '" y="39" text-anchor="middle" class="sym on">' + esc(c) + "</text>";
+    return '<div class="viz">' + s + "</svg></div>";
+  }
+  function vowelPt(v) { var p = VOW[v]; var xl = 34 + 44 * p[1]; return [xl + (164 - xl) * p[0], 16 + 76 * p[1]]; }
+  function diphSVG(a, c) {
+    var p1 = a[0], p2 = a[1];
+    if (!(p1 in VOW) || !(p2 in VOW) || !(c in VOW)) return "";
+    var A = vowelPt(p1), B = vowelPt(p2), C = vowelPt(c);
+    var s = '<svg viewBox="0 0 200 110" role="img" aria-label="The diphthong ' + esc(a) + " glides from " + esc(p1) + " to " + esc(p2) +
+      "; the child says only " + esc(c) + '" style="max-width:230px">';
+    s += '<path class="trap" d="M34 16 L164 16 L164 92 L78 92 Z"/>';
+    s += '<text x="34" y="10">front</text><text x="164" y="10" text-anchor="end">back</text>';
+    s += '<text x="28" y="20" text-anchor="end">high</text><text x="72" y="96" text-anchor="end">low</text>';
+    s += '<line class="glide" x1="' + A[0] + '" y1="' + A[1] + '" x2="' + B[0] + '" y2="' + B[1] + '"/>';
+    s += '<circle class="from" cx="' + A[0] + '" cy="' + A[1] + '" r="8"/><text class="sym" x="' + A[0] + '" y="' + (A[1] + 4) + '" text-anchor="middle">' + esc(p1) + "</text>";
+    s += '<circle class="from dropped" cx="' + B[0] + '" cy="' + B[1] + '" r="8"/><text class="sym" x="' + B[0] + '" y="' + (B[1] + 4) + '" text-anchor="middle">' + esc(p2) + "</text>";
+    s += '<circle class="to" cx="' + C[0] + '" cy="' + C[1] + '" r="9"/><text class="sym on" x="' + C[0] + '" y="' + (C[1] + 4.5) + '" text-anchor="middle">' + esc(c) + "</text>";
+    s += '<text x="100" y="108" text-anchor="middle">dashed: the glide the child leaves out</text>';
+    return '<div class="viz">' + s + "</svg></div>";
+  }
+  function vowelSVG(a, c) {
+    if (DIPH.indexOf(a) >= 0) return diphSVG(a, c);
+    var from = a;
+    if (!(from in VOW) || !(c in VOW)) return "";
+    var A = vowelPt(from), C = vowelPt(c), dx = C[0] - A[0], dy = C[1] - A[1], L = Math.sqrt(dx * dx + dy * dy) || 1;
+    var ex = C[0] - dx / L * 11, ey = C[1] - dy / L * 11, ang = Math.atan2(dy, dx);
+    var s = '<svg viewBox="0 0 200 110" role="img" aria-label="Vowel moves from ' + esc(a) + " to " + esc(c) + '" style="max-width:230px">';
+    s += '<path class="trap" d="M34 16 L164 16 L164 92 L78 92 Z"/>';
+    s += '<text x="34" y="10">front</text><text x="164" y="10" text-anchor="end">back</text>';
+    s += '<text x="28" y="20" text-anchor="end">high</text><text x="72" y="96" text-anchor="end">low</text>';
+    s += '<line class="arrow" x1="' + A[0] + '" y1="' + A[1] + '" x2="' + ex + '" y2="' + ey + '"/>';
+    s += '<path class="head" transform="translate(' + ex + " " + ey + ") rotate(" + (ang * 180 / Math.PI) + ')" d="M2 0 L-6 -4 L-6 4 Z"/>';
+    s += '<circle class="from" cx="' + A[0] + '" cy="' + A[1] + '" r="9"/><text class="sym" x="' + A[0] + '" y="' + (A[1] + 4.5) + '" text-anchor="middle">' + esc(from) + "</text>";
+    s += '<circle class="to" cx="' + C[0] + '" cy="' + C[1] + '" r="9"/><text class="sym" x="' + C[0] + '" y="' + (C[1] + 4.5) + '" text-anchor="middle" class="sym on">' + esc(c) + "</text>";
+    return '<div class="viz">' + s + "</svg></div>";
+  }
+  /* A figure only where the move is the point of the process: the place strip for changes of place,
+     the vowel chart for changes of vowel position. Elsewhere a place or vowel can change along the
+     way (bottle → [ˈbɑbɑ] turns /t/ into [b] by repeating a syllable; red → [wɛd] turns a liquid into a
+     glide), and a figure would point at the wrong thing. */
+  var PLACE_VIZ = ["vfront", "pfront", "palat", "back", "alveo", "labial", "dental", "velasm", "labasm", "alvasm",
+    "harmony", "xback", "glot", "phar"];
+  var VOWEL_VIZ = ["vneut", "vlow", "vraise", "vback", "vfront2", "diph", "xvowel"];
+  function vizFor(p, e) {
+    var place = PLACE_VIZ.indexOf(p.id) >= 0, vowel = VOWEL_VIZ.indexOf(p.id) >= 0;
+    if (!place && !vowel) return "";
+    var cols = parseAl(e.al).filter(function (x) { return x.ch && x.a && x.c && single(x.a) && single(x.c); });
+    for (var i = 0; i < cols.length; i++) {
+      var x = cols[i];
+      if (place && x.a in CONS && x.c in CONS && CONS[x.a][0] !== CONS[x.c][0]) return placeSVG(x.a, x.c);
+      if (vowel && isVowel(x.a) && x.c in VOW) return vowelSVG(x.a, x.c);
+    }
+    return "";
+  }
+
+  /* ------------------------------------------------------------ playing sounds */
+  // the single-file build carries its clips inside the page (window.CLIP_DATA); the published page
+  // serves them as files next to it; the practice-site page has none (window.NO_SOUND)
+  var SOUND = !w.NO_SOUND;
+  function clip(sym) { var s = SOUND && CLIP[sym]; return s ? ((w.CLIP_DATA && w.CLIP_DATA[s]) || "audio/ipa_" + s + ".mp3") : null; }
+  function clipsOf(s) {
+    var out = [];
+    if (s && SOUND) phones(s).forEach(function (x) {
+      if (CLIP[x]) out.push(clip(x)); else if (x === "ts") { out.push(clip("t")); out.push(clip("s")); }
+    });
+    return out;
+  }
+  var playToken = 0;
+  function playOne(src, token) {
+    return new Promise(function (res) {
+      if (token !== playToken) return res();
+      var a = new Audio(src), done = false;
+      function fin() { if (!done) { done = true; res(); } }
+      a.addEventListener("ended", fin); a.addEventListener("error", fin);
+      setTimeout(fin, 2500);
+      var p = a.play(); if (p && p.catch) p.catch(fin);
+    });
+  }
+  function wait(ms) { return new Promise(function (r) { setTimeout(r, ms); }); }
+  function playCol(btn) {
+    var token = ++playToken, A = clipsOf(btn.dataset.a), C = clipsOf(btn.dataset.c);
+    d.querySelectorAll(".col.playing").forEach(function (b) { b.classList.remove("playing"); });
+    btn.classList.add("playing");
+    var chain = Promise.resolve();
+    A.forEach(function (s) { chain = chain.then(function () { return playOne(s, token); }).then(function () { return wait(120); }); });
+    if (A.length && C.length) chain = chain.then(function () { return wait(380); });
+    C.forEach(function (s) { chain = chain.then(function () { return playOne(s, token); }).then(function () { return wait(120); }); });
+    chain.then(function () { btn.classList.remove("playing"); });
+  }
+  function playSym(sym) { var s = clip(sym); if (s) { ++playToken; playOne(s, playToken); } }
+  d.addEventListener("click", function (ev) {
+    var b = ev.target.closest("button.col");
+    if (b) playCol(b);
+    var cb = ev.target.closest("button.cb");
+    if (cb) playSym(cb.dataset.s);
+  });
+
+  /* ------------------------------------------------------------ the alignment */
+  function alHTML(e, fam, mode) {
+    mode = mode || "full";
+    var full = mode === "full", trig = full ? e.trig : null, cols = parseAl(e.al);
+    var s = '<div class="al f-' + fam + (mode === "mark" ? " neutral" : "") + '" role="group" aria-label="Sound by sound, adult over child">';
+    s += '<div class="lab" aria-hidden="true"><span>Adult</span><span>Child</span></div>';
+    cols.forEach(function (x, k) {
+      var cells = '<span class="cell top' + (x.a ? "" : " gap") + '">' + (x.a ? esc(x.a) : "·") + "</span>" +
+        '<span class="cell bot' + (x.c ? "" : " gap") + '">' + (x.c ? esc(x.c) : "·") + "</span>";
+      var ch = x.ch && mode !== "hide", hasA = clipsOf(x.a).length, hasC = clipsOf(x.c).length;
+      if (full && x.ch && (hasA || hasC)) {
+        var lab = (x.a ? (hasA ? "Hear /" + esc(x.a) + "/" : "No recording of /" + esc(x.a) + "/") : "Nothing in the adult form") + ", then " +
+          (x.c ? (hasC ? "[" + esc(x.c) + "]" : "no recording of [" + esc(x.c) + "]") : "nothing");
+        s += '<button type="button" class="col ch" data-a="' + esc(x.a) + '" data-c="' + esc(x.c) + '" aria-label="' + lab + '" title="' + lab + '">' + cells + "</button>";
+      } else s += '<span class="col' + (ch ? " ch" : "") + (k === trig ? ' trig" title="The sound it copied' : "") + '">' + cells + "</span>";
+    });
+    return s + "</div>";
+  }
+  function formsHTML(e) {
+    return '<span class="forms">' + esc("/" + e.a + "/") + '<span class="arr" aria-hidden="true">→</span>' + esc("[" + e.c + "]") + "</span>";
+  }
+
+  /* ------------------------------------------------------------ explore */
+  /* The names down the side, grouped by family; one process in full beside them. On a phone the list
+     and the process are two screens, with a button back to the list. */
+  var famSel = "all", cur = null;
+
+  function exHTML(p, e, first) {
+    return '<div class="ex"><div class="ex-h"><span class="w">' + esc(e.w) + "</span>" + formsHTML(e) + "</div>" +
+      alHTML(e, p.fam) + '<p class="change">' + changeLine(e) + "</p>" + (first ? vizFor(p, e) : "") + "</div>";
+  }
+  function tagsHTML(p) {
+    return (p.atypical || p.fam === "aty" ? '<span class="tag atyp">Atypical</span>' : "") +
+      (p.age ? '<span class="tag age">Gone by ' + esc(p.age) + "</span>" : "");
+  }
+  function famNote(f) {
+    if (f.id === "asm") return " It can go either way. <b>Regressive</b>: a later sound changes an earlier one (duck → [gʌk]). <b>Progressive</b>: an earlier sound changes a later one (dog → [dɔd]).";
+    if (f.id === "aty") return " Also atypical: " + PROCESSES.filter(function (q) { return q.atypical && q.fam !== "aty"; }).map(function (q) {
+      return '<a href="#p-' + q.id + '">' + esc(q.name.toLowerCase()) + "</a> (" + esc(FAM[q.fam].name) + ")";
+    }).join(" and ") + ".";
+    return "";
+  }
+  function pairsHTML(p) {
+    var pairs = PAIR[p.id];
+    if (!pairs.length) return "";
+    return '<div class="d-pairs"><h4>Learn it with</h4><ul>' + pairs.map(function (x) {
+      return '<li class="f-' + P[x.to].fam + '"><a href="#p-' + x.to + '">' + esc(P[x.to].name) + "</a>. " + rich(x.rel) + "</li>";
+    }).join("") + "</ul></div>";
+  }
+  // everything about one process
+  function detailHTML(p) {
+    var f = FAM[p.fam];
+    return '<div class="detail f-' + p.fam + '"><div class="d-top"><span class="famlab"><span class="swatch"></span>' + esc(f.name) + "</span>" + tagsHTML(p) +
+      '</div><h2 class="d-name">' + esc(p.name) + "</h2>" + (p.aka ? '<p class="aka">Also called ' + rich(p.aka) + "</p>" : "") +
+      '<p class="def">' + rich(p.def) + "</p>" + (p.ageNote ? '<p class="agenote">Usually gone by ' + rich(p.ageNote) + ".</p>" : "") +
+      p.ex.map(function (e, i) { return exHTML(p, e, i === 0); }).join("") +
+      (p.watch ? '<p class="watch"><b>Watch out.</b> ' + rich(p.watch) + "</p>" : "") + pairsHTML(p) +
+      '<p class="famnote"><b>' + esc(f.name) + ".</b> " + rich(f.blurb) + famNote(f) + "</p></div>";
+  }
+  function searchText(p) {
+    return [p.name, p.aka || ""].concat(p.ex.map(function (e) { return e.w + " " + e.a + " " + e.c; })).join(" ").toLowerCase();
+  }
+  function matches(p) {
+    var q = $("q").value.trim().toLowerCase();
+    return (famSel === "all" || p.fam === famSel || (famSel === "aty" && p.atypical)) && (!q || searchText(p).indexOf(q) >= 0);
+  }
+  function groups() {
+    return FAMILIES.map(function (f) { return { f: f, list: PROCESSES.filter(function (p) { return p.fam === f.id && matches(p); }) }; })
+      .filter(function (g) { return g.list.length; });
+  }
+  function visibleIds() { var out = []; groups().forEach(function (g) { g.list.forEach(function (p) { out.push(p.id); }); }); return out; }
+
+  function paneHTML(id) {
+    var ids = visibleIds(), k = ids.indexOf(id), prev = ids[k - 1], next = ids[k + 1];
+    return '<button type="button" class="back" data-back>All processes</button>' + detailHTML(P[id]) + '<div class="pane-nav">' +
+      (prev ? '<button type="button" class="btn ghost" data-go="' + prev + '">‹ ' + esc(P[prev].name) + "</button>" : "<span></span>") +
+      (next ? '<button type="button" class="btn ghost" data-go="' + next + '">' + esc(P[next].name) + " ›</button>" : "<span></span>") + "</div>";
+  }
+  function renderList() {
+    var gs = groups(), ids = visibleIds();
+    $("empty").hidden = gs.length > 0;
+    if (!gs.length) { $("fams").innerHTML = ""; setFiltH(); return; }
+    if (ids.indexOf(cur) < 0) cur = ids[0];
+    var picked = $("split") && $("split").classList.contains("picked");
+    $("fams").innerHTML = '<div class="split' + (picked ? " picked" : "") + '" id="split"><nav class="index" aria-label="Processes">' + gs.map(function (g) {
+      return '<div class="ix-group f-' + g.f.id + '"><h3><span class="swatch"></span>' + esc(g.f.name) + "</h3><ul>" + g.list.map(function (p) {
+        return '<li><button type="button" class="ix" data-id="' + p.id + '" aria-current="' + (p.id === cur) + '">' + esc(p.name) +
+          (p.atypical && p.fam !== "aty" ? ' <span class="ix-aty">atypical</span>' : "") + "</button></li>";
+      }).join("") + "</ul></div>";
+    }).join("") + '</nav><section class="pane" id="pane" aria-live="polite">' + paneHTML(cur) + "</section></div>";
+    setFiltH();
+  }
+  function narrow() { return w.matchMedia("(max-width: 760px)").matches; }
+  // brings the top of the process into view when it is not (and always on a phone, where it replaces the list)
+  function toPane(smooth) {
+    var sp = $("split"), top = sp.getBoundingClientRect().top, room = parseFloat(getComputedStyle(sp).scrollMarginTop) || 0;
+    if (narrow() || top < room - 1 || top > innerHeight * 0.6) sp.scrollIntoView({ behavior: smooth ? "smooth" : "auto", block: "start" });
+  }
+  function selectPane(id) {
+    cur = id;
+    $("pane").innerHTML = paneHTML(id);
+    d.querySelectorAll("#split .ix").forEach(function (b) { b.setAttribute("aria-current", String(b.dataset.id === id)); });
+    $("split").classList.add("picked");
+    // keep the name in view in the list beside it (the list scrolls on its own on wider screens)
+    var ix = d.querySelector("#split .index"), it = d.querySelector('.ix[data-id="' + id + '"]');
+    if (!narrow() && it && it.offsetParent === ix && (it.offsetTop < ix.scrollTop || it.offsetTop + it.offsetHeight > ix.scrollTop + ix.clientHeight))
+      ix.scrollTop = it.offsetTop - ix.clientHeight / 3;
+  }
+  // from the list, a link, a pair, the age chart or practice (no element has a p-<id> id, so the
+  // browser does not jump on its own; this places the page)
+  function showProcess(id, smooth) {
+    if (!matches(P[id])) { $("q").value = ""; setFam("all"); }
+    selectPane(id);
+    try { history.replaceState(null, "", "#p-" + id); } catch (err) {}
+    requestAnimationFrame(function () { toPane(smooth); });
+  }
+  function setFam(f) {
+    famSel = f;
+    if ($("split")) $("split").classList.remove("picked");
+    d.querySelectorAll("#filters .chip").forEach(function (c) { c.setAttribute("aria-pressed", String(c.dataset.fam === f)); });
+    renderList();
+  }
+  function buildExplore() {
+    $("steps").innerHTML = GUIDE.map(function (g) {
+      return '<li class="f-' + g.kind + '"><span class="q">' + esc(g.q) + '</span><span class="h">' + rich(g.hint) + '</span><a href="#" data-fam="' + g.kind +
+        '"><span class="swatch"></span>' + esc(FAM[g.kind].name) + "</a></li>";
+    }).join("");
+    var chips = '<button type="button" class="chip" data-fam="all" aria-pressed="true">All</button>' + FAMILIES.map(function (f) {
+      return '<button type="button" class="chip f-' + f.id + '" data-fam="' + f.id + '" aria-pressed="false"><span class="swatch"></span>' + esc(f.short) + "</button>";
+    }).join("");
+    $("filters").insertAdjacentHTML("afterbegin", chips);
+    $("filters").addEventListener("click", function (ev) { var b = ev.target.closest(".chip"); if (b) setFam(b.dataset.fam); });
+    $("steps").addEventListener("click", function (ev) {
+      var a = ev.target.closest("a[data-fam]"); if (!a) return;
+      ev.preventDefault(); setFam(a.dataset.fam);
+      $("filters").scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+    $("q").addEventListener("input", function () { if ($("split")) $("split").classList.remove("picked"); renderList(); });
+    $("fams").addEventListener("click", function (ev) {
+      var b = ev.target.closest(".ix, [data-go]");
+      if (b) { showProcess(b.dataset.id || b.dataset.go, false); return; }
+      if (ev.target.closest("[data-back]")) {
+        $("split").classList.remove("picked");
+        try { history.replaceState(null, "", "#explore"); } catch (err) {}
+        var it = d.querySelector('.ix[data-id="' + cur + '"]'); if (it) { it.scrollIntoView({ block: "center" }); it.focus({ preventScroll: true }); }
+      }
+    });
+    // a link to the process already showing still shows it
+    d.addEventListener("click", function (ev) {
+      var a = ev.target.closest('a[href^="#p-"]');
+      if (a && a.getAttribute("href") === location.hash) { ev.preventDefault(); route(); }
+    });
+    renderList();
+  }
+
+  /* ------------------------------------------------------------ practice */
+  /* Options never offered for a given answer, because that answer's example would also fit them.
+     Extensive vowel errors is never offered at all: one word cannot show it. */
+  var VOWEL_IDS = ["vneut", "vlow", "vraise", "vback", "vfront2", "diph", "derhot"];
+  var NOT_WITH = { xback: ["back", "stop"], usyl: ["wsd"], ucluster: ["cins"], cins: ["ucluster"],
+    harmony: ["velasm", "back"], labasm: ["harmony"], alvasm: ["harmony"], nasasm: ["harmony"],
+    vneut: ["vraise", "vlow", "vback", "vfront2", "derhot"], derhot: ["vneut"], vback: ["vlow"], sshift: VOWEL_IDS,
+    redup: ["harmony", "labasm"], coal: ["cr"], cr: ["icd"], migr: ["ucluster", "icd", "cr"],
+    medv: ["pvv"], pfront: ["alveo"], stop: ["pfront", "alveo"], glot: ["back", "xback"], phar: ["back", "xback"] };
+  var NEVER = ["xvowel"];
+  var AGE_OPTS = ["3", "4", "5", "6 to 7"];
+  var S = { mode: "name", scope: "all", round: [], i: 0, right: 0, missed: [], done: false };
+  function inScope(p) { return S.scope === "all" || p.fam === S.scope || (S.scope === "aty" && p.atypical); }
+  function namePool() {
+    var out = [];
+    PROCESSES.forEach(function (p) { if (inScope(p)) p.ex.forEach(function (e) { if (!e.no_practice) out.push({ p: p, e: e }); }); });
+    return out;
+  }
+  function newRound(only) {
+    var items;
+    if (S.mode === "name") {
+      var pool = only ? only.map(function (x) { return { p: x.p, e: x.e }; }) : namePool(), seen = {}, first = [], rest = [];
+      shuffle(pool).forEach(function (x) { (seen[x.p.id] ? rest : first).push(x); seen[x.p.id] = 1; });
+      items = first.concat(rest).slice(0, 10);
+    } else {
+      items = shuffle(only || AGES).slice(0, 10).map(function (r) { return { r: r }; });
+    }
+    S.round = shuffle(items); S.i = 0; S.right = 0; S.missed = []; S.done = false;
+    renderQ();
+  }
+  function options(p) {
+    var bar = NOT_WITH[p.id] || [], used = {}, out = [];
+    used[p.id] = 1; bar.concat(NEVER).forEach(function (b) { used[b] = 1; });
+    function take(list, n) { shuffle(list).forEach(function (id) { if (n > 0 && !used[id]) { out.push(id); used[id] = 1; n--; } }); }
+    take(PAIR[p.id].map(function (x) { return x.to; }), 2);
+    take(PROCESSES.filter(function (q) { return kindOf(q) === kindOf(p) || q.fam === p.fam; }).map(function (q) { return q.id; }), 3 - out.length);
+    take(PROCESSES.map(function (q) { return q.id; }), 3 - out.length);
+    return shuffle(out.concat([p.id]));
+  }
+  function progress() {
+    $("progress").textContent = S.done ? "" : "Question " + (S.i + 1) + " of " + S.round.length + " · " + S.right + " right";
+  }
+  function renderQ() {
+    var host = $("qhost"), it = S.round[S.i];
+    progress();
+    if (!it) return renderSummary();
+    if (S.mode === "name") {
+      var p = it.p, e = it.e;
+      it.opts = it.opts || options(p);
+      host.innerHTML = '<div class="qcard f-' + p.fam + '"><p class="prompt">Which process is this?</p><div class="word">' + esc(e.w) +
+        '</div><div class="forms">' + esc("/" + e.a + "/") + '<span class="arr" aria-hidden="true">→</span>' + esc("[" + e.c + "]") + "</div>" +
+        '<div id="qal">' + alHTML(e, p.fam, "hide") + '</div><button type="button" class="reveal-btn" id="reveal">Show where it changed</button>' +
+        '<div class="opts" id="opts">' + it.opts.map(function (id, k) {
+          return '<button type="button" class="opt" data-id="' + id + '"><span class="k">' + (k + 1) + "</span>" + esc(P[id].name) + "</button>";
+        }).join("") + '</div><div id="fb" aria-live="polite"></div><div class="actions" id="acts"></div></div>';
+      $("reveal").addEventListener("click", function () { $("qal").innerHTML = alHTML(e, p.fam, "mark"); this.remove(); });
+    } else {
+      var r = it.r;
+      host.innerHTML = '<div class="qcard f-' + P[r.p].fam + '"><p class="prompt">By about what age is this usually gone?</p><div class="word">' + rich(r.label) +
+        '</div><div class="forms" style="font-size:1.2rem">' + esc(r.ex) + "</div>" +
+        '<div class="opts" id="opts">' + AGE_OPTS.map(function (o, k) {
+          return '<button type="button" class="opt" data-id="' + o + '"><span class="k">' + (k + 1) + "</span>By " + o + "</button>";
+        }).join("") + '</div><div id="fb" aria-live="polite"></div><div class="actions" id="acts"></div></div>';
+    }
+    $("opts").addEventListener("click", function (ev) { var b = ev.target.closest(".opt"); if (b && !b.disabled) answer(b.dataset.id); });
+  }
+  /* How the five guide questions lead to the family, in words: the questions answered no, the one
+     answered yes; the fifth is not a yes/no question, it is what is left when the first four are no. */
+  var FAM_PHRASE = { syl: "a syllable structure process", asm: "an assimilation process", voi: "a voicing process",
+    vow: "a vowel or stress process", sub: "a substitution: one kind of consonant replaced by another" };
+  function guideLine(step) {
+    var g = GUIDE[step - 1];
+    var no = step === 2 ? "no to question 1, " : step === 3 ? "no to questions 1 and 2, " : step > 3 ? "no to questions 1 to " + (step - 1) + ", " : "";
+    if (step === GUIDE.length) return "Using the guide: no to questions 1 to " + (step - 1) + ", so it is " + FAM_PHRASE[g.kind] + ".";
+    return "Using the guide: " + no + "yes to question " + step + " (" + esc(g.q) + "), so it is " + FAM_PHRASE[g.kind] + ".";
+  }
+  function ageLabel(r) { return r.end === 7 ? "6 to 7" : String(r.end); }
+  function answer(id) {
+    var it = S.round[S.i], ok, html;
+    d.querySelectorAll("#opts .opt").forEach(function (b) { b.disabled = true; });
+    if (S.mode === "name") {
+      var p = it.p, e = it.e;
+      ok = id === p.id;
+      $("qal").innerHTML = alHTML(e, p.fam, "full");
+      var rb = $("reveal"); if (rb) rb.remove();
+      d.querySelectorAll("#opts .opt").forEach(function (b) {
+        if (b.dataset.id === p.id) b.classList.add("right"); else if (b.dataset.id === id) b.classList.add("wrong");
+      });
+      var g = GUIDE.filter(function (x) { return x.kind === kindOf(p); })[0], step = GUIDE.indexOf(g) + 1;
+      var askDir = ok && (e.dir === "reg" || e.dir === "prog");
+      html = '<p class="verdict">' + (ok ? "Right: " + esc(p.name) + "." : "Not quite. This is " + esc(p.name) + ".") + "</p>" +
+        '<p class="line">' + rich(p.def) + '</p><p class="line" id="chline">' + changeLine(e, askDir) + "</p>" + vizFor(p, e) +
+        '<p class="guide-line">' + guideLine(step) + (p.fam === "aty" || p.atypical ? " It is also an atypical pattern." : "") + "</p>";
+      if (!ok) {
+        var rel = pairText(p.id, id);
+        html += '<p class="line"><b>Telling them apart.</b> ' + rich(rel || P[id].name + " is different: " + P[id].def.charAt(0).toLowerCase() + P[id].def.slice(1)) + "</p>";
+      }
+      if (askDir) {
+        html += '<div class="dir" id="dir"><span class="q">Which way did it go?</span><button type="button" data-d="reg">Regressive</button><button type="button" data-d="prog">Progressive</button></div>';
+      }
+      html += '<p class="line" style="font-size:.88rem"><a href="#p-' + p.id + '">Read about ' + esc(p.name) + "</a></p>";
+      if (!ok) S.missed.push(it);
+    } else {
+      var r = it.r, right = ageLabel(r);
+      ok = id === right;
+      d.querySelectorAll("#opts .opt").forEach(function (b) {
+        if (b.dataset.id === right) b.classList.add("right"); else if (b.dataset.id === id) b.classList.add("wrong");
+      });
+      var same = AGES.filter(function (x) { return x !== r && x.end === r.end; }).map(function (x) { return x.label.toLowerCase(); });
+      html = '<p class="verdict">' + (ok ? "Right: by " + right + "." : "Not quite. Usually gone by " + right + ".") + "</p>" +
+        (same.length ? '<p class="line">Also gone by ' + right + ": " + rich(same.join(", ")) + ".</p>" : "") +
+        '<p class="guide-line">A guideline, not a cutoff: a pattern past its age is a reason to look closer.</p>';
+      if (!ok) S.missed.push(it);
+    }
+    if (ok) S.right++;
+    var fb = $("fb"); fb.className = "fb " + (ok ? "good" : "bad"); fb.innerHTML = html;
+    var dir = $("dir");
+    if (dir) dir.addEventListener("click", function (ev) {
+      var b = ev.target.closest("button[data-d]"); if (!b || dir.dataset.done) return;
+      dir.dataset.done = 1;
+      var want = S.round[S.i].e.dir;
+      dir.querySelectorAll("button").forEach(function (x) { x.disabled = true; if (x.dataset.d === want) x.classList.add("right"); else if (x === b) x.classList.add("wrong"); });
+      dir.insertAdjacentHTML("beforeend", '<span class="line">' + (want === "reg" ? "Regressive: a later sound changed an earlier one." : "Progressive: an earlier sound changed a later one.") + "</span>");
+      $("chline").innerHTML = changeLine(S.round[S.i].e);
+    });
+    $("acts").innerHTML = '<button type="button" class="btn" id="next">' + (S.i + 1 < S.round.length ? "Next question" : "See how it went") + "</button>";
+    $("next").addEventListener("click", next);
+    $("next").focus({ preventScroll: true });
+    progress();
+  }
+  function next() { S.i++; renderQ(); }
+  function renderSummary() {
+    S.done = true; progress();
+    var n = S.round.length, miss = S.missed;
+    var list = miss.map(function (it) {
+      if (S.mode === "name") return '<li><a href="#p-' + it.p.id + '">' + esc(it.p.name) + "</a> <span class=\"ipa\">" + esc(it.e.w + " /" + it.e.a + "/ → [" + it.e.c + "]") + "</span></li>";
+      return "<li>" + esc(it.r.label) + ": usually gone by " + esc(ageLabel(it.r)) + "</li>";
+    }).join("");
+    $("qhost").innerHTML = '<div class="qcard summary"><h2>' + S.right + " of " + n + " right</h2>" +
+      (miss.length ? "<p class=\"lede\" style=\"margin-top:6px\">To review:</p><ul>" + list + "</ul>" : '<p class="lede" style="margin-top:6px">All right this round.</p>') +
+      '<div class="actions">' + (miss.length ? '<button type="button" class="btn" id="again">Practice the ones I missed</button>' : "") +
+      '<button type="button" class="btn' + (miss.length ? " ghost" : "") + '" id="fresh">New round</button></div></div>';
+    if ($("again")) $("again").addEventListener("click", function () { newRound(S.mode === "name" ? miss : miss.map(function (x) { return x.r; })); });
+    $("fresh").addEventListener("click", function () { newRound(); });
+  }
+  function buildPractice() {
+    $("scope").innerHTML = '<option value="all">All processes</option>' + FAMILIES.map(function (f) { return '<option value="' + f.id + '">' + esc(f.name) + "</option>"; }).join("");
+    $("scope").addEventListener("change", function () { S.scope = this.value; newRound(); });
+    function mode(m) {
+      S.mode = m;
+      $("m-name").setAttribute("aria-pressed", String(m === "name")); $("m-age").setAttribute("aria-pressed", String(m === "age"));
+      $("scope").closest(".scope").hidden = m !== "name";
+      newRound();
+    }
+    $("m-name").addEventListener("click", function () { mode("name"); });
+    $("m-age").addEventListener("click", function () { mode("age"); });
+    d.addEventListener("keydown", function (ev) {
+      if ($("v-practice").hidden || ev.target.closest("input, select, textarea")) return;
+      var k = parseInt(ev.key, 10), opts = d.querySelectorAll("#opts .opt");
+      if (k >= 1 && k <= opts.length && !opts[0].disabled) { ev.preventDefault(); opts[k - 1].click(); }
+    });
+    newRound();
+  }
+
+  /* ------------------------------------------------------------ age check */
+  var LO = 24, HI = 96;
+  function pct(months) { return ((months - LO) / (HI - LO) * 100).toFixed(2) + "%"; }
+  var consMode = "cm";
+  var GRID = [
+    ["Stops", [["p", "b"], [], ["t", "d"], [], [], ["k", "g"], []]],
+    ["Nasals", [["m"], [], ["n"], [], [], ["ŋ"], []]],
+    ["Fricatives", [["f", "v"], ["θ", "ð"], ["s", "z"], ["ʃ", "ʒ"], [], [], ["h"]]],
+    ["Affricates", [[], [], [], ["tʃ", "dʒ"], [], [], []]],
+    ["Glides", [["w"], [], [], [], ["j"], [], []]],
+    ["Liquids", [[], [], ["l"], ["ɹ"], [], [], []]]
+  ];
+  var GCOLS = ["Lips", "Teeth", "Ridge", "Behind ridge", "Palate", "Soft palate", "Glottis"];
+  function groupOf(sym, src) { for (var g in src) if (src[g].set.indexOf(sym) >= 0) return g; return ""; }
+  function buildAge() {
+    var rows = AGES.slice().sort(function (a, b) { return a.end - b.end; });
+    var ticks = ""; for (var y = 2; y <= 8; y++) ticks += '<span style="left:' + pct(y * 12) + '">' + y + "</span>";
+    $("tl").innerHTML = rows.map(function (r, k) {
+      // one bar; where a process fades out over a year (gliding), its last stretch fades
+      var fam = P[r.p].fam, end = r.end * 12, fade = r.from ? ((r.from * 12 - LO) / (end - LO) * 100).toFixed(1) + "%" : "";
+      var bar = '<div class="bar" style="width:' + pct(end) + (fade ? ";background:linear-gradient(90deg, var(--fc) " + fade +
+        ", color-mix(in srgb, var(--fc) 18%, transparent))" : "") + '"></div>';
+      return '<div class="tl-row f-' + fam + '" data-k="' + k + '"><div class="tl-name"><a href="#p-' + r.p + '">' + rich(r.label) + "</a><small>" + esc(r.ex) +
+        '</small></div><div class="track">' + bar + '<span class="now"></span></div><span class="status"></span></div>';
+    }).join("") + '<div class="tl-axis"><span class="axlab">Age (years)</span><div class="ticks" aria-hidden="true">' + ticks + "</div><span></span></div>";
+    $("tl").dataset.rows = JSON.stringify(rows.map(function (r) { return [r.end, r.from || 0]; }));
+    var aty = PROCESSES.filter(function (p) { return p.fam === "aty" || p.atypical; });
+    $("atypList").innerHTML = "<b>Not usually seen in typical development:</b> " + aty.map(function (p) { return '<a href="#p-' + p.id + '">' + esc(p.name.toLowerCase()) + "</a>"; }).join(", ") + ".";
+    $("ageIn").addEventListener("input", renderAge);
+    $("c-cm").addEventListener("click", function () { consMode = "cm"; renderAge(); });
+    $("c-sh").addEventListener("click", function () { consMode = "sh"; renderAge(); });
+    renderAge();
+  }
+  /* The groups as a table without lines: the group once, beside the years it covers. */
+  function groupTable(rows, src) {
+    var html = "";
+    rows.forEach(function (r, k) {
+      var n = 1; if (k && rows[k - 1].g === r.g) n = 0; else while (rows[k + n] && rows[k + n].g === r.g) n++;
+      if (n) html += '<b class="gtag" style="grid-row:' + (k + 1) + " / span " + n + '">' + esc(src[r.g].label) + "</b>";
+      if (r.age) html += '<span class="gage" style="grid-row:' + (k + 1) + '">' + r.age + "</span>";
+      html += '<span class="gset" style="grid-row:' + (k + 1) + '">/' + r.set.map(esc).join(", ") + "/</span>";
+    });
+    $("groups").className = "groups" + (rows[0].age ? "" : " noage");
+    $("groups").innerHTML = html;
+  }
+  function renderAge() {
+    var m = +$("ageIn").value, yy = Math.floor(m / 12), mm = m % 12;
+    $("ageOut").innerHTML = yy + ";" + mm + "<small>" + yy + " years, " + mm + " months</small>";
+    $("ageIn").style.setProperty("--fill", pct(m));
+    var rows = JSON.parse($("tl").dataset.rows);
+    d.querySelectorAll(".tl-row").forEach(function (row, k) {
+      var end = rows[k][0] * 12, from = rows[k][1] * 12, st = row.querySelector(".status");
+      row.querySelector(".now").style.left = pct(m);
+      if (m >= end) { st.className = "status gone"; st.textContent = "Usually gone"; }
+      else if (from && m >= from) { st.className = "status going"; st.textContent = "Going now"; }
+      else { st.className = "status common"; st.textContent = "Still common"; }
+    });
+    // consonants
+    $("c-cm").setAttribute("aria-pressed", String(consMode === "cm")); $("c-sh").setAttribute("aria-pressed", String(consMode === "sh"));
+    var src = consMode === "cm" ? CM : SHRIBERG;
+    var html = "<table><thead><tr><th></th>" + GCOLS.map(function (c) { return "<th scope=\"col\"><span>" + c + "</span></th>"; }).join("") + "</tr></thead><tbody>";
+    GRID.forEach(function (row) {
+      html += '<tr><th scope="row">' + row[0] + "</th>" + row[1].map(function (cell) {
+        return '<td><div class="cbtn">' + cell.map(function (s) {
+          // the look says where the sound stands at this age; the corner, by when most children have it
+          var g = groupOf(s, src), cls = "cb", mark, say;
+          if (consMode === "cm") {
+            var yr = CM_YEAR[s];
+            cls += m >= (yr + 1) * 12 ? " s-yes" : m >= yr * 12 ? " s-now" : " s-later";
+            mark = yr; say = "most children have it by " + yr + ";11";
+          } else { cls += " s-plain"; mark = src[g].label.charAt(0); say = src[g].label; }
+          var inner = esc(s) + '<sup aria-hidden="true">' + mark + "</sup>";
+          return SOUND ? '<button type="button" class="' + cls + '" data-s="' + esc(s) + '" aria-label="' + esc(s) + ", " + say + ', tap to hear">' + inner + "</button>"
+            : '<span class="' + cls + '" title="' + esc(s) + ", " + say + '">' + inner + "</span>";
+        }).join("") + "</div></td>";
+      }).join("") + "</tr>";
+    });
+    $("cons").innerHTML = html + "</tbody></table>";
+    if (consMode === "cm") {
+      $("consNote").textContent = "Each sound is placed by the year in which 90% of typically developing American English-speaking children have it." + (SOUND ? " Tap a sound to hear it." : "");
+      $("legend").innerHTML = '<span><i class="s-yes"></i>Most children have it by ' + yy + ";" + mm + "</span>" +
+        '<span><i class="s-now"></i>Being acquired this year</span><span><i class="s-later"></i>Not expected yet</span>' +
+        '<span><i class="num">2 to 6</i>the year most children have it by</span>';
+      groupTable([2, 3, 4, 5, 6].map(function (yr) {
+        var set = Object.keys(CM_YEAR).filter(function (x) { return CM_YEAR[x] === yr; }), g = groupOf(set[0], CM);
+        set.sort(function (a, b) { return CM[g].set.indexOf(a) - CM[g].set.indexOf(b); });
+        return { g: g, age: yr + ";0 to " + yr + ";11", set: set };
+      }), CM);
+    } else {
+      $("consNote").textContent = "The order in which children with speech delays mastered the sounds. It describes order, not ages, so the slider does not change it.";
+      $("legend").innerHTML = '<span><i class="num">E, M, L</i>early, middle, late</span>';
+      groupTable(["early", "middle", "late"].map(function (g) { return { g: g, set: SHRIBERG[g].set }; }), SHRIBERG);
+    }
+  }
+
+  /* ------------------------------------------------------------ views */
+  function setTopH() { d.documentElement.style.setProperty("--topH", $("top").offsetHeight + "px"); setFiltH(); }
+  // the filter bar stays at the top only on wider screens; links land below it there
+  function setFiltH() { var f = $("filters"); if (f) d.documentElement.style.setProperty("--filtH", (getComputedStyle(f).position === "sticky" ? f.offsetHeight : 0) + "px"); }
+  function route() {
+    var h = (location.hash || "").replace("#", ""), view = "explore", card = null;
+    if (h === "practice" || h === "age") view = h;
+    else if (h.indexOf("p-") === 0 && P[h.slice(2)]) card = h;
+    ["explore", "practice", "age"].forEach(function (v) { $("v-" + v).hidden = v !== view; });
+    d.querySelectorAll(".tabs a").forEach(function (a) { if (a.dataset.view === view) a.setAttribute("aria-current", "page"); else a.removeAttribute("aria-current"); });
+    if (card) showProcess(card.slice(2), true);
+    else w.scrollTo(0, 0);
+  }
+  buildExplore(); buildPractice(); buildAge();
+  setTopH(); w.addEventListener("resize", setTopH);
+  w.addEventListener("hashchange", route);
+  route();
+})();
+
+</script>
+
+</body>
+</html>
