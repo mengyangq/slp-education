@@ -2,7 +2,7 @@
 
 ## Recordings
 
-Phonetics Lab 8 plays 58 sound files.
+Phonetics Lab 8 plays 73 sound files and 15 short videos.
 
 42 of the sound files come from elsewhere and are listed below, each redistributed
 exactly as it was received.
@@ -52,4 +52,10 @@ exactly as it was received.
 | `ipa_zh.mp3` | /ʒ/ | Fabien Snauwaert (chart), Alan Adelberg (voice) | [CC BY-NC-ND 4.0](https://creativecommons.org/licenses/by-nc-nd/4.0/) | [PHONEME-TELEVISION.mp3 (American IPA Chart)](https://americanipachart.com/) |
 | `w_zebra.mp3` | /zibɹə/ | Fabien Snauwaert (chart), Alan Adelberg (voice) | [CC BY-NC-ND 4.0](https://creativecommons.org/licenses/by-nc-nd/4.0/) | [NORMAL-ZEBRA.mp3 (American IPA Chart)](https://americanipachart.com/) |
 
-The speech-error worked example is the Phonological Processes Lab's recording of *chair*. The other word recordings were made for this course, and every effect sound is synthesized in the browser.
+## Videos
+
+The made-up words are videos from [*IPA Online*, Practical Exercises](https://teaching.ncl.ac.uk/ipa/practical-exercises.html), by Gerry Docherty and Ghada Khattab, Speech and Language Sciences, Newcastle University (developed by JISC Netskills), licensed under [CC BY-NC 2.0 UK](https://creativecommons.org/licenses/by-nc/2.0/uk/). For this lab the clips were trimmed at the start and end, their sound was levelled, and they were re-encoded (MP4 and WebM, renamed nw01 to nw15); the recap plays each clip's sound on its own (`audio/nw01.mp3` to `nw15.mp3`).
+
+## Everything else
+
+The speech-error worked example is the Phonological Processes Lab's recording of *chair*. The other word recordings were generated with ElevenLabs text-to-speech, and every effect sound is synthesized in the browser.

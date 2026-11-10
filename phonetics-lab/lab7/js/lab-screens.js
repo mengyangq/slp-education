@@ -223,6 +223,8 @@
         ? '<div class="callout c-audio"><span class="ic" aria-hidden="true">' + ART.speaker() +
           "</span><p>" + leg.audio_note + "</p></div>"
         : "") +
+      // where a trail's media come from, when they were not made for the course (Lab 8's videos)
+      (leg.credit ? '<p class="fig-credit leg-credit">' + leg.credit + "</p>" : "") +
       '<div id="demoHost"></div>' +
       actionBar("Start the " + leg.items.length + " questions");
 
