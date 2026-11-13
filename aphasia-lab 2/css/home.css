@@ -1,0 +1,44 @@
+/* Aphasia Lab front page (aphasia-lab/index.html): the lab's own navy and indigo,
+   the same as its sessions. System fonts only; no external files. */
+
+:root{
+  --top:#1f2335; --top-2:#3730a3; --top-accent:#a5b4fc;
+  --bg:#f5f6fb; --surface:#fff; --line:#e3e5f0;
+  --ink:#1f2335; --ink-2:#4b5068; --muted:#606583;
+  --accent:#4f46e5; --accent-deep:#3730a3; --accent-soft:#eef2ff;
+  --shadow:0 1px 2px rgba(31,35,53,.06), 0 12px 32px rgba(31,35,53,.08);
+  --font:-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,Roboto,"Helvetica Neue",Arial,sans-serif;
+  --mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+}
+*,*::before,*::after{ box-sizing:border-box }
+html{ -webkit-text-size-adjust:100% }
+body{ margin:0; background:var(--bg); color:var(--ink); font-family:var(--font);
+  font-size:clamp(15.5px,15px + .2vw,17px); line-height:1.6; -webkit-font-smoothing:antialiased;
+  min-height:100vh; min-height:100dvh; display:flex; flex-direction:column }
+main{ flex:1 0 auto; padding:clamp(28px,5vw,48px) 0 52px }
+a{ color:var(--accent-deep) }
+.skip{ position:absolute; left:-9999px; top:0; z-index:9; padding:10px 16px; background:var(--top); color:#fff }
+.skip:focus{ left:0 }
+:focus-visible{ outline:3px solid var(--accent); outline-offset:3px; border-radius:6px }
+.wrap{ max-width:960px; margin:0 auto; padding:0 clamp(16px,4vw,32px) }
+
+.head{ background:linear-gradient(160deg,#1f2335 0%,#2a2f6b 100%); color:#e7e9f6; padding:clamp(38px,7vw,66px) 0 clamp(32px,6vw,52px) }
+.eyebrow{ display:block; font-family:var(--mono); font-size:.7rem; letter-spacing:.2em; text-transform:uppercase;
+  color:var(--top-accent); margin-bottom:12px }
+.head h1{ font-size:clamp(2.1rem,1.4rem + 3vw,3.1rem); letter-spacing:-.02em; line-height:1.1; color:#fff; margin:0 0 .3em }
+.head p{ color:#c9cdea; font-size:1.05rem; margin:0 }
+
+.grid{ list-style:none; margin:0; padding:0; display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr));
+  grid-auto-rows:1fr; gap:20px }
+.card{ background:var(--surface); border:1px solid var(--line); border-radius:18px; box-shadow:var(--shadow);
+  padding:22px 24px; display:flex; flex-direction:column; position:relative; overflow:hidden }
+.card::before{ content:""; position:absolute; left:0; top:0; right:0; height:5px; background:linear-gradient(90deg,#4f46e5,#a5b4fc) }
+.num{ font-family:var(--mono); font-size:.7rem; letter-spacing:.16em; text-transform:uppercase; color:var(--accent) }
+.card h2{ font-size:1.3rem; margin:.3em 0 .35em; line-height:1.2 }
+.card p{ color:var(--ink-2); margin:0 0 18px }
+.open{ margin-top:auto; align-self:flex-start; background:var(--top); color:#fff; text-decoration:none; font-weight:700;
+  padding:11px 20px; border-radius:12px }
+.open:hover{ background:var(--accent-deep) }
+
+.foot{ border-top:1px solid var(--line); background:var(--surface); padding:24px 0 40px; color:var(--muted); flex-shrink:0 }
+.foot p{ font-size:.86rem; margin:0 0 .5em } .foot .small{ font-size:.8rem; line-height:1.6 }

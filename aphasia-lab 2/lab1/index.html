@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Aphasia Lab: Reading the Scores</title>
+<meta name="description" content="Eight fictional clients with results from the Comprehensive Aphasia Test. Read the results and the errors, and build the chart summary.">
+<meta name="author" content="Mengyang Qiu">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Aphasia Lab: Reading the Scores">
+<meta property="og:description" content="Aphasia assessment practice: eight fictional clients, their test results and errors, and the chart summary to build.">
+<meta name="theme-color" content="#1f2335">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 2l7 7-7 13L5 9z' fill='%23dc9329'/%3E%3Cpath d='M5 9h14l-7 13z' fill='%23b7741a'/%3E%3Cpath d='M12 2l3.5 7h-7z' fill='%23f3c979'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="css/caselab.css">
+<script>window.CASELAB_MODE = "web";</script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="top">
+  <div class="top-in">
+    <div class="brand"><span class="crs">Aphasia Lab</span><span class="ttl">Reading the Scores</span></div>
+    <button type="button" class="homebtn" id="homeBtn"><svg viewBox="0 0 16 16" aria-hidden="true"><rect x="1" y="1" width="6" height="6" rx="1.5"/><rect x="9" y="1" width="6" height="6" rx="1.5"/><rect x="1" y="9" width="6" height="6" rx="1.5"/><rect x="9" y="9" width="6" height="6" rx="1.5"/></svg>All clients</button>
+    <nav class="chips" id="chips" aria-label="Clients"></nav>
+    <div class="gems"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2l7 7-7 13L5 9z" fill="#dc9329"/><path d="M5 9h14l-7 13z" fill="#b7741a"/><path d="M12 2l3.5 7h-7z" fill="#f3c979"/></svg><span class="count" id="gemCount"></span><span class="visually-hidden">gems</span></div>
+  </div>
+</header>
+<main id="main">
+
+  <section class="screen" id="startScreen" hidden>
+    <div class="wrap home">
+      <div class="hero">
+        <p class="eyebrow">Aphasia Lab</p>
+        <h1>Reading the Scores</h1>
+        <p class="lede">Eight fictional clients, each with results from the Comprehensive Aphasia Test (CAT). Choose any client, read the results and the errors, and build the summary a clinician would write in the chart.</p>
+      </div>
+      <ol class="steps">
+        <li><span class="stepn" aria-hidden="true">1</span><div><h2>Read the results</h2><p>Each subtest is marked below the cut-off or within normal limits. Below the cut-off means lower than 95 percent of people without aphasia.</p></div></li>
+        <li><span class="stepn" aria-hidden="true">2</span><div><h2>Answer four questions</h2><p>Two on what the results show, then a chart paragraph to complete and its closing sentence. Retry as often as you like: a right first try earns a gem, a later try half a gem.</p></div></li>
+        <li><span class="stepn" aria-hidden="true">3</span><div><h2>Compare with the model</h2><p>Each client closes with the full chart summary.</p></div></li>
+      </ol>
+      <div class="homebar">
+        <h2 id="clientsH" tabindex="-1">Choose a client</h2>
+        <p class="homeprog" id="homeProgress"></p>
+        <button type="button" class="linkbtn" id="resetBtn" hidden>Start over</button>
+      </div>
+      <p class="banner" id="doneBanner" hidden></p>
+      <div class="grid" id="clientGrid" aria-labelledby="clientsH"></div>
+    </div>
+    <footer class="foot pagefoot"><div class="foot-in">
+      <p><a href="../">&larr; Back to the Aphasia Lab</a></p>
+      <p>Created by <a href="https://mengyang.dev">Mengyang Qiu</a>. Built with the help of Claude Opus 5.5 (Anthropic).</p>
+      <p class="foot-notice">No real CAT test items appear here: the error examples use made-up items, and the clients and their results are fictional, scored as in the Comprehensive Aphasia Test (<a href="https://doi.org/10.1037/t13733-000">Swinburn et al., 2004</a>).</p>
+      <p class="foot-notice">Except where otherwise noted, original instructional content &copy; 2026 Mengyang Qiu is licensed under <a href="https://creativecommons.org/licenses/by-nc/4.0/">CC BY-NC 4.0</a>. Site source code is licensed under the <a href="https://opensource.org/license/mit">MIT License</a>. Third-party media retain their original rights and licenses; see <a href="../../credits.html#aphasia">Credits</a>.</p>
+    </div></footer>
+  </section>
+
+  <section class="screen" id="setScreen" hidden>
+    <div class="wrap">
+      <div class="client">
+        <div class="kicker" id="setKicker"></div>
+        <h1 id="setName" tabindex="-1"></h1>
+        <div id="setBio"></div>
+      </div>
+      <div class="panels">
+        <section class="panel results" aria-labelledby="resultsH">
+          <div class="panel-head">
+            <h2 id="resultsH">Results</h2>
+          </div>
+          <div class="tabs" id="tabs" role="tablist"></div>
+          <div id="tabBody" role="tabpanel"></div>
+        </section>
+        <section class="panel questions" aria-labelledby="qH">
+          <div class="panel-head">
+            <h2 id="qH" tabindex="-1">Question</h2>
+            <button type="button" class="nextbtn" id="qNext" disabled>Next &#8594;</button>
+          </div>
+          <div id="qBody"></div>
+          <div class="found" id="found" hidden>
+            <h3>What you’ve found</h3>
+            <ul id="foundList"></ul>
+          </div>
+        </section>
+      </div>
+    </div>
+  </section>
+
+</main>
+<script src="js/sets.js"></script>
+<script src="js/engine.js"></script>
+</body>
+</html>

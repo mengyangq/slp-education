@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Phonetics Lab 3: Where Sounds Are Made</title>
+<meta name="description" content="Phonetics Lab 3: find the articulators that make each sound on a map of the mouth, work out which sound a picture shows from where and how it is made, and build words from phonemes. Thirty questions across three activities.">
+<link rel="stylesheet" href="css/lab.css">
+<style>
+  /* Lab 3's gem is a ruby. The shared sheet's cyan stays the series default. */
+  :root{ --gem:#E23D5B; --gem-lite:#FF8FA3; --gem-deep:#8E1230; }
+</style>
+<script>
+  window.LAB_MODE = "site";
+  // Draw affricates and diphthongs with a tie bar: /t͡ʃ/, /o͡ʊ/. Set false for the plain form.
+  window.LAB_TIE = true;
+  // This lab's gem: a rose-red teardrop instead of Lab 1's cyan diamond.
+  window.LAB_GEM = "ruby";
+  // This lab's celebration: balloons rising, in place of the fireworks of Labs 1 and 2.
+  window.LAB_FX = "balloons";
+  window.LAB_META = {
+    course: "Phonetics",
+    lab: 3,
+    home: "../"
+  };
+</script>
+</head>
+<body>
+<a class="skip" href="#stage">Skip to the activity</a>
+
+
+<div class="lab">
+
+  <!-- ============ the path ============ -->
+  <aside class="rail" id="rail" aria-label="Your progress through the lab">
+    <div class="rail-head">
+      <span class="rail-course">Phonetics Lab 3</span>
+      <span class="rail-title">Where Sounds Are Made</span>
+    </div>
+    <div class="rail-scroll" id="railScroll">
+      <div class="path-wrap" id="pathWrap"></div>
+    </div>
+  </aside>
+  <div class="rail-scrim" id="railScrim"></div>
+
+  <!-- ============ everything else ============ -->
+  <div class="content">
+    <header class="hud">
+      <button type="button" class="map-btn" id="mapBtn" aria-expanded="false" aria-controls="rail">
+        &#9776; Map
+      </button>
+      <h1 class="hud-leg" id="hudLeg"><span class="leg-dot"></span><span>Where Sounds Are Made</span></h1>
+      <span class="hud-spacer"></span>
+      <button type="button" class="fx-btn" id="fxBtn" aria-pressed="true">
+        &#9834;<span class="vh">Effect sounds on</span>
+      </button>
+      <p class="gem-tally" id="gemTally">
+        <svg class="gem-ico" viewBox="0 0 36 28" aria-hidden="true" focusable="false">
+          <linearGradient id="gemHud" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#FF8FA3"/><stop offset="1" stop-color="#E23D5B"/>
+          </linearGradient>
+          <path d="M18 1.5 C23 8 30 12.5 30 18.5 C30 24 24.6 27 18 27 C11.4 27 6 24 6 18.5 C6 12.5 13 8 18 1.5 Z" fill="url(#gemHud)"/>
+          <path d="M18 1.5 C13 8 6 12.5 6 18.5 C6 21 7 23 9 24.5 L18 10 Z" fill="#FFC2CD" opacity=".85"/>
+          <path d="M18 10 L27 24.5 C29 23 30 21 30 18.5 C30 12.5 23 8 18 1.5 Z" fill="#8E1230" opacity=".28"/>
+        </svg>
+        <span id="gemCount">0</span>
+        <span class="vh">gems earned</span>
+      </p>
+    </header>
+
+    <main class="stage" id="stage" tabindex="-1"></main>
+    <footer class="site-foot">
+      <p><a href="../">&larr; Back to the Phonetics Lab</a></p>
+      <p>Created by <a href="https://mengyang.dev">Mengyang Qiu</a> in collaboration with Siena Sun. Built with the help of Claude (Anthropic) and GPT (OpenAI).</p>
+      <p class="foot-notice">Except where otherwise noted, original instructional content &copy; 2026 Mengyang Qiu and Siena Sun is licensed under <a href="https://creativecommons.org/licenses/by-nc/4.0/">CC BY-NC 4.0</a>. Site source code is licensed under the <a href="https://opensource.org/license/mit">MIT License</a>. Third-party media retain their original rights and licenses; see <a href="../../credits.html#phonetics">Credits</a>.</p>
+    </footer>
+  </div>
+</div>
+
+<script src="js/lab-art.js"></script>
+<script src="js/items.js"></script>
+<script src="js/lab-audio-manifest.js"></script>
+<script src="js/lab-engine.js"></script>
+<script src="js/lab-screens.js"></script>
+</body>
+</html>

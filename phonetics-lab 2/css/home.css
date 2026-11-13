@@ -1,0 +1,125 @@
+/* ============================================================
+   Phonetics Labs, landing page
+   Shares the labs' colour vocabulary so the site and the labs
+   feel like one thing. No external fonts, no CDN.
+   ============================================================ */
+
+:root{
+  --paper:#FBF7F0; --paper-2:#F4EEE3; --card:#FFFFFF;
+  --ink:#23262D; --ink-soft:#4A5058; --muted:#767E88;
+  --line:#E9E0D3; --line-soft:#F1EAE0;
+
+  --violet:#3B2A63; --violet-deep:#241943; --violet-soft:#6E5AA0;
+  --info:#2563A8;
+  --gem:#1FB6D4; --gem-deep:#0E7E96;
+
+  --l1:#E8A33D; --l2:#5B62D6; --l3:#D4529A;
+
+  --radius:18px;
+  --shadow:0 1px 2px rgba(35,38,45,.05), 0 10px 28px rgba(35,38,45,.08);
+  --shadow-lift:0 2px 4px rgba(35,38,45,.06), 0 18px 44px rgba(35,38,45,.14);
+  --font:-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,Roboto,"Helvetica Neue",Arial,sans-serif;
+  --mono:ui-monospace,"SF Mono",Menlo,Consolas,"Cascadia Code","Segoe UI Mono",monospace;
+  --ease:cubic-bezier(.4,0,.2,1);
+  --spring:cubic-bezier(.22,1.2,.36,1);
+}
+
+*,*::before,*::after{ box-sizing:border-box }
+html{ -webkit-text-size-adjust:100% }
+body{ margin:0; background:var(--paper); color:var(--ink); font-family:var(--font);
+  font-size:clamp(16px,15px + .25vw,18px); line-height:1.6; -webkit-font-smoothing:antialiased }
+/* the footer is the page footer: at the bottom of the window when the page is short */
+body{ min-height:100vh; min-height:100dvh; display:flex; flex-direction:column }
+main{ flex:1 0 auto }
+h1,h2,h3{ line-height:1.15; margin:0 0 .4em; font-weight:700 }
+p{ margin:0 0 1em }
+a{ color:var(--info) }
+
+.skip{ position:absolute; left:-9999px; top:0; z-index:900; background:var(--ink); color:#fff;
+  padding:10px 16px; border-radius:0 0 10px 0 }
+.skip:focus{ left:0 }
+:focus-visible{ outline:3px solid var(--violet-soft); outline-offset:3px; border-radius:8px }
+.vh{ position:absolute!important; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden;
+  clip:rect(0,0,0,0); white-space:nowrap; border:0 }
+
+.container{ max-width:940px; margin:0 auto; padding:0 clamp(18px,4vw,32px) }
+
+/* ---- header ---- */
+.site-head{ background:linear-gradient(160deg,#3B2A63 0%,#241943 100%); color:#EDE7F8;
+  padding:clamp(38px,7vw,68px) 0 clamp(34px,6vw,56px); position:relative; overflow:hidden }
+.site-head::after{
+  content:""; position:absolute; inset:auto -10% -60% 40%; height:220px;
+  background:radial-gradient(closest-side,rgba(232,163,61,.20),transparent 70%);
+  pointer-events:none;
+}
+.site-head .eyebrow{ display:inline-block; font-family:var(--mono); font-size:.7rem;
+  letter-spacing:.2em; text-transform:uppercase; color:#B9A6E8; margin-bottom:12px }
+.site-head h1{ font-size:clamp(2rem,1.4rem + 3vw,3.1rem); color:#fff; letter-spacing:-.02em;
+  margin-bottom:.3em; position:relative }
+.site-head h1 .accent{ color:var(--l1) }
+.site-head p{ color:#CFC4E6; font-size:1.03rem; margin:0; position:relative }
+
+/* the trail motif, a nod to the panel inside each lab */
+.trail-strip{ display:flex; align-items:center; gap:0; margin-top:26px; position:relative }
+.trail-strip .seg{ height:5px; border-radius:99px; flex:1 }
+.trail-strip .s1{ background:var(--l1) }
+.trail-strip .s2{ background:var(--l2) }
+.trail-strip .s3{ background:var(--l3) }
+.trail-strip .dot{ width:11px; height:11px; border-radius:50%; background:#fff; flex:none;
+  margin:0 5px; box-shadow:0 0 0 4px rgba(255,255,255,.14) }
+
+/* ---- main ---- */
+main{ padding:clamp(30px,5vw,52px) 0 20px }
+
+/* every card the same size: equal columns, and every row as tall as the tallest card */
+.grid{ display:grid; gap:16px; grid-template-columns:repeat(auto-fill,minmax(250px,1fr));
+  grid-auto-rows:1fr; margin:0 0 34px; padding:0; list-style:none }
+
+.card{ display:flex; flex-direction:column; background:var(--card); border:1px solid var(--line);
+  border-radius:var(--radius); padding:20px 20px 18px 24px; box-shadow:var(--shadow);
+  position:relative; overflow:hidden; transition:transform .18s var(--spring), box-shadow .18s var(--ease) }
+.card::before{ content:""; position:absolute; inset:0 auto 0 0; width:5px;
+  background:linear-gradient(180deg,var(--l1),var(--l2) 55%,var(--l3)) }
+.card:hover{ transform:translateY(-3px); box-shadow:var(--shadow-lift) }
+
+.card .num{ font-family:var(--mono); font-size:.68rem; letter-spacing:.14em; text-transform:uppercase;
+  color:var(--violet-soft); margin-bottom:7px }
+.card h3{ font-size:1.1rem; margin:0 0 8px; color:var(--ink) }
+.card .blurb{ font-size:.92rem; color:var(--ink-soft); margin:0 0 16px }
+
+.open{ display:inline-flex; align-items:center; justify-content:center; gap:8px; align-self:flex-start;
+  margin-top:auto; background:var(--violet); color:#fff; text-decoration:none; font-weight:700; font-size:.92rem;
+  border-radius:13px; padding:10px 20px; box-shadow:0 4px 0 var(--violet-deep);
+  transition:transform .07s var(--ease), box-shadow .07s var(--ease), filter .18s var(--ease) }
+.open:hover{ filter:brightness(1.12) }
+.open:active{ transform:translateY(4px); box-shadow:0 0 0 var(--violet-deep) }
+
+/* the reference: one wide card below the labs, set apart from them */
+.ref-card{ display:flex; align-items:center; gap:18px 28px; background:var(--card); border:1px solid var(--line);
+  border-radius:var(--radius); padding:22px 24px 22px 28px; box-shadow:var(--shadow); position:relative;
+  overflow:hidden; margin:0 0 34px; transition:transform .18s var(--spring), box-shadow .18s var(--ease) }
+.ref-card::before{ content:""; position:absolute; inset:0 auto 0 0; width:5px; background:var(--violet-soft) }
+.ref-card:hover{ transform:translateY(-3px); box-shadow:var(--shadow-lift) }
+.ref-card > div{ flex:1; min-width:0 }
+.ref-card .num{ display:block; font-family:var(--mono); font-size:.68rem; letter-spacing:.14em; text-transform:uppercase;
+  color:var(--violet-soft); margin-bottom:7px }
+.ref-card h3{ font-size:1.1rem; margin:0 0 8px; color:var(--ink) }
+.ref-card .blurb{ font-size:.92rem; color:var(--ink-soft); margin:0 }
+.ref-card .open{ margin-top:0; align-self:center; flex:none }
+
+/* ---- footer ---- */
+.site-foot{ border-top:1px solid var(--line); background:var(--paper-2);
+  padding:26px 0 40px; margin-top:20px }
+.site-foot p{ font-size:.88rem; color:var(--muted); margin:0 0 .4em }
+.site-foot a{ color:var(--violet-soft) }
+.site-foot .foot-notice{ font-size:.8rem; line-height:1.55; margin-top:.7em }
+
+@media (max-width:560px){
+  .grid{ grid-template-columns:1fr }
+  .ref-card{ flex-direction:column; align-items:stretch }
+  .ref-card .open{ align-self:flex-start }
+}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{ animation-duration:.001ms!important; transition-duration:.001ms!important }
+  .card:hover, .ref-card:hover{ transform:none }
+}

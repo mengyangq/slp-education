@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Phonetics Lab 6: Sound to Symbol</title>
+<meta name="description" content="Phonetics Lab 6: read fifteen pictures of consonants being made and pick out each one's symbol, then listen to fifteen words and write each one in IPA. Thirty questions across two activities.">
+<link rel="stylesheet" href="css/lab.css">
+<style>
+  /* Lab 6's gem is a red apple. The shared sheet's cyan stays the series default. */
+  :root{ --gem:#E0392B; --gem-lite:#FFD9D0; --gem-deep:#961C12; }
+</style>
+<script>
+  window.LAB_MODE = "site";
+  // Draw affricates and diphthongs with a tie bar: /t͡ʃ/, /o͡ʊ/. Set false for the plain form.
+  window.LAB_TIE = true;
+  // This lab's gem: an apple, the food in the game Snake.
+  window.LAB_GEM = "apple";
+  // This lab's celebration: the game Snake, after the fireworks of Labs 1-2, Lab 3's
+  // balloons, Lab 4's confetti and Lab 5's dragon.
+  window.LAB_FX = "snake";
+  window.LAB_META = {
+    course: "Phonetics",
+    lab: 6,
+    home: "../"
+  };
+</script>
+</head>
+<body>
+<a class="skip" href="#stage">Skip to the activity</a>
+
+
+<div class="lab">
+
+  <!-- ============ the path ============ -->
+  <aside class="rail" id="rail" aria-label="Your progress through the lab">
+    <div class="rail-head">
+      <span class="rail-course">Phonetics Lab 6</span>
+      <span class="rail-title">Sound to Symbol</span>
+    </div>
+    <div class="rail-scroll" id="railScroll">
+      <div class="path-wrap" id="pathWrap"></div>
+    </div>
+  </aside>
+  <div class="rail-scrim" id="railScrim"></div>
+
+  <!-- ============ everything else ============ -->
+  <div class="content">
+    <header class="hud">
+      <button type="button" class="map-btn" id="mapBtn" aria-expanded="false" aria-controls="rail">
+        &#9776; Map
+      </button>
+      <h1 class="hud-leg" id="hudLeg"><span class="leg-dot"></span><span>Sound to Symbol</span></h1>
+      <span class="hud-spacer"></span>
+      <button type="button" class="fx-btn" id="fxBtn" aria-pressed="true">
+        &#9834;<span class="vh">Effect sounds on</span>
+      </button>
+      <p class="gem-tally" id="gemTally">
+        <svg class="gem-ico" viewBox="0 0 36 28" aria-hidden="true" focusable="false">
+          <linearGradient id="gemHud" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#FF8A73"/><stop offset="1" stop-color="#E0392B"/>
+          </linearGradient>
+          <path d="M18 8.8 C15.4 6.6 9 6.2 7 11.8 C5.2 17 8.4 26.6 13.4 26.8 C15.4 26.9 16.4 26 18 26 C19.6 26 20.6 26.9 22.6 26.8 C27.6 26.6 30.8 17 29 11.8 C27 6.2 20.6 6.6 18 8.8 Z" fill="url(#gemHud)"/>
+          <ellipse cx="12" cy="13" rx="2.6" ry="4.2" transform="rotate(18 12 13)" fill="#FFFFFF" opacity=".75"/>
+          <path d="M18 9.2 C17.8 6.8 18.4 4.6 19.8 2.8" fill="none" stroke="#7A4A22" stroke-width="1.7" stroke-linecap="round"/>
+          <path d="M19.2 5 C20.6 2 24.6 1.2 27.2 2.4 C25.6 5.6 22 6.6 19.2 5 Z" fill="#3E9A68"/>
+        </svg>
+        <span id="gemCount">0</span>
+        <span class="vh">gems earned</span>
+      </p>
+    </header>
+
+    <main class="stage" id="stage" tabindex="-1"></main>
+    <footer class="site-foot">
+      <p><a href="../">&larr; Back to the Phonetics Lab</a></p>
+      <p>Created by <a href="https://mengyang.dev">Mengyang Qiu</a> in collaboration with Siena Sun. Built with the help of Claude (Anthropic) and GPT (OpenAI).</p>
+      <p class="foot-notice">Except where otherwise noted, original instructional content &copy; 2026 Mengyang Qiu and Siena Sun is licensed under <a href="https://creativecommons.org/licenses/by-nc/4.0/">CC BY-NC 4.0</a>. Site source code is licensed under the <a href="https://opensource.org/license/mit">MIT License</a>. Third-party media retain their original rights and licenses; see <a href="../../credits.html#phonetics">Credits</a>.</p>
+    </footer>
+  </div>
+</div>
+
+<script src="js/lab-art.js"></script>
+<script src="js/items.js"></script>
+<script src="js/lab-audio-manifest.js"></script>
+<script src="js/lab-engine.js"></script>
+<script src="js/lab-screens.js"></script>
+</body>
+</html>
